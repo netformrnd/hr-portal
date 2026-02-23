@@ -732,9 +732,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
             </div>
 
             <!-- ====== 연구소 (우측 상단, 2×2) ====== -->
-            <div class="sdg" data-team="기술연구소" style="left:730px;top:15px;width:252px;height:162px;">
-                <div style="position:absolute;top:6px;left:12px;font-size:12px;color:#0097a7;font-weight:700;">연구소</div>
-            </div>
+            <div class="sdg" data-team="기술연구소" style="left:730px;top:15px;width:252px;height:162px;"></div>
             <div class="sk" data-name="김소정" style="left:738px;top:36px;width:108px;height:50px;background:#2563EB;">김소정<span class="sk-pos">연구원</span></div>
             <div class="sk" data-name="심혜진" style="left:856px;top:36px;width:108px;height:50px;background:#2563EB;">심혜진<span class="sk-pos">연구원</span></div>
             <div class="sk" data-name="신명희" style="left:738px;top:98px;width:108px;height:50px;background:#0E7490;">신명희<span class="sk-pos">선임연구원</span></div>
@@ -1921,13 +1919,14 @@ document.querySelectorAll('.seat-tab[data-sf]').forEach(t=>t.addEventListener('c
 }));
 // Seat map - 좌석별 팀명 자동 매핑
 (function(){
-    const colorTeam={'#4F6DB5':'경영관리팀','#3182CE':'서비스운영1팀','#805AD5':'서비스운영2팀','#0891B2':'서비스운영3팀','#D97706':'설계/적산팀','#16A34A':'영업팀','#0E7490':'소재기술연구소','#2563EB':'건설기술연구소','#6D28D9':'브랜드커머스팀','#0D9488':'미디어커머스팀','#EA580C':'해외사업팀','#DC2626':'모여라딜팀','#CA8A04':'브랜드마케팅팀','#DB2777':'그로스팀','#475569':'대표이사실'};
+    const colorTeam={'#4f6db5':'경영관리팀','#3182ce':'서비스운영1팀','#805ad5':'서비스운영2팀','#0891b2':'서비스운영3팀','#d97706':'설계/적산팀','#16a34a':'영업팀','#0e7490':'소재기술연구소','#2563eb':'건설기술연구소','#6d28d9':'브랜드커머스팀','#0d9488':'미디어커머스팀','#ea580c':'해외사업팀','#dc2626':'모여라딜팀','#ca8a04':'브랜드마케팅팀','#db2777':'그로스팀','#475569':'대표이사실'};
     const nameTeam={'백정석':'경영관리본부','황윤선':'경영관리본부','이승우':'대표이사실'};
     document.querySelectorAll('.seat-bp .sk[data-name]').forEach(sk=>{
         const nm=sk.dataset.name;
         if(nameTeam[nm]){sk.dataset.team=nameTeam[nm];return;}
-        const bg=(sk.style.background||sk.style.backgroundColor||'').toUpperCase();
-        for(const[c,t]of Object.entries(colorTeam)){if(bg.includes(c.toUpperCase())){sk.dataset.team=t;break;}}
+        const raw=(sk.getAttribute('style')||'').toLowerCase();
+        const m=raw.match(/background:\s*(#[0-9a-f]{6})/);
+        if(m&&colorTeam[m[1]]){sk.dataset.team=colorTeam[m[1]];}
     });
 })();
 // Seat map - search
