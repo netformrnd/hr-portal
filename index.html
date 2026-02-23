@@ -414,6 +414,8 @@ table.dt{width:100%;border-collapse:collapse;}
 .orgtree-mem-tasks{font-size:11px;color:var(--text-sub);}
 .orgtree-mem-right{display:flex;flex-direction:column;align-items:center;gap:1px;}
 .orgtree-mem-phone{font-size:12px;color:var(--text);font-weight:600;letter-spacing:.2px;}
+.orgtree-mem-phone a{color:inherit;text-decoration:none;}
+.orgtree-mem-phone a:hover{color:var(--accent);text-decoration:underline;}
 .orgtree-mem-email{font-size:11px;color:var(--text-sub);overflow:hidden;text-overflow:ellipsis;max-width:100%;}
 
 /* === SIDEBAR HOTLINE === */
@@ -469,7 +471,44 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 .ct-modal-hd h3{font-size:14px;font-weight:700;}
 .ct-modal-bd{padding:20px;}
 
-@media(max-width:768px){.sidebar{display:none;}.main-area{margin-left:0;}.hd{display:flex;}.wrap{padding:14px;}.dpn{width:100%;}.stats{flex-wrap:wrap;gap:12px;}}
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .main-area{margin-left:0;}
+  .hd{display:flex;padding:0 14px;}
+  .wrap{padding:14px;}
+  .dpn{width:100%;}
+  .stats{flex-wrap:wrap;gap:12px;}
+  .orgtree-layout{flex-direction:column;min-height:auto;}
+  .orgtree-nav{width:100%;max-height:180px;border-right:none;border-bottom:1px solid var(--border);}
+  .orgtree-members{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:12px;}
+  .orgtree-mem{padding:14px 10px;gap:8px;}
+  .orgtree-mem .av{width:56px;height:56px;font-size:18px;}
+  .orgtree-mem-nm{font-size:13px;}
+  .orgtree-mem-pos{font-size:11px;}
+  .orgtree-mem-phone{font-size:11px;}
+  .orgtree-mem-tasks{font-size:11px;}
+  .dt th,.dt td{padding:6px 8px;font-size:12px;}
+  .ct-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .acc-mem .av{width:24px;height:24px;font-size:9px;}
+  .acc-mem-nm{font-size:12px;}
+  .acc-mem-task{font-size:10px;}
+  .fgi input,.fgi select,.fgi textarea{font-size:16px;}
+  .fg{grid-template-columns:1fr;}
+  .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+}
+@media(max-width:480px){
+  .orgtree-members{grid-template-columns:1fr;padding:8px;}
+  .hd{padding:0 10px;height:40px;}
+  .hd-logo{font-size:11px;}
+  .hd-logo b{font-size:11px;}
+  .sbar{width:100%;}
+  .sbar input{width:100%;}
+  .wrap{padding:10px;}
+  .dpn-inner{padding:16px 12px;}
+  .dgrid{grid-template-columns:60px 1fr;font-size:12px;}
+  .orgtree-nav{max-height:140px;}
+  .ct-tbl th,.ct-tbl td{padding:6px 8px;font-size:11px;}
+}
 
 /* === PRINT === */
 @media print{
@@ -875,7 +914,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
                 <div class="fgi"><label>부문 *</label><select id="fD"><option value="">선택</option><option>경영총괄</option><option>용인사업장</option><option>영업본부</option><option>경영관리본부</option><option>커머스사업본부</option><option>브랜드마케팅팀</option></select></div>
                 <div class="fgi"><label>팀명</label><input id="fT" placeholder="본부 총괄자는 비워두세요"></div>
                 <div class="fgi"><label>직위 *</label><select id="fP"><option value="">선택</option><option>대표이사</option><option>부사장</option><option>상무이사</option><option>이사</option><option>공장장</option><option>기술연구소장</option><option>리드 매니저</option><option>선임연구원</option><option>매니저</option><option>연구원</option></select></div>
-                <div class="fgi"><label>연락처</label><input id="fPh" placeholder="010-0000-0000"></div>
+                <div class="fgi"><label>연락처</label><input id="fPh" type="tel" placeholder="010-0000-0000"></div>
                 <div class="fgi"><label>이메일</label><input id="fEm"></div>
                 <div class="fgi"><label>내선번호</label><input id="fEx"></div>
                 <div class="fgi full"><label>주요 업무 (2개)</label><div id="fPrWrap"><div class="task-rows" id="fPrRows"><input class="task-input" placeholder="주업무 1"><input class="task-input" placeholder="주업무 2"></div></div></div>
@@ -1202,7 +1241,7 @@ function refresh(){
             matchBadge=matchedTasks.map(t=>`<span class="tg-match">${t}</span>`).join('');
         }
         taskHtml=priTasks.map(t=>`<span>${t}</span>`).join('');
-        return `<tr data-id="${e.id}"><td><div class="cn"><div class="av">${e.photo?`<img src="${e.photo}">`:ini}</div>${e.name}${matchBadge}</div></td><td>${e.division||'-'}</td><td>${e.team||'-'}</td><td><span class="cp ${pc}">${e.position||'-'}</span></td><td>${e.phone||'-'}</td><td><div class="tg">${taskHtml}</div></td></tr>`;
+        return `<tr data-id="${e.id}"><td><div class="cn"><div class="av">${e.photo?`<img src="${e.photo}">`:ini}</div>${e.name}${matchBadge}</div></td><td>${e.division||'-'}</td><td>${e.team||'-'}</td><td><span class="cp ${pc}">${e.position||'-'}</span></td><td>${e.phone?`<a href="tel:${e.phone}">${e.phone}</a>`:'-'}</td><td><div class="tg">${taskHtml}</div></td></tr>`;
     }).join('');
     tb.querySelectorAll('tr').forEach(tr=>tr.onclick=()=>showD(tr.dataset.id));
 }
@@ -1303,7 +1342,7 @@ function renderOrgTreeSearchResults(list){
         h+=`<div class="orgtree-mem-info"><div class="orgtree-mem-top"><span class="orgtree-mem-nm">${m.name}</span><span class="orgtree-mem-pos cp ${pc}">${m.position||''}</span></div>`;
         h+=`<div class="orgtree-mem-tasks" style="color:var(--text-dim)">${m.team||''}</div>`;
         if(tasks) h+=`<div class="orgtree-mem-tasks">${tasks}</div>`;
-        if(m.phone) h+=`<span class="orgtree-mem-phone">${m.phone}</span>`;
+        if(m.phone) h+=`<span class="orgtree-mem-phone"><a href="tel:${m.phone}">${m.phone}</a></span>`;
         h+=`</div>`;
         h+=`</div>`;
     });
@@ -1371,7 +1410,7 @@ function renderOrgTreeDivMembers(div){
             h+=`<div class="av" style="background:${tc}">${m.photo?`<img src="${m.photo}">`:ini}</div>`;
             h+=`<div class="orgtree-mem-info"><div class="orgtree-mem-top"><span class="orgtree-mem-nm">${m.name}</span><span class="orgtree-mem-pos cp ${pc}">${m.position||''}</span></div>`;
             if(tasks) h+=`<div class="orgtree-mem-tasks">${tasks}</div>`;
-            if(m.phone) h+=`<span class="orgtree-mem-phone">${m.phone}</span>`;
+            if(m.phone) h+=`<span class="orgtree-mem-phone"><a href="tel:${m.phone}">${m.phone}</a></span>`;
             if(m.email) h+=`<span class="orgtree-mem-email">${m.email}</span>`;
             h+=`</div></div>`;
         });
@@ -1452,7 +1491,7 @@ function renderMemCards(members,tc){
         h+=`<div class="av" style="background:${tc}">${m.photo?`<img src="${m.photo}">`:ini}</div>`;
         h+=`<div class="orgtree-mem-info"><div class="orgtree-mem-top"><span class="orgtree-mem-nm">${m.name}</span><span class="orgtree-mem-pos cp ${pc}">${m.position||''}</span></div>`;
         if(tasks) h+=`<div class="orgtree-mem-tasks">${tasks}</div>`;
-        if(m.phone) h+=`<span class="orgtree-mem-phone">${m.phone}</span>`;
+        if(m.phone) h+=`<span class="orgtree-mem-phone"><a href="tel:${m.phone}">${m.phone}</a></span>`;
         if(m.email) h+=`<span class="orgtree-mem-email">${m.email}</span>`;
         h+=`</div></div>`;
     });
@@ -2454,7 +2493,7 @@ function renderContacts(){
         h+=arrowSvg;
         h+=`</div>`;
         h+=`<div class="ct-group-body${isHidden?' collapsed':''}">`;
-        h+=`<table class="ct-tbl"><thead><tr>`;
+        h+=`<div class="ct-tbl-wrap"><table class="ct-tbl"><thead><tr>`;
         if(hasCorpPhone&&isAdm){
             h+=`<th style="width:20%">업체/기관명</th><th style="width:12%">담당자</th><th style="width:14%">연락처</th><th style="width:14%">법인폰</th><th style="width:20%">이메일</th><th style="width:14%">메모</th><th style="width:6%"></th>`;
         } else if(hasCorpPhone){
@@ -2476,7 +2515,7 @@ function renderContacts(){
             if(isAdm) h+=`<td><button class="ct-edit-btn" onclick="editCt('${c.id}')">수정</button></td>`;
             h+=`</tr>`;
         });
-        h+=`</tbody></table></div></div>`;
+        h+=`</tbody></table></div></div></div>`;
     });
     document.getElementById('ctList').innerHTML=h;
 }
