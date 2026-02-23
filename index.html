@@ -8,6 +8,8 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 <style>
 :root {
     --bg-body: #f4f5f7;
@@ -919,6 +921,8 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 
 <script>
 const SK='nf_emp_v4',PK='nf_apw';
+firebase.initializeApp({apiKey:"AIzaSyBqPaSodmaZDtVNc2UEfmHKe_JxOM6k8Io",authDomain:"hr-portal-5f785.firebaseapp.com",databaseURL:"https://hr-portal-5f785-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"hr-portal-5f785",storageBucket:"hr-portal-5f785.firebasestorage.app",messagingSenderId:"193320235811",appId:"1:193320235811:web:fbd35e3ef69a98abbe1296"});
+const fbDb=firebase.database(),fbEmpRef=fbDb.ref('employees'),fbCtRef=fbDb.ref('contacts'),fbPwRef=fbDb.ref('adminPassword');
 const gid=()=>'e'+Date.now().toString(36)+Math.random().toString(36).substr(2,5);
 const DEFAULT_EMP=[
 {id:"emlfzblh9dvxqi",name:"이승우",division:"경영총괄",team:"",position:"대표이사",phone:"010-2636-4179",email:"swl@netformrnd.com",joinDate:"",extension:"",primaryTasks:[],secondaryTasks:[],memo:"",photo:"",sortOrder:0},
@@ -989,8 +993,8 @@ function _mergeDefaults(stored){
     });
     return changed;
 }
-const G=()=>{try{const d=JSON.parse(localStorage.getItem(SK));if(d&&d.length){if(_mergeDefaults(d))S(d);return d;}localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e}));}catch(e){localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e}));}};
-const S=d=>localStorage.setItem(SK,JSON.stringify(d));
+const G=()=>{try{const d=JSON.parse(localStorage.getItem(SK));if(d&&d.length){if(_mergeDefaults(d))localStorage.setItem(SK,JSON.stringify(d));return d;}localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e}));}catch(e){localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e}));}};
+const S=d=>{localStorage.setItem(SK,JSON.stringify(d));fbEmpRef.set(d).catch(e=>console.error('FB emp write err:',e));};
 const gPw=()=>localStorage.getItem(PK)||'admin';
 
 // Tab (nav-btn + sidebar)
@@ -2008,7 +2012,7 @@ async function downloadDirectoryPDF(){
 
 // Admin
 function admLogin(){if(document.getElementById('admPw').value===gPw()){document.getElementById('admLock').style.display='none';document.getElementById('admC').classList.add('unlocked');toast('관리자 로그인 완료','ok');renderAdmEmpList();}else toast('비밀번호가 올바르지 않습니다.','err');}
-function chgPw(){const p=document.getElementById('nPw').value.trim();if(!p){toast('비밀번호를 입력하세요.','err');return;}localStorage.setItem(PK,p);document.getElementById('nPw').value='';toast('비밀번호 변경됨','ok');}
+function chgPw(){const p=document.getElementById('nPw').value.trim();if(!p){toast('비밀번호를 입력하세요.','err');return;}localStorage.setItem(PK,p);fbPwRef.set(p).catch(e=>console.error('FB pw err:',e));document.getElementById('nPw').value='';toast('비밀번호 변경됨','ok');}
 
 // Photo helpers
 function handlePhoto(e){
@@ -2232,7 +2236,7 @@ function importPhotoBatch(e){
     e.target.value='';
 }
 
-function clearAll(){if(!confirm('전체 삭제?'))return;localStorage.removeItem(SK);toast('삭제 완료','ok');resetF();refresh();}
+function clearAll(){if(!confirm('전체 삭제?'))return;localStorage.removeItem(SK);fbEmpRef.set(null).catch(e=>console.error('FB clear err:',e));toast('삭제 완료','ok');resetF();refresh();}
 
 // Sample (기본 데이터 초기화)
 function loadSample(){
@@ -2405,7 +2409,7 @@ const DEFAULT_CONTACTS=[
 {id:"ctmlue7cdw5mzn",category:"회사법인폰",company:"서비스운영2팀",name:"이지연",phone:"010-9500-2734",corpPhone:"",email:"",memo:"대금관련 업무폰"}
 ];
 const getCt=()=>{try{const d=JSON.parse(localStorage.getItem(CT_KEY));if(d&&d.length)return d;localStorage.setItem(CT_KEY,JSON.stringify(DEFAULT_CONTACTS));return DEFAULT_CONTACTS.map(e=>({...e}));}catch(e){localStorage.setItem(CT_KEY,JSON.stringify(DEFAULT_CONTACTS));return DEFAULT_CONTACTS.map(e=>({...e}));}};
-const setCt=d=>localStorage.setItem(CT_KEY,JSON.stringify(d));
+const setCt=d=>{localStorage.setItem(CT_KEY,JSON.stringify(d));fbCtRef.set(d).catch(e=>console.error('FB ct write err:',e));};
 const getCollapsed=()=>{try{return JSON.parse(localStorage.getItem(CT_COLLAPSE_KEY))||{};}catch(e){return{};}};
 const setCollapsed=d=>localStorage.setItem(CT_COLLAPSE_KEY,JSON.stringify(d));
 
@@ -2549,6 +2553,47 @@ function delCt(){
     renderContacts();
     toast('연락처 삭제 완료','ok');
 }
+
+/* === Firebase 실시간 동기화 === */
+(function(){
+let _fbInitDone=false;
+// 직원 데이터 실시간 리스너
+fbEmpRef.on('value',snap=>{
+  const data=snap.val();
+  if(data&&Array.isArray(data)&&data.length){
+    _mergeDefaults(data);
+    localStorage.setItem(SK,JSON.stringify(data));
+    if(_fbInitDone){try{refresh();renderAdmEmpList();}catch(e){}}
+    _fbInitDone=true;
+  }
+},err=>console.error('FB emp listener err:',err));
+
+// 연락처 데이터 실시간 리스너
+fbCtRef.on('value',snap=>{
+  const data=snap.val();
+  if(data&&Array.isArray(data)&&data.length){
+    localStorage.setItem(CT_KEY,JSON.stringify(data));
+    if(_fbInitDone){try{renderContacts();}catch(e){}}
+  }
+},err=>console.error('FB ct listener err:',err));
+
+// 비밀번호 동기화
+fbPwRef.on('value',snap=>{
+  const data=snap.val();
+  if(data)localStorage.setItem(PK,data);
+},err=>console.error('FB pw listener err:',err));
+
+// 최초 마이그레이션: Firebase 비어있으면 현재 데이터 업로드
+fbEmpRef.once('value',snap=>{
+  if(!snap.val()){const d=G();if(d&&d.length)fbEmpRef.set(d);}
+});
+fbCtRef.once('value',snap=>{
+  if(!snap.val()){const d=getCt();if(d&&d.length)fbCtRef.set(d);}
+});
+fbPwRef.once('value',snap=>{
+  if(!snap.val()){const p=localStorage.getItem(PK);if(p)fbPwRef.set(p);}
+});
+})();
 </script>
 </body>
 </html>
