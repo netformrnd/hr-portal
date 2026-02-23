@@ -445,9 +445,9 @@ table.dt{width:100%;border-collapse:collapse;}
 .ct-group-body.collapsed{display:none;}
 
 /* 테이블형 행 */
-table.ct-tbl{width:100%;border-collapse:collapse;}
+table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 .ct-tbl th{padding:7px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--text-sub);background:var(--bg-elevated);border-bottom:1px solid var(--border);white-space:nowrap;}
-.ct-tbl td{padding:8px 14px;font-size:13px;color:var(--text-sub);border-bottom:1px solid var(--border);white-space:nowrap;}
+.ct-tbl td{padding:8px 14px;font-size:13px;color:var(--text-sub);border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .ct-tbl tbody tr{transition:.08s;}
 .ct-tbl tbody tr:hover{background:var(--bg-hover);}
 .ct-tbl tbody tr:hover td{color:var(--text);}
@@ -2413,10 +2413,15 @@ function renderContacts(){
         h+=`</div>`;
         h+=`<div class="ct-group-body${isHidden?' collapsed':''}">`;
         h+=`<table class="ct-tbl"><thead><tr>`;
-        h+=`<th>업체/기관명</th><th>담당자</th><th>연락처</th>`;
-        if(hasCorpPhone) h+=`<th>법인폰</th>`;
-        h+=`<th>이메일</th><th>메모</th>`;
-        if(isAdm) h+=`<th></th>`;
+        if(hasCorpPhone&&isAdm){
+            h+=`<th style="width:20%">업체/기관명</th><th style="width:12%">담당자</th><th style="width:14%">연락처</th><th style="width:14%">법인폰</th><th style="width:20%">이메일</th><th style="width:14%">메모</th><th style="width:6%"></th>`;
+        } else if(hasCorpPhone){
+            h+=`<th style="width:20%">업체/기관명</th><th style="width:13%">담당자</th><th style="width:15%">연락처</th><th style="width:15%">법인폰</th><th style="width:22%">이메일</th><th style="width:15%">메모</th>`;
+        } else if(isAdm){
+            h+=`<th style="width:22%">업체/기관명</th><th style="width:14%">담당자</th><th style="width:16%">연락처</th><th style="width:24%">이메일</th><th style="width:16%">메모</th><th style="width:8%"></th>`;
+        } else {
+            h+=`<th style="width:24%">업체/기관명</th><th style="width:14%">담당자</th><th style="width:17%">연락처</th><th style="width:26%">이메일</th><th style="width:19%">메모</th>`;
+        }
         h+=`</tr></thead><tbody>`;
         items.forEach(c=>{
             h+=`<tr>`;
