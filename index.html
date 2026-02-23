@@ -112,11 +112,16 @@ a{color:var(--accent);text-decoration:none;}
 .acc-div-body{display:none;}.acc-div-body.open{display:block;}
 .acc-mem{display:flex;align-items:center;gap:8px;padding:5px 14px 5px 40px;border-top:1px solid rgba(0,0,0,.03);transition:.1s;cursor:pointer;}
 .acc-mem:hover{background:var(--bg-hover);}
-.acc-mem .av{width:26px;height:26px;font-size:10px;}
+.acc-mem .av{width:21px;height:28px;font-size:9px;border-radius:3px;}
 .acc-mem-info{flex:1;display:flex;align-items:center;gap:6px;min-width:0;}
 .acc-mem-nm{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;}
 .acc-mem-pos{font-size:10px;padding:1px 6px;border-radius:3px;white-space:nowrap;}
 .acc-mem-task{font-size:11px;color:var(--text-sub);}
+
+/* 아코디언 전체 펼치기/묶기 버튼 */
+.acc-ctrl{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border);background:var(--bg-surface);}
+.acc-ctrl-btn{padding:5px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg-surface);color:var(--text-sub);font-size:12px;font-weight:500;cursor:pointer;transition:.15s;font-family:inherit;}
+.acc-ctrl-btn:hover{background:var(--accent-dim);border-color:var(--accent);color:var(--accent);}
 
 /* admin 직원목록 테이블 */
 .adm-emp-list{margin-top:10px;max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);}
@@ -133,9 +138,9 @@ a{color:var(--accent);text-decoration:none;}
 .sbar{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
 .sbox{flex:1;min-width:220px;position:relative;}
 .sbox svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-dim);width:15px;height:15px;}
-.sbox input{width:100%;padding:6px 10px 6px 32px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:12px;outline:none;transition:.15s;font-family:inherit;}
+.sbox input{width:100%;padding:8px 12px 8px 34px;background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;outline:none;transition:.15s;font-family:inherit;}
 .sbox input::placeholder{color:var(--text-dim);}
-.sbox input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(74,85,104,.07);}
+.sbox input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(74,85,104,.1);}
 
 /* filter dropdowns */
 .fdd{position:relative;}
@@ -165,9 +170,10 @@ table.dt{width:100%;border-collapse:collapse;}
 .dt tbody tr{cursor:pointer;transition:.08s;}
 .dt tbody tr:hover{background:var(--bg-hover);}
 .dt tbody tr:hover td{color:var(--text);}
-.cn{font-weight:600;color:var(--text);display:flex;align-items:center;gap:9px;}
-.av{width:28px;height:28px;border-radius:50%;background:#4a5568;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0;overflow:hidden;}
-.av img{width:100%;height:100%;object-fit:cover;}
+.cn{font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
+.cn .av{width:24px;height:32px;border-radius:4px;}
+.av{width:24px;height:32px;border-radius:4px;background:#4a5568;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;flex-shrink:0;overflow:hidden;}
+.av img{width:100%;height:100%;object-fit:cover;object-position:top;}
 .cp{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;}
 .cp-e{background:var(--amber-dim);color:var(--amber);}
 .cp-l{background:var(--accent-dim);color:var(--accent);}
@@ -265,6 +271,11 @@ table.dt{width:100%;border-collapse:collapse;}
 .o-row{display:flex;justify-content:center;gap:0;align-items:flex-start;}
 .o-col{display:flex;flex-direction:column;align-items:center;padding:0 4px;}
 
+/* org chart search highlight */
+.o-mem.org-hl{background:#fff3cd!important;border:2px solid #f59e0b!important;box-shadow:0 0 0 4px rgba(245,158,11,.25),0 0 16px rgba(245,158,11,.4);z-index:10;position:relative;animation:org-glow 1.2s ease-in-out infinite;}
+.o-mem.org-dim,.o-head.org-dim,.o-ceo.org-dim{opacity:.2;}
+@keyframes org-glow{0%,100%{box-shadow:0 0 0 4px rgba(245,158,11,.25),0 0 16px rgba(245,158,11,.4);}50%{box-shadow:0 0 0 6px rgba(245,158,11,.4),0 0 24px rgba(245,158,11,.6);}}
+
 /* === SEAT MAP === */
 .seat-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
 .seat-tabs{display:flex;gap:6px;}
@@ -298,6 +309,12 @@ table.dt{width:100%;border-collapse:collapse;}
 .seat-bp .sk.dm{opacity:.1;pointer-events:none;}
 .seat-bp .sk.empty{background:#f5f7fa!important;border:1px dashed #d8dde3!important;color:transparent!important;font-size:0!important;min-height:0;opacity:.4;}
 .seat-bp .sk.empty .sk-pos{display:none;}
+.seat-bp .sk.vacant{background:#f0f0f0!important;border:1.5px dashed #bbb!important;color:#999!important;font-size:10px!important;font-weight:500;cursor:default;opacity:.7;}
+.seat-bp .sk.vacant:hover{transform:none;box-shadow:none;}
+.seat-bp .sk.vacant .sk-pos{display:none;}
+.seat-bp .sk.blank{background:#e5e7eb!important;border:1px solid #d1d5db!important;color:transparent!important;font-size:0!important;cursor:default;opacity:.5;}
+.seat-bp .sk.blank:hover{transform:none;box-shadow:none;}
+.seat-bp .sk.blank .sk-pos{display:none;}
 
 /* 배치도 직원 클릭 팝업 */
 .seat-popup{position:fixed;z-index:250;background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 12px 40px rgba(0,0,0,.18);padding:18px;min-width:260px;max-width:320px;opacity:0;transform:translateY(6px);transition:.2s;pointer-events:none;}
@@ -316,7 +333,10 @@ table.dt{width:100%;border-collapse:collapse;}
     50%{box-shadow:0 0 0 6px rgba(255,23,68,.4),0 0 30px rgba(255,23,68,.8);}
 }
 .seat-bp .stl{position:absolute;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;color:#fff;z-index:4;white-space:nowrap;}
-.seat-bp .sdg{position:absolute;border:1px dashed rgba(0,0,0,.08);border-radius:4px;z-index:0;background:rgba(0,0,0,.02);}
+.seat-bp .sdg{position:absolute;border:1px dashed rgba(0,0,0,.08);border-radius:4px;z-index:0;background:rgba(0,0,0,.02);transition:background .15s;}
+.seat-bp .sdg[data-team]:hover{background:rgba(0,0,0,.05);}
+.seat-bp .sdg[data-team]::after{content:attr(data-team);position:absolute;top:2px;right:4px;font-size:8px;color:rgba(0,0,0,.25);font-weight:600;pointer-events:none;white-space:nowrap;}
+.seat-bp .sdg[data-team]:hover::after{color:rgba(0,0,0,.6);font-size:9px;}
 .seat-bp .sw{position:absolute;background:#94a3b8;z-index:2;}
 .seat-lgd{position:absolute;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:9px;z-index:5;line-height:1.7;}
 .seat-lgd-i{display:flex;align-items:center;gap:4px;}
@@ -407,7 +427,7 @@ table.dt{width:100%;border-collapse:collapse;}
 .orgtree-members{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;padding:20px;}
 .orgtree-mem{display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 16px;border:1px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:.12s;background:var(--bg-surface);text-align:center;}
 .orgtree-mem:hover{border-color:var(--accent);box-shadow:0 2px 10px rgba(0,0,0,.06);}
-.orgtree-mem .av{width:68px;height:68px;font-size:22px;}
+.orgtree-mem .av{width:54px;height:72px;font-size:18px;border-radius:6px;}
 .orgtree-mem-info{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;width:100%;}
 .orgtree-mem-top{display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap;}
 .orgtree-mem-nm{font-size:14px;font-weight:700;color:var(--text);}
@@ -498,14 +518,14 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
   .orgtree-nav{width:100%;max-height:180px;border-right:none;border-bottom:1px solid var(--border);}
   .orgtree-members{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:12px;}
   .orgtree-mem{padding:14px 10px;gap:8px;}
-  .orgtree-mem .av{width:56px;height:56px;font-size:18px;}
+  .orgtree-mem .av{width:42px;height:56px;font-size:15px;border-radius:5px;}
   .orgtree-mem-nm{font-size:13px;}
   .orgtree-mem-pos{font-size:11px;}
   .orgtree-mem-phone{font-size:11px;}
   .orgtree-mem-tasks{font-size:11px;}
   .dt th,.dt td{padding:6px 8px;font-size:12px;}
   .ct-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .acc-mem .av{width:24px;height:24px;font-size:9px;}
+  .acc-mem .av{width:18px;height:24px;font-size:8px;}
   .acc-mem-nm{font-size:12px;}
   .acc-mem-task{font-size:10px;}
   .fgi input,.fgi select,.fgi textarea{font-size:16px;}
@@ -658,9 +678,15 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 
 <!-- ===== 조직도 ===== -->
 <div id="p-orgchart" class="panel">
-    <div class="sbar org-toolbar" style="justify-content:flex-end">
-        <button class="btn" onclick="printOrg()">인쇄</button>
-        <button class="btn btn-p" onclick="downloadPDF()">PDF 다운로드</button>
+    <div class="sbar org-toolbar" style="justify-content:space-between">
+        <div class="sbox" style="max-width:280px;min-width:160px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="orgChartSearch" placeholder="이름으로 검색" oninput="searchOrgChart(this.value)">
+        </div>
+        <div style="display:flex;gap:6px;">
+            <button class="btn" onclick="printOrg()">인쇄</button>
+            <button class="btn btn-p" onclick="downloadPDF()">PDF 다운로드</button>
+        </div>
     </div>
     <div class="org-wrap"><div id="orgArea" class="org-print-area"></div></div>
 </div>
@@ -677,13 +703,14 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
             <input type="text" id="seatSI" placeholder="이름 검색 (예: 김유림)">
         </div>
         <div id="seatResult"></div>
+        <div style="font-size:12px;color:var(--text-sub);padding:4px 0;white-space:nowrap;">💡 좌석을 클릭하면 상세 정보를 확인할 수 있습니다</div>
         <div style="margin-left:auto;display:flex;gap:6px;">
             <button class="btn" onclick="printSeat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> 출력</button>
             <button class="btn btn-p" onclick="downloadSeatPDF()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF</button>
         </div>
     </div>
 
-    <!-- 2층 도면 -->
+    <!-- 2층 도면 (180° 회전 적용) -->
     <div class="seat-floor on" id="sf2">
         <div class="seat-bp" style="width:1000px;height:680px;">
             <!-- 외벽 -->
@@ -693,7 +720,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
             <div class="sw" style="left:0;top:678px;width:1000px;height:2px;"></div>
 
             <!-- 범례 -->
-            <div class="seat-lgd" style="right:14px;bottom:14px;">
+            <div class="seat-lgd" style="left:14px;top:14px;">
                 <div class="seat-lgd-i"><div class="seat-lgd-c" style="background:#4F6DB5"></div>경영관리팀</div>
                 <div class="seat-lgd-i"><div class="seat-lgd-c" style="background:#3182CE"></div>서비스운영1팀</div>
                 <div class="seat-lgd-i"><div class="seat-lgd-c" style="background:#805AD5"></div>서비스운영2팀</div>
@@ -704,83 +731,83 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
                 <div class="seat-lgd-i"><div class="seat-lgd-c" style="background:#2563EB"></div>건설 기술연구소</div>
             </div>
 
-            <!-- ====== 황윤선 독립실 (좌측 상단) ====== -->
-            <div class="sdg" style="left:16px;top:16px;width:140px;height:180px;"></div>
-            <div class="sk" data-name="황윤선" style="left:30px;top:70px;width:110px;height:48px;background:#3182CE;">황윤선<span class="sk-pos">상무이사</span></div>
-
-            <!-- ====== 상단 데스크 (4×2) ====== -->
-            <div class="sdg" style="left:180px;top:16px;width:400px;height:120px;"></div>
-            <div class="sk" data-name="최영옥" style="left:188px;top:24px;width:90px;height:44px;background:#4F6DB5;">최영옥<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="신나영" style="left:286px;top:24px;width:90px;height:44px;background:#4F6DB5;">신나영<span class="sk-pos">리드 매니저</span></div>
-            <div class="sk" data-name="주유진" style="left:384px;top:24px;width:90px;height:44px;background:#4F6DB5;">주유진<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="김유림" style="left:482px;top:24px;width:90px;height:44px;background:#4F6DB5;">김유림<span class="sk-pos">매니저</span></div>
-            <div class="sk empty" style="left:188px;top:76px;width:90px;height:20px;"></div>
-            <div class="sk" data-name="김수진" style="left:286px;top:76px;width:90px;height:44px;background:#805AD5;">김수진<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="권정아" style="left:384px;top:76px;width:90px;height:44px;background:#805AD5;">권정아<span class="sk-pos">리드 매니저</span></div>
-            <div class="sk" data-name="이지연" style="left:482px;top:76px;width:90px;height:44px;background:#805AD5;">이지연<span class="sk-pos">매니저</span></div>
-
-            <!-- ====== 화장실 ====== -->
-            <div class="sdg" style="left:850px;top:200px;width:130px;height:76px;">
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;color:#90a4ae;font-weight:600;">화장실(남)</div>
+            <!-- ====== 연구소 (우측 상단) ====== -->
+            <div class="sdg" data-team="기술연구소" style="left:754px;top:22px;width:230px;height:148px;">
+                <div style="position:absolute;top:4px;left:10px;font-size:11px;color:#0097a7;font-weight:700;">연구소</div>
             </div>
-            <div class="sdg" style="left:850px;top:294px;width:130px;height:76px;">
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;color:#90a4ae;font-weight:600;">화장실(여)</div>
-            </div>
+            <div class="sk" data-name="이정훈" style="left:876px;top:96px;width:100px;height:44px;background:#2563EB;">이정훈<span class="sk-pos">기술연구소장</span></div>
+            <div class="sk" data-name="신명희" style="left:766px;top:96px;width:100px;height:44px;background:#0E7490;">신명희<span class="sk-pos">선임연구원</span></div>
+            <div class="sk" data-name="심혜진" style="left:876px;top:42px;width:100px;height:44px;background:#2563EB;">심혜진<span class="sk-pos">연구원</span></div>
+            <div class="sk" data-name="김소정" style="left:766px;top:42px;width:100px;height:44px;background:#2563EB;">김소정<span class="sk-pos">연구원</span></div>
 
-            <!-- ====== 중앙 데스크1 (3+2) ====== -->
-            <div class="sdg" style="left:180px;top:160px;width:300px;height:120px;"></div>
-            <div class="sk" data-name="김경미" style="left:188px;top:168px;width:90px;height:44px;background:#3182CE;">김경미<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="송보람" style="left:286px;top:168px;width:90px;height:44px;background:#0891B2;">송보람<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="주현진" style="left:384px;top:168px;width:90px;height:44px;background:#0891B2;">주현진<span class="sk-pos">리드 매니저</span></div>
-            <div class="sk" data-name="조현식" style="left:188px;top:220px;width:90px;height:44px;background:#9CA3AF;">조현식</div>
-            <div class="sk" data-name="한인규" style="left:286px;top:220px;width:90px;height:44px;background:#D97706;">한인규<span class="sk-pos">리드 매니저</span></div>
+            <!-- ====== 백정석 ====== -->
+            <div class="sdg" data-team="경영관리본부" style="left:600px;top:60px;width:110px;height:100px;"></div>
+            <div class="sk" data-name="백정석" style="left:605px;top:88px;width:100px;height:48px;background:#4F6DB5;font-size:12px;">백정석<span class="sk-pos">이사</span></div>
 
-            <!-- ====== 회의실 (좌측 중간) ====== -->
-            <div class="sdg" style="left:16px;top:220px;width:140px;height:180px;">
+            <!-- ====== 회의실 (상단) ====== -->
+            <div class="sdg" style="left:410px;top:60px;width:150px;height:100px;">
                 <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:#90a4ae;font-weight:600;">회의실</div>
+            </div>
+
+            <!-- ====== 조재연/정정훈 독립 (3×1) ====== -->
+            <div class="sdg" data-team="서비스운영1팀" style="left:520px;top:190px;width:300px;height:56px;"></div>
+            <div class="sk" data-name="조재연" style="left:722px;top:196px;width:90px;height:44px;background:#3182CE;">조재연<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="정정훈" style="left:624px;top:196px;width:90px;height:44px;background:#3182CE;">정정훈<span class="sk-pos">매니저</span></div>
+            <div class="sk vacant" style="left:526px;top:196px;width:90px;height:44px;">공석</div>
+
+            <!-- ====== 탕비실 ====== -->
+            <div class="sdg" style="left:20px;top:202px;width:130px;height:90px;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:#90a4ae;font-weight:600;">탕비실</div>
             </div>
 
             <!-- ====== 중앙 데스크2 (3×2) ====== -->
-            <div class="sdg" style="left:180px;top:290px;width:300px;height:120px;"></div>
-            <div class="sk" data-name="정태윤" style="left:188px;top:298px;width:90px;height:44px;background:#D97706;">정태윤<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="신수진" style="left:286px;top:298px;width:90px;height:44px;background:#9CA3AF;">신수진</div>
-            <div class="sk" data-name="김영성" style="left:384px;top:298px;width:90px;height:44px;background:#9CA3AF;">김영성</div>
-            <div class="sk" data-name="한준엽" style="left:188px;top:350px;width:90px;height:44px;background:#3182CE;">한준엽<span class="sk-pos">리드 매니저</span></div>
-            <div class="sk" data-name="김성민" style="left:286px;top:350px;width:90px;height:44px;background:#3182CE;">김성민<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="이필선" style="left:384px;top:350px;width:90px;height:44px;background:#16A34A;">이필선<span class="sk-pos">매니저</span></div>
+            <div class="sdg" data-team="서비스운영1팀 / 영업팀" style="left:520px;top:270px;width:300px;height:120px;"></div>
+            <div class="sk" data-name="정태윤" style="left:722px;top:338px;width:90px;height:44px;background:#D97706;">정태윤<span class="sk-pos">매니저</span></div>
+            <div class="sk blank" style="left:624px;top:338px;width:90px;height:44px;"></div>
+            <div class="sk blank" style="left:526px;top:338px;width:90px;height:44px;"></div>
+            <div class="sk" data-name="한준엽" style="left:722px;top:286px;width:90px;height:44px;background:#3182CE;">한준엽<span class="sk-pos">리드 매니저</span></div>
+            <div class="sk" data-name="김성민" style="left:624px;top:286px;width:90px;height:44px;background:#3182CE;">김성민<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="이필선" style="left:526px;top:286px;width:90px;height:44px;background:#16A34A;">이필선<span class="sk-pos">매니저</span></div>
 
-            <!-- ====== 조재연/정정훈 독립 (3×1) ====== -->
-            <div class="sdg" style="left:180px;top:434px;width:300px;height:56px;"></div>
-            <div class="sk" data-name="조재연" style="left:188px;top:440px;width:90px;height:44px;background:#3182CE;">조재연<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="정정훈" style="left:286px;top:440px;width:90px;height:44px;background:#3182CE;">정정훈<span class="sk-pos">매니저</span></div>
-            <div class="sk empty" style="left:384px;top:440px;width:90px;height:20px;"></div>
-
-            <!-- ====== 연구소 (좌측 하단) ====== -->
-            <div class="sdg" style="left:16px;top:510px;width:230px;height:148px;">
-                <div style="position:absolute;top:4px;left:10px;font-size:11px;color:#0097a7;font-weight:700;">연구소</div>
-            </div>
-            <div class="sk" data-name="이정훈" style="left:24px;top:540px;width:100px;height:44px;background:#2563EB;">이정훈<span class="sk-pos">기술연구소장</span></div>
-            <div class="sk" data-name="신명희" style="left:134px;top:540px;width:100px;height:44px;background:#0E7490;">신명희<span class="sk-pos">선임연구원</span></div>
-            <div class="sk" data-name="심혜진" style="left:24px;top:594px;width:100px;height:44px;background:#2563EB;">심혜진<span class="sk-pos">연구원</span></div>
-            <div class="sk" data-name="김소정" style="left:134px;top:594px;width:100px;height:44px;background:#2563EB;">김소정<span class="sk-pos">연구원</span></div>
-
-            <!-- ====== 백정석 ====== -->
-            <div class="sdg" style="left:290px;top:520px;width:110px;height:100px;"></div>
-            <div class="sk" data-name="백정석" style="left:295px;top:544px;width:100px;height:48px;background:#4F6DB5;font-size:12px;">백정석<span class="sk-pos">이사</span></div>
-
-            <!-- ====== 회의실 (하단) ====== -->
-            <div class="sdg" style="left:440px;top:520px;width:150px;height:100px;">
+            <!-- ====== 회의실 (우측 중간) ====== -->
+            <div class="sdg" style="left:844px;top:280px;width:140px;height:180px;">
                 <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:#90a4ae;font-weight:600;">회의실</div>
             </div>
 
-            <!-- ====== 탕비실 ====== -->
-            <div class="sdg" style="left:850px;top:388px;width:130px;height:90px;">
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:#90a4ae;font-weight:600;">탕비실</div>
+            <!-- ====== 화장실 ====== -->
+            <div class="sdg" style="left:20px;top:310px;width:130px;height:76px;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;color:#90a4ae;font-weight:600;">화장실(여)</div>
             </div>
+            <div class="sdg" style="left:20px;top:404px;width:130px;height:76px;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;color:#90a4ae;font-weight:600;">화장실(남)</div>
+            </div>
+
+            <!-- ====== 중앙 데스크1 (3+2) ====== -->
+            <div class="sdg" data-team="서비스운영1·3팀 / 설계적산팀" style="left:520px;top:400px;width:300px;height:120px;"></div>
+            <div class="sk" data-name="김경미" style="left:722px;top:468px;width:90px;height:44px;background:#3182CE;">김경미<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="송보람" style="left:624px;top:468px;width:90px;height:44px;background:#0891B2;">송보람<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="주현진" style="left:526px;top:468px;width:90px;height:44px;background:#0891B2;">주현진<span class="sk-pos">리드 매니저</span></div>
+            <div class="sk blank" style="left:722px;top:416px;width:90px;height:44px;"></div>
+            <div class="sk" data-name="한인규" style="left:624px;top:416px;width:90px;height:44px;background:#D97706;">한인규<span class="sk-pos">리드 매니저</span></div>
+
+            <!-- ====== 황윤선 독립실 (우측 하단) ====== -->
+            <div class="sdg" data-team="영업본부" style="left:844px;top:484px;width:140px;height:180px;"></div>
+            <div class="sk" data-name="황윤선" style="left:860px;top:562px;width:110px;height:48px;background:#3182CE;">황윤선<span class="sk-pos">상무이사</span></div>
+
+            <!-- ====== 상단 데스크 (4×2) → 하단 데스크 ====== -->
+            <div class="sdg" data-team="경영관리팀 / 서비스운영2팀" style="left:420px;top:544px;width:400px;height:120px;"></div>
+            <div class="sk" data-name="최영옥" style="left:722px;top:612px;width:90px;height:44px;background:#4F6DB5;">최영옥<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="신나영" style="left:624px;top:612px;width:90px;height:44px;background:#4F6DB5;">신나영<span class="sk-pos">리드 매니저</span></div>
+            <div class="sk" data-name="주유진" style="left:526px;top:612px;width:90px;height:44px;background:#4F6DB5;">주유진<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="김유림" style="left:428px;top:612px;width:90px;height:44px;background:#4F6DB5;">김유림<span class="sk-pos">매니저</span></div>
+            <div class="sk vacant" style="left:722px;top:560px;width:90px;height:44px;">공석</div>
+            <div class="sk" data-name="김수진" style="left:624px;top:560px;width:90px;height:44px;background:#805AD5;">김수진<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="권정아" style="left:526px;top:560px;width:90px;height:44px;background:#805AD5;">권정아<span class="sk-pos">리드 매니저</span></div>
+            <div class="sk" data-name="이지연" style="left:428px;top:560px;width:90px;height:44px;background:#805AD5;">이지연<span class="sk-pos">매니저</span></div>
         </div>
     </div>
 
-    <!-- 3층 도면 -->
+    <!-- 3층 도면 (180° 회전 적용) -->
     <div class="seat-floor" id="sf3">
         <div class="seat-bp" style="width:1000px;height:680px;">
             <!-- 외벽 -->
@@ -790,7 +817,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
             <div class="sw" style="left:0;top:678px;width:1000px;height:2px;"></div>
 
             <!-- 범례 -->
-            <div class="seat-lgd" style="right:14px;bottom:14px;">
+            <div class="seat-lgd" style="left:14px;top:14px;">
                 <div class="seat-lgd-i"><div class="seat-lgd-c" style="background:#6D28D9"></div>브랜드커머스팀</div>
                 <div class="seat-lgd-i"><div class="seat-lgd-c" style="background:#0D9488"></div>미디어커머스팀</div>
                 <div class="seat-lgd-i"><div class="seat-lgd-c" style="background:#EA580C"></div>해외사업팀</div>
@@ -800,56 +827,56 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
                 <div class="seat-lgd-i"><div class="seat-lgd-c" style="background:#475569"></div>대표이사</div>
             </div>
 
-            <!-- ====== 이승우 대표이사실 (좌측 상단) ====== -->
-            <div class="sdg" style="left:16px;top:16px;width:140px;height:180px;"></div>
-            <div class="sk" data-name="이승우" style="left:30px;top:70px;width:110px;height:48px;background:#475569;font-size:12px;">이승우<span class="sk-pos">대표이사</span></div>
+            <!-- ====== 하단 데스크 (3×2) → 상단 ====== -->
+            <div class="sdg" data-team="브랜드마케팅팀 / 그로스팀" style="left:520px;top:220px;width:300px;height:120px;"></div>
+            <div class="sk" data-name="함지민" style="left:722px;top:288px;width:90px;height:44px;background:#CA8A04;">함지민<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="김소라" style="left:624px;top:288px;width:90px;height:44px;background:#CA8A04;">김소라<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="최경선" style="left:526px;top:288px;width:90px;height:44px;background:#CA8A04;">최경선<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="이재훈" style="left:722px;top:236px;width:90px;height:44px;background:#DB2777;">이재훈<span class="sk-pos">리드 매니저</span></div>
+            <div class="sk" data-name="김범석" style="left:624px;top:236px;width:90px;height:44px;background:#DB2777;">김범석<span class="sk-pos">매니저</span></div>
+            <div class="sk vacant" style="left:526px;top:236px;width:90px;height:44px;">공석</div>
 
-            <!-- ====== 상단 데스크 (4×2) ====== -->
-            <div class="sdg" style="left:180px;top:16px;width:400px;height:120px;"></div>
-            <div class="sk" data-name="허지은" style="left:188px;top:24px;width:90px;height:44px;background:#0D9488;">허지은<span class="sk-pos">리드매니저</span></div>
-            <div class="sk empty" style="left:286px;top:24px;width:90px;height:20px;"></div>
-            <div class="sk" data-name="김소연" style="left:384px;top:24px;width:90px;height:44px;background:#0D9488;">김소연<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="남윤정" style="left:482px;top:24px;width:90px;height:44px;background:#0D9488;">남윤정<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="이란" style="left:188px;top:76px;width:90px;height:44px;background:#6D28D9;">이란<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="쩐티리" style="left:286px;top:76px;width:90px;height:44px;background:#EA580C;">쩐티리<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="김채원" style="left:384px;top:76px;width:90px;height:44px;background:#EA580C;">김채원<span class="sk-pos">매니저</span></div>
-            <div class="sk empty" style="left:482px;top:76px;width:90px;height:20px;"></div>
-
-            <!-- ====== 화장실 ====== -->
-            <div class="sdg" style="left:850px;top:120px;width:130px;height:76px;">
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;color:#90a4ae;font-weight:600;">화장실(남)</div>
-            </div>
-            <div class="sdg" style="left:850px;top:214px;width:130px;height:76px;">
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;color:#90a4ae;font-weight:600;">화장실(여)</div>
-            </div>
-
-            <!-- ====== 중앙 데스크 (3×2) ====== -->
-            <div class="sdg" style="left:180px;top:160px;width:300px;height:120px;"></div>
-            <div class="sk" data-name="김민지" style="left:188px;top:168px;width:90px;height:44px;background:#6D28D9;">김민지<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="김송희" style="left:286px;top:168px;width:90px;height:44px;background:#DC2626;">김송희<span class="sk-pos">리드 매니저</span></div>
-            <div class="sk" data-name="이채은" style="left:384px;top:168px;width:90px;height:44px;background:#DC2626;">이채은<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="권혜영" style="left:188px;top:220px;width:90px;height:44px;background:#CA8A04;">권혜영<span class="sk-pos">리드 매니저</span></div>
-            <div class="sk" data-name="손예진" style="left:286px;top:220px;width:90px;height:44px;background:#CA8A04;">손예진<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="류동환" style="left:384px;top:220px;width:90px;height:44px;background:#9CA3AF;">류동환</div>
-
-            <!-- ====== 회의실 (좌측 중간) ====== -->
-            <div class="sdg" style="left:16px;top:220px;width:140px;height:180px;">
+            <!-- ====== 회의실 (우측 중간) ====== -->
+            <div class="sdg" style="left:844px;top:280px;width:140px;height:180px;">
                 <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:#90a4ae;font-weight:600;">회의실</div>
             </div>
 
-            <!-- ====== 하단 데스크 (3×2) ====== -->
-            <div class="sdg" style="left:180px;top:340px;width:300px;height:120px;"></div>
-            <div class="sk" data-name="함지민" style="left:188px;top:348px;width:90px;height:44px;background:#CA8A04;">함지민<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="김소라" style="left:286px;top:348px;width:90px;height:44px;background:#CA8A04;">김소라<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="최경선" style="left:384px;top:348px;width:90px;height:44px;background:#CA8A04;">최경선<span class="sk-pos">매니저</span></div>
-            <div class="sk" data-name="이재훈" style="left:188px;top:400px;width:90px;height:44px;background:#DB2777;">이재훈<span class="sk-pos">리드 매니저</span></div>
-            <div class="sk" data-name="김범석" style="left:286px;top:400px;width:90px;height:44px;background:#DB2777;">김범석<span class="sk-pos">매니저</span></div>
-            <div class="sk empty" style="left:384px;top:400px;width:90px;height:20px;"></div>
+            <!-- ====== 화장실 ====== -->
+            <div class="sdg" style="left:20px;top:390px;width:130px;height:76px;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;color:#90a4ae;font-weight:600;">화장실(여)</div>
+            </div>
+            <div class="sdg" style="left:20px;top:484px;width:130px;height:76px;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;color:#90a4ae;font-weight:600;">화장실(남)</div>
+            </div>
+
+            <!-- ====== 중앙 데스크 (3×2) ====== -->
+            <div class="sdg" data-team="브랜드커머스 / 모여라딜 / 브랜드마케팅" style="left:520px;top:400px;width:300px;height:120px;"></div>
+            <div class="sk blank" style="left:722px;top:468px;width:90px;height:44px;"></div>
+            <div class="sk" data-name="김송희" style="left:624px;top:468px;width:90px;height:44px;background:#DC2626;">김송희<span class="sk-pos">리드 매니저</span></div>
+            <div class="sk" data-name="이채은" style="left:526px;top:468px;width:90px;height:44px;background:#DC2626;">이채은<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="권혜영" style="left:722px;top:416px;width:90px;height:44px;background:#CA8A04;">권혜영<span class="sk-pos">리드 매니저</span></div>
+            <div class="sk blank" style="left:624px;top:416px;width:90px;height:44px;"></div>
+            <div class="sk blank" style="left:526px;top:416px;width:90px;height:44px;"></div>
 
             <!-- ====== 탕비실 ====== -->
-            <div class="sdg" style="left:600px;top:160px;width:130px;height:90px;">
+            <div class="sdg" style="left:270px;top:430px;width:130px;height:90px;">
                 <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:#90a4ae;font-weight:600;">탕비실</div>
             </div>
+
+            <!-- ====== 이승우 대표이사실 (우측 하단) ====== -->
+            <div class="sdg" data-team="대표이사실" style="left:844px;top:484px;width:140px;height:180px;"></div>
+            <div class="sk" data-name="이승우" style="left:860px;top:562px;width:110px;height:48px;background:#475569;font-size:12px;">이승우<span class="sk-pos">대표이사</span></div>
+
+            <!-- ====== 상단 데스크 (4×2) → 하단 데스크 ====== -->
+            <div class="sdg" data-team="미디어커머스 / 브랜드커머스 / 해외사업" style="left:420px;top:544px;width:400px;height:120px;"></div>
+            <div class="sk vacant" style="left:722px;top:612px;width:90px;height:44px;">공석</div>
+            <div class="sk vacant" style="left:624px;top:612px;width:90px;height:44px;">공석</div>
+            <div class="sk" data-name="김소연" style="left:526px;top:612px;width:90px;height:44px;background:#0D9488;">김소연<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="남윤정" style="left:428px;top:612px;width:90px;height:44px;background:#0D9488;">남윤정<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="이란" style="left:722px;top:560px;width:90px;height:44px;background:#6D28D9;">이란<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="쩐티리" style="left:624px;top:560px;width:90px;height:44px;background:#EA580C;">쩐티리<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="김채원" style="left:526px;top:560px;width:90px;height:44px;background:#EA580C;">김채원<span class="sk-pos">매니저</span></div>
+            <div class="sk empty" style="left:428px;top:560px;width:90px;height:44px;"></div>
         </div>
     </div>
 </div>
@@ -1096,17 +1123,17 @@ function buildDD(){
     const cd=cnt(e,'division'),ct=cnt(filteredForTeam,'team'),cp=cnt(e,'position');
 
     // Build division dropdown
-    let dh=`<div class="fdd-item${!F.div?' on':''}" data-v="">전체 부문 <span class="fdd-cnt">${e.length}</span></div><div class="fdd-divider"></div>`;
+    let dh=`<div class="fdd-item${!F.div?' on':''}" data-v="">전체 부문 <span class="fdd-cnt">${divs.length}</span></div><div class="fdd-divider"></div>`;
     divs.forEach(d=>{dh+=`<div class="fdd-item${F.div===d?' on':''}" data-v="${d}">${d} <span class="fdd-cnt">${cd[d]||0}</span></div>`;});
     document.getElementById('lstDiv').innerHTML=dh;
 
     // Build team dropdown (filtered by division)
-    let th=`<div class="fdd-item${!F.team?' on':''}" data-v="">전체 팀 <span class="fdd-cnt">${filteredForTeam.length}</span></div><div class="fdd-divider"></div>`;
+    let th=`<div class="fdd-item${!F.team?' on':''}" data-v="">전체 팀 <span class="fdd-cnt">${teams.length}</span></div><div class="fdd-divider"></div>`;
     teams.forEach(t=>{th+=`<div class="fdd-item${F.team===t?' on':''}" data-v="${t}">${t} <span class="fdd-cnt">${ct[t]||0}</span></div>`;});
     document.getElementById('lstTeam').innerHTML=th;
 
     // Build position dropdown
-    let ph=`<div class="fdd-item${!F.pos?' on':''}" data-v="">전체 직위 <span class="fdd-cnt">${e.length}</span></div><div class="fdd-divider"></div>`;
+    let ph=`<div class="fdd-item${!F.pos?' on':''}" data-v="">전체 직위 <span class="fdd-cnt">${poss.length}</span></div><div class="fdd-divider"></div>`;
     poss.forEach(p=>{ph+=`<div class="fdd-item${F.pos===p?' on':''}" data-v="${p}">${p} <span class="fdd-cnt">${cp[p]||0}</span></div>`;});
     document.getElementById('lstPos').innerHTML=ph;
 
@@ -1222,7 +1249,7 @@ function refresh(){
         if(F.div&&e.division!==F.div)return false;
         if(F.team&&e.team!==F.team)return false;
         if(F.pos&&e.position!==F.pos)return false;
-        if(F.q){const s=[e.name,e.position,...(e.primaryTasks||[]),...(e.secondaryTasks||[])].join(' ').toLowerCase();if(!s.includes(F.q))return false;}
+        if(F.q){const s=[e.name,e.position,e.team,e.division,...(e.primaryTasks||[]),...(e.secondaryTasks||[])].join(' ').toLowerCase();if(!s.includes(F.q))return false;}
         return true;
     });
     // Sort
@@ -1773,6 +1800,9 @@ function renderOrg(){
     h+=`</div></div>`; // /grid, /본사 o-col
     h+=`</div>`; // /최상위 o-row
 
+    // 업데이트 날짜 추가
+    h+=`<div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--text-dim);font-weight:500;">최종 업데이트: 2026년 2월 23일</div>`;
+
     document.getElementById('orgArea').innerHTML=h;
 
     // 수평선 너비 자동 맞춤 (절대 좌표 기반)
@@ -1823,6 +1853,31 @@ function renderOrg(){
     requestAnimationFrame(()=>{ layoutHLines(); setTimeout(layoutHLines,100); });
 }
 function filterTeam(t){F.team=t;document.getElementById('lblTeam').textContent=t;switchPanel('directory');refresh();}
+
+// 조직도 내 이름 검색
+function searchOrgChart(q){
+    const area=document.getElementById('orgArea');if(!area)return;
+    const mems=area.querySelectorAll('.o-mem');
+    const heads=area.querySelectorAll('.o-head');
+    const ceo=area.querySelectorAll('.o-ceo');
+    const all=[...mems,...heads,...ceo];
+    // clear previous
+    all.forEach(el=>{el.classList.remove('org-hl','org-dim');});
+    if(!q||!q.trim()){return;}
+    const query=q.trim().toLowerCase();
+    let found=null;
+    all.forEach(el=>{
+        const nm=el.querySelector('.o-nm');
+        const name=nm?nm.textContent.trim().toLowerCase():'';
+        if(name.includes(query)){
+            el.classList.add('org-hl');
+            if(!found)found=el;
+        } else {
+            el.classList.add('org-dim');
+        }
+    });
+    if(found){found.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});}
+}
 
 // Print/PDF
 function printOrg(){
@@ -1923,7 +1978,7 @@ async function downloadDirectoryPDF(){
         if(F.div&&e.division!==F.div)return false;
         if(F.team&&e.team!==F.team)return false;
         if(F.pos&&e.position!==F.pos)return false;
-        if(F.q){const s=[e.name,e.position,...(e.primaryTasks||[]),...(e.secondaryTasks||[])].join(' ').toLowerCase();if(!s.includes(F.q))return false;}
+        if(F.q){const s=[e.name,e.position,e.team,e.division,...(e.primaryTasks||[]),...(e.secondaryTasks||[])].join(' ').toLowerCase();if(!s.includes(F.q))return false;}
         return true;
     });
     list.sort(defaultSort);
@@ -2336,7 +2391,7 @@ function renderAccView(list){
         const ai=DIV_ORDER.indexOf(a),bi=DIV_ORDER.indexOf(b);
         return(ai<0?99:ai)-(bi<0?99:bi);
     });
-    let h='';
+    let h='<div class="acc-ctrl"><button class="acc-ctrl-btn" onclick="accToggleAll(true)">전체 펼치기</button><button class="acc-ctrl-btn" onclick="accToggleAll(false)">전체 묶기</button></div>';
     divKeys.forEach(div=>{
         const members=divMap[div];
         // 팀별 그룹
@@ -2393,6 +2448,12 @@ function renderAccView(list){
         h+=`</div></div>`;
     });
     area.innerHTML=h;
+}
+function accToggleAll(open){
+    const area=document.getElementById('accArea');if(!area)return;
+    area.querySelectorAll('.acc-div-hd,.acc-tm-hd,.acc-div-body,.acc-tm-body').forEach(el=>{
+        if(open)el.classList.add('open');else el.classList.remove('open');
+    });
 }
 
 // ===== 관리자 직원목록 =====
