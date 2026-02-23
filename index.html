@@ -335,8 +335,8 @@ table.dt{width:100%;border-collapse:collapse;}
 .seat-bp .stl{position:absolute;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;color:#fff;z-index:4;white-space:nowrap;}
 .seat-bp .sdg{position:absolute;border:1.5px dashed rgba(0,0,0,.06);border-radius:6px;z-index:0;background:transparent;transition:all .25s;}
 .seat-bp .sdg[data-team]:hover{background:rgba(74,85,104,.06);border:2.5px solid rgba(74,85,104,.3);box-shadow:0 0 20px rgba(74,85,104,.1);}
-.seat-bp .sdg[data-team]::after{content:attr(data-team);position:absolute;top:-26px;left:50%;transform:translateX(-50%) scale(.92);font-size:11.5px;font-weight:700;color:#fff;background:rgba(45,55,72,.78);padding:4px 14px;border-radius:6px;pointer-events:none;white-space:nowrap;opacity:0;transition:all .2s ease;z-index:10;letter-spacing:-.3px;}
-.seat-bp .sdg[data-team]:hover::after{opacity:1;transform:translateX(-50%) scale(1);}
+.seat-bp .sk[data-team]::before{content:attr(data-team);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#fff;background:rgba(45,55,72,.85);padding:3px 11px;border-radius:5px;pointer-events:none;white-space:nowrap;opacity:0;transition:all .15s ease;z-index:50;letter-spacing:-.2px;}
+.seat-bp .sk[data-team]:hover::before{opacity:1;}
 .seat-bp .sw{position:absolute;background:#94a3b8;z-index:2;}
 .seat-lgd{position:absolute;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:9px;z-index:5;line-height:1.7;}
 .seat-lgd-i{display:flex;align-items:center;gap:4px;}
@@ -740,19 +740,19 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
             <div class="sk" data-name="신명희" style="left:738px;top:98px;width:108px;height:50px;background:#0E7490;">신명희<span class="sk-pos">선임연구원</span></div>
             <div class="sk" data-name="이정훈" style="left:856px;top:98px;width:108px;height:50px;background:#2563EB;">이정훈<span class="sk-pos">기술연구소장</span></div>
 
-            <!-- ====== 백정석 ====== -->
-            <div class="sdg" data-team="경영관리본부" style="left:450px;top:50px;width:135px;height:118px;"></div>
-            <div class="sk" data-name="백정석" style="left:460px;top:76px;width:114px;height:56px;background:#4F6DB5;font-size:14px;">백정석<span class="sk-pos">이사</span></div>
+            <!-- ====== 탕비실 (상단 좌측, 원형) ====== -->
+            <div class="sdg" style="left:155px;top:25px;width:185px;height:150px;border-radius:50%;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;color:#90a4ae;font-weight:600;">탕비실</div>
+            </div>
 
-            <!-- ====== 회의실 (상단) ====== -->
-            <div class="sdg" style="left:230px;top:50px;width:190px;height:118px;">
+            <!-- ====== 회의실 (상단, 탕비실 옆) ====== -->
+            <div class="sdg" style="left:370px;top:50px;width:190px;height:118px;">
                 <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;color:#90a4ae;font-weight:600;">회의실</div>
             </div>
 
-            <!-- ====== 탕비실 ====== -->
-            <div class="sdg" style="left:20px;top:200px;width:148px;height:100px;">
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;color:#90a4ae;font-weight:600;">탕비실</div>
-            </div>
+            <!-- ====== 백정석 (회의실 오른쪽) ====== -->
+            <div class="sdg" data-team="경영관리본부" style="left:590px;top:50px;width:118px;height:118px;"></div>
+            <div class="sk" data-name="백정석" style="left:594px;top:76px;width:110px;height:56px;background:#4F6DB5;font-size:14px;">백정석<span class="sk-pos">이사</span></div>
 
             <!-- ====== 조재연/정정훈 (3×1) ====== -->
             <div class="sdg" data-team="서비스운영1팀" style="left:330px;top:190px;width:360px;height:64px;"></div>
@@ -1919,6 +1919,17 @@ document.querySelectorAll('.seat-tab[data-sf]').forEach(t=>t.addEventListener('c
     t.classList.add('on');
     document.getElementById(t.dataset.sf).classList.add('on');
 }));
+// Seat map - 좌석별 팀명 자동 매핑
+(function(){
+    const colorTeam={'#4F6DB5':'경영관리팀','#3182CE':'서비스운영1팀','#805AD5':'서비스운영2팀','#0891B2':'서비스운영3팀','#D97706':'설계/적산팀','#16A34A':'영업팀','#0E7490':'소재기술연구소','#2563EB':'건설기술연구소','#6D28D9':'브랜드커머스팀','#0D9488':'미디어커머스팀','#EA580C':'해외사업팀','#DC2626':'모여라딜팀','#CA8A04':'브랜드마케팅팀','#DB2777':'그로스팀','#475569':'대표이사실'};
+    const nameTeam={'백정석':'경영관리본부','황윤선':'경영관리본부','이승우':'대표이사실'};
+    document.querySelectorAll('.seat-bp .sk[data-name]').forEach(sk=>{
+        const nm=sk.dataset.name;
+        if(nameTeam[nm]){sk.dataset.team=nameTeam[nm];return;}
+        const bg=(sk.style.background||sk.style.backgroundColor||'').toUpperCase();
+        for(const[c,t]of Object.entries(colorTeam)){if(bg.includes(c.toUpperCase())){sk.dataset.team=t;break;}}
+    });
+})();
 // Seat map - search
 document.getElementById('seatSI').addEventListener('input',function(){seatSearch(this.value.trim());});
 document.querySelectorAll('.seat-bp .sk[data-name]').forEach(s=>{
