@@ -459,7 +459,12 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 .ct-tbl .ct-company{font-size:13px;font-weight:600;color:var(--text);}
 .ct-tbl a{color:var(--accent);font-weight:500;text-decoration:none;}
 .ct-tbl a:hover{text-decoration:underline;}
-.ct-tbl .ct-memo-cell{font-size:11px;color:var(--text-dim);max-width:200px;overflow:hidden;text-overflow:ellipsis;}
+.ct-tbl .ct-memo-cell{font-size:12px;color:var(--text);cursor:pointer;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ct-tbl .ct-memo-cell:hover{color:var(--accent);}
+.ct-memo-full-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.15);z-index:300;display:flex;align-items:center;justify-content:center;}
+.ct-memo-full{background:var(--bg-surface);border-radius:var(--radius-lg);padding:24px;max-width:480px;width:90%;box-shadow:0 8px 30px rgba(0,0,0,.12);max-height:70vh;overflow-y:auto;}
+.ct-memo-full-title{font-size:13px;font-weight:700;color:var(--text-sub);margin-bottom:12px;}
+.ct-memo-full-text{font-size:14px;color:var(--text);line-height:1.7;white-space:pre-wrap;word-break:break-word;}
 .ct-tbl .ct-edit-btn{font-size:11px;color:var(--text-dim);cursor:pointer;padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:none;transition:.1s;white-space:nowrap;}
 .ct-tbl .ct-edit-btn:hover{background:var(--accent-dim);color:var(--accent);border-color:var(--accent);}
 
@@ -2495,13 +2500,13 @@ function renderContacts(){
         h+=`<div class="ct-group-body${isHidden?' collapsed':''}">`;
         h+=`<div class="ct-tbl-wrap"><table class="ct-tbl"><thead><tr>`;
         if(hasCorpPhone&&isAdm){
-            h+=`<th style="width:20%">업체/기관명</th><th style="width:12%">담당자</th><th style="width:14%">연락처</th><th style="width:14%">법인폰</th><th style="width:20%">이메일</th><th style="width:14%">메모</th><th style="width:6%"></th>`;
+            h+=`<th style="width:18%">업체/기관명</th><th style="width:10%">담당자</th><th style="width:13%">연락처</th><th style="width:13%">법인폰</th><th style="width:16%">이메일</th><th style="width:24%">메모</th><th style="width:6%"></th>`;
         } else if(hasCorpPhone){
-            h+=`<th style="width:20%">업체/기관명</th><th style="width:13%">담당자</th><th style="width:15%">연락처</th><th style="width:15%">법인폰</th><th style="width:22%">이메일</th><th style="width:15%">메모</th>`;
+            h+=`<th style="width:18%">업체/기관명</th><th style="width:11%">담당자</th><th style="width:14%">연락처</th><th style="width:14%">법인폰</th><th style="width:17%">이메일</th><th style="width:26%">메모</th>`;
         } else if(isAdm){
-            h+=`<th style="width:22%">업체/기관명</th><th style="width:14%">담당자</th><th style="width:16%">연락처</th><th style="width:24%">이메일</th><th style="width:16%">메모</th><th style="width:8%"></th>`;
+            h+=`<th style="width:20%">업체/기관명</th><th style="width:12%">담당자</th><th style="width:15%">연락처</th><th style="width:17%">이메일</th><th style="width:28%">메모</th><th style="width:8%"></th>`;
         } else {
-            h+=`<th style="width:24%">업체/기관명</th><th style="width:14%">담당자</th><th style="width:17%">연락처</th><th style="width:26%">이메일</th><th style="width:19%">메모</th>`;
+            h+=`<th style="width:20%">업체/기관명</th><th style="width:13%">담당자</th><th style="width:15%">연락처</th><th style="width:18%">이메일</th><th style="width:34%">메모</th>`;
         }
         h+=`</tr></thead><tbody>`;
         items.forEach(c=>{
@@ -2511,13 +2516,20 @@ function renderContacts(){
             h+=`<td>${c.phone?`<a href="tel:${c.phone}">${c.phone}</a>`:'-'}</td>`;
             if(hasCorpPhone) h+=`<td>${c.corpPhone?`<a href="tel:${c.corpPhone}">${c.corpPhone}</a>`:'-'}</td>`;
             h+=`<td>${c.email?`<a href="mailto:${c.email}">${c.email}</a>`:'-'}</td>`;
-            h+=`<td><span class="ct-memo-cell">${c.memo||'-'}</span></td>`;
+            h+=`<td><span class="ct-memo-cell"${c.memo?` onclick="showMemo('${c.id}')"`:' style="cursor:default"'}>${c.memo||'-'}</span></td>`;
             if(isAdm) h+=`<td><button class="ct-edit-btn" onclick="editCt('${c.id}')">수정</button></td>`;
             h+=`</tr>`;
         });
         h+=`</tbody></table></div></div></div>`;
     });
     document.getElementById('ctList').innerHTML=h;
+}
+function showMemo(id){
+    const c=getCt().find(x=>x.id===id);if(!c||!c.memo)return;
+    const ov=document.createElement('div');ov.className='ct-memo-full-overlay';
+    ov.onclick=e=>{if(e.target===ov)ov.remove();};
+    ov.innerHTML=`<div class="ct-memo-full"><div class="ct-memo-full-title">${c.company||''} 메모</div><div class="ct-memo-full-text">${c.memo.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>`;
+    document.body.appendChild(ov);
 }
 
 function openCtForm(id){
