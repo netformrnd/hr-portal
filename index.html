@@ -67,6 +67,7 @@ a{color:var(--accent);text-decoration:none;}
 .hd{background:var(--bg-surface);border-bottom:1px solid var(--border);padding:0 28px;height:44px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
 .hd-logo{font-size:12px;color:var(--text-sub);display:flex;align-items:center;gap:6px;}
 .hd-logo b{color:var(--text);font-size:12px;font-weight:600;}
+.hd-menu-btn{display:none;background:none;border:none;color:var(--text);cursor:pointer;padding:4px;margin-right:8px;line-height:0;}
 
 /* === NAV (hidden - replaced by sidebar) === */
 .nav{display:none;}
@@ -477,7 +478,11 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 .ct-modal-bd{padding:20px;}
 
 @media(max-width:768px){
-  .sidebar{display:none;}
+  .hd-menu-btn{display:block;}
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease;display:flex;z-index:300;}
+  .sidebar.mob-open{transform:translateX(0);}
+  .mob-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:299;}
+  .mob-overlay.on{display:block;}
   .main-area{margin-left:0;}
   .hd{display:flex;padding:0 14px;}
   .wrap{padding:14px;}
@@ -538,6 +543,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 <body>
 
 <!-- 사이드바 -->
+<div class="mob-overlay" id="mobOverlay" onclick="closeMobMenu()"></div>
 <aside class="sidebar">
     <div class="sb-logo">
         <div class="sb-logo-icon">N</div>
@@ -581,6 +587,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 
 <div class="main-area">
 <header class="hd">
+    <button class="hd-menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('mob-open');document.getElementById('mobOverlay').classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     <div class="hd-logo">NETFORM R&D / <b id="breadcrumbTitle">직원 목록</b></div>
 </header>
 
@@ -1059,7 +1066,8 @@ function switchPanel(p){
     if(p==='contacts')renderContacts();
 }
 document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>switchPanel(b.dataset.p)));
-document.querySelectorAll('.sb-item[data-p]').forEach(b=>b.addEventListener('click',()=>switchPanel(b.dataset.p)));
+document.querySelectorAll('.sb-item[data-p]').forEach(b=>b.addEventListener('click',()=>{switchPanel(b.dataset.p);closeMobMenu();}));
+function closeMobMenu(){const sb=document.querySelector('.sidebar');if(sb)sb.classList.remove('mob-open');const ov=document.getElementById('mobOverlay');if(ov)ov.classList.remove('on');};
 
 // Filters
 let F={div:'',team:'',pos:'',q:''},SS={k:'sortOrder',a:true};
