@@ -68,6 +68,9 @@ a{color:var(--accent);text-decoration:none;}
 .hd-logo{font-size:12px;color:var(--text-sub);display:flex;align-items:center;gap:6px;}
 .hd-logo b{color:var(--text);font-size:12px;font-weight:600;}
 .hd-menu-btn{display:none;background:none;border:none;color:var(--text);cursor:pointer;padding:8px;margin-right:4px;line-height:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+.hd-cal{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:#2d3748;color:#fff;font-size:11.5px;font-weight:600;border-radius:6px;text-decoration:none;transition:all .2s;letter-spacing:-.2px;white-space:nowrap;}
+.hd-cal:hover{background:#4a5568;transform:translateY(-1px);box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.hd-cal svg{flex-shrink:0;}
 
 /* === NAV (hidden - replaced by sidebar) === */
 .nav{display:none;}
@@ -537,6 +540,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
   .hd{padding:0 10px;height:40px;}
   .hd-logo{font-size:11px;}
   .hd-logo b{font-size:11px;}
+  .hd-cal span{display:none;}.hd-cal{padding:5px 8px;}
   .sbar{width:100%;}
   .sbar input{width:100%;}
   .wrap{padding:10px;}
@@ -615,6 +619,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 <header class="hd">
     <button class="hd-menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('mob-open');document.getElementById('mobOverlay').classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     <div class="hd-logo">NETFORM R&D / <b id="breadcrumbTitle">직원 목록</b></div>
+    <a class="hd-cal" href="https://netformrnd.github.io/calendar/" target="_blank" title="(주) 넷폼알앤디 근무현황 캘린더"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>근무현황 캘린더</span></a>
 </header>
 
 <div class="wrap">
