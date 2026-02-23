@@ -2396,7 +2396,15 @@ refresh();
 // ===== 업무 연락처 =====
 const CT_KEY='nf_contacts_v1';
 const CT_COLLAPSE_KEY='nf_ct_collapsed';
-const getCt=()=>{try{return JSON.parse(localStorage.getItem(CT_KEY))||[];}catch(e){return[];}};
+const DEFAULT_CONTACTS=[
+{id:"ctmludpj0dmazv",category:"협력업체",company:"아파트스퀘어",name:"조현식 이사",phone:"010-8981-1831",email:"daon21cho@gmail.com",memo:""},
+{id:"ctmludq1b169lv",category:"협력업체",company:"아파트스퀘어",name:"김영성 실장",phone:"010-9115-1699",email:"tpo123@nate.com",memo:""},
+{id:"ctmludqk9x25am",category:"협력업체",company:"아파트스퀘어",name:"신수진 과장",phone:"010-4023-8939",email:"wlsdl503@naver.com",memo:""},
+{id:"ctmludr58t0wr0",category:"IT/시스템",company:"신도리코",name:"",phone:"010-3715-3723",email:"",memo:""},
+{id:"ctmlue6oz9rau1",category:"회사법인폰",company:"서비스운영2팀 & 적산팀",name:"김수진",phone:"010-4795-8411",corpPhone:"",email:"",memo:"현장 및 시공사 문의 응대 \n컨설팅 내역서 관련 응대"},
+{id:"ctmlue7cdw5mzn",category:"회사법인폰",company:"서비스운영2팀",name:"이지연",phone:"010-9500-2734",corpPhone:"",email:"",memo:"대금관련 업무폰"}
+];
+const getCt=()=>{try{const d=JSON.parse(localStorage.getItem(CT_KEY));if(d&&d.length)return d;localStorage.setItem(CT_KEY,JSON.stringify(DEFAULT_CONTACTS));return DEFAULT_CONTACTS.map(e=>({...e}));}catch(e){localStorage.setItem(CT_KEY,JSON.stringify(DEFAULT_CONTACTS));return DEFAULT_CONTACTS.map(e=>({...e}));}};
 const setCt=d=>localStorage.setItem(CT_KEY,JSON.stringify(d));
 const getCollapsed=()=>{try{return JSON.parse(localStorage.getItem(CT_COLLAPSE_KEY))||{};}catch(e){return{};}};
 const setCollapsed=d=>localStorage.setItem(CT_COLLAPSE_KEY,JSON.stringify(d));
