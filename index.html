@@ -380,6 +380,7 @@ table.dt{width:100%;border-collapse:collapse;}
 .orgtree-div:last-child{border-bottom:none;}
 .orgtree-div-hd{display:flex;align-items:center;gap:6px;padding:9px 14px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text);transition:.12s;user-select:none;position:relative;}
 .orgtree-div-hd:hover{background:var(--bg-hover);}
+.orgtree-div-hd.on{background:var(--accent-dim);color:var(--accent);}
 .orgtree-div-hd .ot-arrow{width:14px;height:14px;color:var(--text-dim);transition:transform .2s;flex-shrink:0;}
 .orgtree-div-hd.collapsed .ot-arrow{transform:rotate(-90deg);}
 .orgtree-div-hd .ot-cnt{font-size:10px;font-weight:500;color:var(--text-dim);margin-left:auto;}
@@ -1203,7 +1204,7 @@ function renderOrgTreeNav(list){
             const ai=TO.indexOf(a),bi=TO.indexOf(b);return(ai<0?99:ai)-(bi<0?99:bi);
         });
         h+=`<div class="orgtree-div">`;
-        h+=`<div class="orgtree-div-hd" onclick="toggleOrgTreeDiv(this)">`;
+        h+=`<div class="orgtree-div-hd${_orgTreeSelected==='DIV__'+div?' on':''}" onclick="selectOrgTreeDiv('${div}',this)" data-otdiv="${div}">`;
         h+=`<svg class="ot-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`;
         h+=`${div} <span class="ot-cnt">${members.length}</span>`;
         h+=`</div>`;
@@ -1234,8 +1235,11 @@ function renderOrgTreeNav(list){
         renderOrgTreeSearchResults(list);
         return;
     }
-    // 선택된 팀이 있으면 다시 렌더
-    if(_orgTreeSelected) renderOrgTreeMembers();
+    // 선택된 항목이 있으면 다시 렌더
+    if(_orgTreeSelected && _orgTreeSelected.startsWith('DIV__')){
+        const selDiv=_orgTreeSelected.replace('DIV__','');
+        renderOrgTreeDivMembers(selDiv);
+    } else if(_orgTreeSelected) renderOrgTreeMembers();
     else document.getElementById('orgTreeContent').innerHTML=`<div class="orgtree-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>왼쪽 조직도에서 팀을 선택하세요</span></div>`;
 }
 function renderOrgTreeSearchResults(list){
@@ -1267,10 +1271,68 @@ function toggleOrgTreeDiv(el){
     el.classList.toggle('collapsed');
     el.nextElementSibling.classList.toggle('collapsed');
 }
+function selectOrgTreeDiv(div,el){
+    // 펼치기 (접혀있으면 펼침)
+    if(el.classList.contains('collapsed')){
+        el.classList.remove('collapsed');
+        el.nextElementSibling.classList.remove('collapsed');
+    }
+    _orgTreeSelected='DIV__'+div;
+    // 모든 선택 해제
+    document.querySelectorAll('.orgtree-tm').forEach(t=>t.classList.remove('on'));
+    document.querySelectorAll('.orgtree-div-hd').forEach(t=>t.classList.remove('on'));
+    el.classList.add('on');
+    renderOrgTreeDivMembers(div);
+}
+function renderOrgTreeDivMembers(div){
+    const content=document.getElementById('orgTreeContent');if(!content)return;
+    const members=_orgTreeData.filter(e=>(e.division||'기타')===div);
+    members.sort((a,b)=>{
+        const al=PO.indexOf(a.position)<0?99:PO.indexOf(a.position);
+        const bl=PO.indexOf(b.position)<0?99:PO.indexOf(b.position);
+        if(al!==bl) return al-bl;
+        const atm=TO.indexOf(a.team||''),btm=TO.indexOf(b.team||'');
+        if(atm!==btm) return (atm<0?99:atm)-(btm<0?99:btm);
+        return (a.name||'').localeCompare(b.name||'','ko');
+    });
+    // 팀별 그룹핑
+    const tmMap={};
+    members.forEach(m=>{
+        const t=(HEAD_POS.includes(m.position)&&(m.team===div||!m.team))?div+'(총괄)':(m.team||div);
+        if(!tmMap[t])tmMap[t]=[];tmMap[t].push(m);
+    });
+    const tmKeys=Object.keys(tmMap).sort((a,b)=>{
+        if(a.includes('총괄'))return -1;if(b.includes('총괄'))return 1;
+        const ai=TO.indexOf(a),bi=TO.indexOf(b);return(ai<0?99:ai)-(bi<0?99:bi);
+    });
+    let h=`<div class="orgtree-team-hd"><div class="orgtree-team-nm"><span class="ot-color" style="background:var(--accent)"></span>${div} 전체</div><div class="orgtree-team-cnt">${members.length}명</div></div>`;
+    tmKeys.forEach(tm=>{
+        const tmMembers=tmMap[tm];
+        const displayName=tm.includes('총괄')?'총괄':tm;
+        const tc=getTC(tm.replace('(총괄)',''));
+        h+=`<div style="margin:10px 0 4px 0;font-size:12px;font-weight:700;color:var(--text-sub);display:flex;align-items:center;gap:6px;padding:0 2px;"><span style="width:8px;height:8px;border-radius:50%;background:${tc};display:inline-block;"></span>${displayName} <span style="font-weight:400;color:var(--text-dim)">${tmMembers.length}명</span></div>`;
+        h+=`<div class="orgtree-members">`;
+        tmMembers.forEach(m=>{
+            const ini=m.name?m.name[0]:'?';
+            const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['리드 매니저','공장장','선임연구원'].includes(m.position)?'cp-l':'cp-m';
+            const tasks=(m.primaryTasks||[]).filter(Boolean).slice(0,3).join(', ');
+            h+=`<div class="orgtree-mem" style="border-top:3px solid ${tc}" onclick="showD('${m.id}')">`;
+            h+=`<div class="av" style="background:${tc}">${m.photo?`<img src="${m.photo}">`:ini}</div>`;
+            h+=`<div class="orgtree-mem-info"><div class="orgtree-mem-top"><span class="orgtree-mem-nm">${m.name}</span><span class="orgtree-mem-pos cp ${pc}">${m.position||''}</span></div>`;
+            if(tasks) h+=`<div class="orgtree-mem-tasks">${tasks}</div>`;
+            if(m.phone) h+=`<span class="orgtree-mem-phone">${m.phone}</span>`;
+            if(m.email) h+=`<span class="orgtree-mem-email">${m.email}</span>`;
+            h+=`</div></div>`;
+        });
+        h+=`</div>`;
+    });
+    content.innerHTML=h;
+}
 function selectOrgTreeTeam(div,tm){
     _orgTreeSelected=div+'__'+tm;
-    // 모든 팀 버튼 off
+    // 모든 선택 해제
     document.querySelectorAll('.orgtree-tm').forEach(el=>el.classList.remove('on'));
+    document.querySelectorAll('.orgtree-div-hd').forEach(el=>el.classList.remove('on'));
     const sel=document.querySelector(`.orgtree-tm[data-otkey="${div}__${tm}"]`);
     if(sel) sel.classList.add('on');
     renderOrgTreeMembers();
