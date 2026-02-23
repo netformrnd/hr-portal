@@ -392,6 +392,8 @@ table.dt{width:100%;border-collapse:collapse;}
 .orgtree-tm .ot-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 .orgtree-tm .ot-tm-cnt{font-size:10px;color:var(--text-dim);margin-left:auto;}
 .orgtree-tm.on .ot-tm-cnt{color:var(--accent);}
+.orgtree-tm.ot-sub{padding-left:42px;font-size:11px;}
+.orgtree-tm.ot-parent{font-weight:600;}
 .orgtree-content{flex:1;overflow-y:auto;padding:0;}
 .orgtree-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-dim);font-size:13px;flex-direction:column;gap:8px;padding:40px;}
 .orgtree-empty svg{width:40px;height:40px;color:var(--text-dim);opacity:.4;}
@@ -1093,6 +1095,9 @@ function teamMemOrder(name,team){
     if(mo){const idx=mo.indexOf(name);return idx<0?999:idx;}
     return 999;
 }
+// 하위팀 매핑 (부모팀 → 자식팀들)
+const TEAM_CHILDREN={'용인공장':['관리팀','생산/품질관리팀']};
+const CHILD_TEAMS=new Set(Object.values(TEAM_CHILDREN).flat());
 // 본부 총괄 직위 (부문 맨 위에 고정)
 const HEAD_POS=['부사장','상무이사','이사','기술연구소장'];
 function isHeadOf(e){return (HEAD_POS.includes(e.position)||(e.position||'').includes('연구소장'))&&(e.team===e.division||!e.team);}
@@ -1211,8 +1216,8 @@ function renderOrgTreeNav(list){
         h+=`</div>`;
         h+=`<div class="orgtree-div-body">`;
         tmKeys.forEach(tm=>{
+            if(CHILD_TEAMS.has(tm)) return; // 하위팀은 부모팀 아래서 렌더
             if(tm===div && tmKeys.length>1){
-                // 본부 총괄 - 별도 항목
                 const cnt=tmMap[tm].length;
                 if(cnt>0){
                     h+=`<div class="orgtree-tm${_orgTreeSelected===div+'__'+tm?' on':''}" onclick="selectOrgTreeTeam('${div}','${tm}')" data-otkey="${div}__${tm}">`;
@@ -1220,10 +1225,21 @@ function renderOrgTreeNav(list){
                     h+=`</div>`;
                 }
             } else {
-                const cnt=tmMap[tm].length;
-                h+=`<div class="orgtree-tm${_orgTreeSelected===div+'__'+tm?' on':''}" onclick="selectOrgTreeTeam('${div}','${tm}')" data-otkey="${div}__${tm}">`;
-                h+=`<span class="ot-dot" style="background:${getTC(tm)}"></span>${tm} <span class="ot-tm-cnt">${cnt}</span>`;
+                // 부모팀이면 자신+하위팀 인원 합산
+                const children=TEAM_CHILDREN[tm]||[];
+                const totalCnt=(tmMap[tm]?tmMap[tm].length:0)+children.reduce((s,c)=>(tmMap[c]?s+tmMap[c].length:s),0);
+                h+=`<div class="orgtree-tm ot-parent${_orgTreeSelected===div+'__'+tm?' on':''}" onclick="selectOrgTreeTeam('${div}','${tm}')" data-otkey="${div}__${tm}">`;
+                h+=`<span class="ot-dot" style="background:${getTC(tm)}"></span>${tm} <span class="ot-tm-cnt">${totalCnt}</span>`;
                 h+=`</div>`;
+                // 하위팀 렌더 (들여쓰기)
+                children.forEach(sub=>{
+                    const subCnt=tmMap[sub]?tmMap[sub].length:0;
+                    if(subCnt>0){
+                        h+=`<div class="orgtree-tm ot-sub${_orgTreeSelected===div+'__'+sub?' on':''}" onclick="selectOrgTreeTeam('${div}','${sub}')" data-otkey="${div}__${sub}">`;
+                        h+=`<span class="ot-dot" style="background:${getTC(sub)}"></span>${sub} <span class="ot-tm-cnt">${subCnt}</span>`;
+                        h+=`</div>`;
+                    }
+                });
             }
         });
         h+=`</div></div>`;
@@ -1345,23 +1361,55 @@ function renderOrgTreeMembers(){
         return;
     }
     const [div,tm]=_orgTreeSelected.split('__');
-    // 해당 부문+팀 멤버 필터
+    const children=TEAM_CHILDREN[tm]||[];
+    const targetTeams=[tm,...children];
+    // 해당 부문+팀(+하위팀) 멤버 필터
     const members=_orgTreeData.filter(e=>{
         const d=e.division||'기타';
         const t=(HEAD_POS.includes(e.position)&&(e.team===d||!e.team))?d:(e.team||d);
-        return d===div && t===tm;
-    });
-    members.sort((a,b)=>{
-        const ma=teamMemOrder(a.name,tm),mb=teamMemOrder(b.name,tm);
-        if(ma!==999||mb!==999) return ma-mb;
-        const al=PO.indexOf(a.position)<0?99:PO.indexOf(a.position);
-        const bl=PO.indexOf(b.position)<0?99:PO.indexOf(b.position);
-        return al-bl||(a.name||'').localeCompare(b.name||'','ko');
+        return d===div && targetTeams.includes(t);
     });
     const tc=getTC(tm);
     const label=(tm===div&&members.every(m=>HEAD_POS.includes(m.position)))?div+' 총괄':tm;
-    let h=`<div class="orgtree-team-hd"><div class="orgtree-team-nm"><span class="ot-color" style="background:${tc}"></span>${label}</div><div class="orgtree-team-cnt">${members.length}명</div></div>`;
-    h+=`<div class="orgtree-members">`;
+    // 하위팀이 있으면 팀별 그룹핑
+    if(children.length>0){
+        let h=`<div class="orgtree-team-hd"><div class="orgtree-team-nm"><span class="ot-color" style="background:${tc}"></span>${label} 전체</div><div class="orgtree-team-cnt">${members.length}명</div></div>`;
+        const groups=[[tm],[...children]].flat().map(t=>{
+            const gm=members.filter(m=>{
+                const mt=(HEAD_POS.includes(m.position)&&(m.team===div||!m.team))?div:(m.team||div);
+                return mt===t;
+            });
+            return {team:t,members:gm};
+        }).filter(g=>g.members.length>0);
+        groups.forEach(g=>{
+            g.members.sort((a,b)=>{
+                const ma=teamMemOrder(a.name,g.team),mb=teamMemOrder(b.name,g.team);
+                if(ma!==999||mb!==999) return ma-mb;
+                const al=PO.indexOf(a.position)<0?99:PO.indexOf(a.position);
+                const bl=PO.indexOf(b.position)<0?99:PO.indexOf(b.position);
+                return al-bl||(a.name||'').localeCompare(b.name||'','ko');
+            });
+            const gtc=getTC(g.team);
+            const gLabel=g.team===tm?tm:g.team;
+            h+=`<div style="margin:10px 0 4px 0;font-size:12px;font-weight:700;color:var(--text-sub);display:flex;align-items:center;gap:6px;padding:0 2px;"><span style="width:8px;height:8px;border-radius:50%;background:${gtc};display:inline-block;"></span>${gLabel} <span style="font-weight:400;color:var(--text-dim)">${g.members.length}명</span></div>`;
+            h+=renderMemCards(g.members,gtc);
+        });
+        content.innerHTML=h;
+    } else {
+        members.sort((a,b)=>{
+            const ma=teamMemOrder(a.name,tm),mb=teamMemOrder(b.name,tm);
+            if(ma!==999||mb!==999) return ma-mb;
+            const al=PO.indexOf(a.position)<0?99:PO.indexOf(a.position);
+            const bl=PO.indexOf(b.position)<0?99:PO.indexOf(b.position);
+            return al-bl||(a.name||'').localeCompare(b.name||'','ko');
+        });
+        let h=`<div class="orgtree-team-hd"><div class="orgtree-team-nm"><span class="ot-color" style="background:${tc}"></span>${label}</div><div class="orgtree-team-cnt">${members.length}명</div></div>`;
+        h+=renderMemCards(members,tc);
+        content.innerHTML=h;
+    }
+}
+function renderMemCards(members,tc){
+    let h=`<div class="orgtree-members">`;
     members.forEach(m=>{
         const ini=m.name?m.name[0]:'?';
         const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['리드 매니저','공장장','선임연구원'].includes(m.position)?'cp-l':'cp-m';
@@ -1372,11 +1420,10 @@ function renderOrgTreeMembers(){
         if(tasks) h+=`<div class="orgtree-mem-tasks">${tasks}</div>`;
         if(m.phone) h+=`<span class="orgtree-mem-phone">${m.phone}</span>`;
         if(m.email) h+=`<span class="orgtree-mem-email">${m.email}</span>`;
-        h+=`</div>`;
-        h+=`</div>`;
+        h+=`</div></div>`;
     });
     h+=`</div>`;
-    content.innerHTML=h;
+    return h;
 }
 
 // Sort
