@@ -1117,18 +1117,18 @@ function buildDD(){
     // teams: if division selected, show only teams in that division
     filteredForTeam=F.div?e.filter(x=>x.division===F.div):e,
     teams=[...new Set(filteredForTeam.map(x=>x.team))].filter(Boolean).sort(),
-    po=['대표이사','부사장','상무이사','이사','공장장','기술연구소장','리드 매니저','선임연구원','매니저','연구원'],
+    po=['대표이사','부사장','상무이사','이사','기술연구소장','공장장','리드 매니저','선임연구원','매니저','연구원'],
     poss=[...new Set(e.map(x=>x.position))].filter(Boolean).sort((a,b)=>(po.indexOf(a)<0?99:po.indexOf(a))-(po.indexOf(b)<0?99:po.indexOf(b)));
     const cnt=(arr,k)=>{const m={};arr.forEach(x=>m[x[k]]=(m[x[k]]||0)+1);return m;};
     const cd=cnt(e,'division'),ct=cnt(filteredForTeam,'team'),cp=cnt(e,'position');
 
     // Build division dropdown
-    let dh=`<div class="fdd-item${!F.div?' on':''}" data-v="">전체 부문 <span class="fdd-cnt">${divs.length}</span></div><div class="fdd-divider"></div>`;
+    let dh=`<div class="fdd-item${!F.div?' on':''}" data-v="">전체 부문</div><div class="fdd-divider"></div>`;
     divs.forEach(d=>{dh+=`<div class="fdd-item${F.div===d?' on':''}" data-v="${d}">${d} <span class="fdd-cnt">${cd[d]||0}</span></div>`;});
     document.getElementById('lstDiv').innerHTML=dh;
 
     // Build team dropdown (filtered by division)
-    let th=`<div class="fdd-item${!F.team?' on':''}" data-v="">전체 팀 <span class="fdd-cnt">${teams.length}</span></div><div class="fdd-divider"></div>`;
+    let th=`<div class="fdd-item${!F.team?' on':''}" data-v="">전체 팀</div><div class="fdd-divider"></div>`;
     teams.forEach(t=>{th+=`<div class="fdd-item${F.team===t?' on':''}" data-v="${t}">${t} <span class="fdd-cnt">${ct[t]||0}</span></div>`;});
     document.getElementById('lstTeam').innerHTML=th;
 
