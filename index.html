@@ -970,9 +970,8 @@ function _mergeDefaults(stored){
     stored.forEach(e=>{
         const def=_DEF_MAP.get(e.name+'|'+e.division);
         if(!def)return;
-        // 사진: DEFAULT_EMP 기준으로 동기화 (있으면 채우고, 없으면 제거)
+        // 사진: localStorage에 없고 DEFAULT_EMP에 있으면 반영 (관리자 등록 사진은 유지)
         if(!e.photo&&def.photo){e.photo=def.photo;changed=true;}
-        if(e.photo&&!def.photo){e.photo='';changed=true;}
         // 담당업무: localStorage에 없고 DEFAULT_EMP에 있으면 반영
         if((!e.primaryTasks||!e.primaryTasks.length)&&def.primaryTasks&&def.primaryTasks.length){e.primaryTasks=def.primaryTasks;changed=true;}
         if((!e.secondaryTasks||!e.secondaryTasks.length)&&def.secondaryTasks&&def.secondaryTasks.length){e.secondaryTasks=def.secondaryTasks;changed=true;}
