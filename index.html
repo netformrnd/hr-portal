@@ -112,7 +112,7 @@ a{color:var(--accent);text-decoration:none;}
 .acc-div-body{display:none;}.acc-div-body.open{display:block;}
 .acc-mem{display:flex;align-items:center;gap:8px;padding:5px 14px 5px 40px;border-top:1px solid rgba(0,0,0,.03);transition:.1s;cursor:pointer;}
 .acc-mem:hover{background:var(--bg-hover);}
-.acc-mem .av{width:21px;height:28px;font-size:9px;border-radius:3px;}
+.acc-mem .av{width:24px;height:24px;font-size:9px;border-radius:50%;}
 .acc-mem-info{flex:1;display:flex;align-items:center;gap:6px;min-width:0;}
 .acc-mem-nm{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;}
 .acc-mem-pos{font-size:10px;padding:1px 6px;border-radius:3px;white-space:nowrap;}
@@ -171,8 +171,8 @@ table.dt{width:100%;border-collapse:collapse;}
 .dt tbody tr:hover{background:var(--bg-hover);}
 .dt tbody tr:hover td{color:var(--text);}
 .cn{font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
-.cn .av{width:24px;height:32px;border-radius:4px;}
-.av{width:24px;height:32px;border-radius:4px;background:#4a5568;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;flex-shrink:0;overflow:hidden;}
+.cn .av{width:28px;height:28px;border-radius:50%;}
+.av{width:28px;height:28px;border-radius:50%;background:#4a5568;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;flex-shrink:0;overflow:hidden;}
 .av img{width:100%;height:100%;object-fit:cover;object-position:top;}
 .cp{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;}
 .cp-e{background:var(--amber-dim);color:var(--amber);}
@@ -333,10 +333,10 @@ table.dt{width:100%;border-collapse:collapse;}
     50%{box-shadow:0 0 0 6px rgba(255,23,68,.4),0 0 30px rgba(255,23,68,.8);}
 }
 .seat-bp .stl{position:absolute;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;color:#fff;z-index:4;white-space:nowrap;}
-.seat-bp .sdg{position:absolute;border:1.5px dashed rgba(0,0,0,.06);border-radius:6px;z-index:0;background:transparent;transition:all .2s;}
-.seat-bp .sdg[data-team]:hover{background:rgba(74,85,104,.05);border-color:rgba(0,0,0,.12);}
-.seat-bp .sdg[data-team]::after{content:attr(data-team);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.92);font-size:12px;font-weight:700;color:#fff;background:rgba(45,55,72,.7);padding:5px 14px;border-radius:8px;pointer-events:none;white-space:nowrap;opacity:0;transition:all .2s ease;z-index:10;backdrop-filter:blur(2px);letter-spacing:-.3px;}
-.seat-bp .sdg[data-team]:hover::after{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.seat-bp .sdg{position:absolute;border:1.5px dashed rgba(0,0,0,.06);border-radius:6px;z-index:0;background:transparent;transition:all .25s;}
+.seat-bp .sdg[data-team]:hover{background:rgba(74,85,104,.06);border:2.5px solid rgba(74,85,104,.3);box-shadow:0 0 20px rgba(74,85,104,.1);}
+.seat-bp .sdg[data-team]::after{content:attr(data-team);position:absolute;top:-26px;left:50%;transform:translateX(-50%) scale(.92);font-size:11.5px;font-weight:700;color:#fff;background:rgba(45,55,72,.78);padding:4px 14px;border-radius:6px;pointer-events:none;white-space:nowrap;opacity:0;transition:all .2s ease;z-index:10;letter-spacing:-.3px;}
+.seat-bp .sdg[data-team]:hover::after{opacity:1;transform:translateX(-50%) scale(1);}
 .seat-bp .sw{position:absolute;background:#94a3b8;z-index:2;}
 .seat-lgd{position:absolute;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-size:9px;z-index:5;line-height:1.7;}
 .seat-lgd-i{display:flex;align-items:center;gap:4px;}
@@ -427,7 +427,7 @@ table.dt{width:100%;border-collapse:collapse;}
 .orgtree-members{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;padding:20px;}
 .orgtree-mem{display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 16px;border:1px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:.12s;background:var(--bg-surface);text-align:center;}
 .orgtree-mem:hover{border-color:var(--accent);box-shadow:0 2px 10px rgba(0,0,0,.06);}
-.orgtree-mem .av{width:54px;height:72px;font-size:18px;border-radius:6px;}
+.orgtree-mem .av{width:56px;height:56px;font-size:18px;border-radius:50%;}
 .orgtree-mem-info{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;width:100%;}
 .orgtree-mem-top{display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap;}
 .orgtree-mem-nm{font-size:14px;font-weight:700;color:var(--text);}
@@ -518,14 +518,14 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
   .orgtree-nav{width:100%;max-height:180px;border-right:none;border-bottom:1px solid var(--border);}
   .orgtree-members{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:12px;}
   .orgtree-mem{padding:14px 10px;gap:8px;}
-  .orgtree-mem .av{width:42px;height:56px;font-size:15px;border-radius:5px;}
+  .orgtree-mem .av{width:44px;height:44px;font-size:15px;border-radius:50%;}
   .orgtree-mem-nm{font-size:13px;}
   .orgtree-mem-pos{font-size:11px;}
   .orgtree-mem-phone{font-size:11px;}
   .orgtree-mem-tasks{font-size:11px;}
   .dt th,.dt td{padding:6px 8px;font-size:12px;}
   .ct-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .acc-mem .av{width:18px;height:24px;font-size:8px;}
+  .acc-mem .av{width:22px;height:22px;font-size:8px;border-radius:50%;}
   .acc-mem-nm{font-size:12px;}
   .acc-mem-task{font-size:10px;}
   .fgi input,.fgi select,.fgi textarea{font-size:16px;}
@@ -732,13 +732,13 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
             </div>
 
             <!-- ====== 연구소 (우측 상단, 2×2) ====== -->
-            <div class="sdg" data-team="기술연구소" style="left:620px;top:15px;width:262px;height:162px;">
+            <div class="sdg" data-team="기술연구소" style="left:730px;top:15px;width:252px;height:162px;">
                 <div style="position:absolute;top:6px;left:12px;font-size:12px;color:#0097a7;font-weight:700;">연구소</div>
             </div>
-            <div class="sk" data-name="김소정" style="left:630px;top:36px;width:108px;height:50px;background:#2563EB;">김소정<span class="sk-pos">연구원</span></div>
-            <div class="sk" data-name="심혜진" style="left:748px;top:36px;width:108px;height:50px;background:#2563EB;">심혜진<span class="sk-pos">연구원</span></div>
-            <div class="sk" data-name="신명희" style="left:630px;top:98px;width:108px;height:50px;background:#0E7490;">신명희<span class="sk-pos">선임연구원</span></div>
-            <div class="sk" data-name="이정훈" style="left:748px;top:98px;width:108px;height:50px;background:#2563EB;">이정훈<span class="sk-pos">기술연구소장</span></div>
+            <div class="sk" data-name="김소정" style="left:738px;top:36px;width:108px;height:50px;background:#2563EB;">김소정<span class="sk-pos">연구원</span></div>
+            <div class="sk" data-name="심혜진" style="left:856px;top:36px;width:108px;height:50px;background:#2563EB;">심혜진<span class="sk-pos">연구원</span></div>
+            <div class="sk" data-name="신명희" style="left:738px;top:98px;width:108px;height:50px;background:#0E7490;">신명희<span class="sk-pos">선임연구원</span></div>
+            <div class="sk" data-name="이정훈" style="left:856px;top:98px;width:108px;height:50px;background:#2563EB;">이정훈<span class="sk-pos">기술연구소장</span></div>
 
             <!-- ====== 백정석 ====== -->
             <div class="sdg" data-team="경영관리본부" style="left:450px;top:50px;width:135px;height:118px;"></div>
@@ -792,7 +792,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 
             <!-- ====== 황윤선 독립실 (우측 하단) ====== -->
             <div class="sdg" data-team="영업본부" style="left:730px;top:490px;width:252px;height:196px;"></div>
-            <div class="sk" data-name="황윤선" style="left:755px;top:565px;width:120px;height:56px;background:#3182CE;font-size:14px;">황윤선<span class="sk-pos">상무이사</span></div>
+            <div class="sk" data-name="황윤선" style="left:796px;top:560px;width:120px;height:56px;background:#3182CE;font-size:14px;">황윤선<span class="sk-pos">상무이사</span></div>
 
             <!-- ====== 하단 데스크 (4×2, 경영관리팀/서비스운영2팀) ====== -->
             <div class="sdg" data-team="경영관리팀 / 서비스운영2팀" style="left:220px;top:558px;width:480px;height:130px;"></div>
@@ -827,9 +827,19 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
                 <div class="seat-lgd-i"><div class="seat-lgd-c" style="background:#475569"></div>대표이사</div>
             </div>
 
+            <!-- ====== 탕비실 (상단 좌측, 원형) ====== -->
+            <div class="sdg" style="left:155px;top:25px;width:185px;height:175px;border-radius:50%;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;color:#90a4ae;font-weight:600;">탕비실</div>
+            </div>
+
+            <!-- ====== 테라스 (상단 우측) ====== -->
+            <div class="sdg" style="left:380px;top:10px;width:600px;height:185px;">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;color:#90a4ae;font-weight:600;">테라스</div>
+            </div>
+
             <!-- ====== 브랜드마케팅/그로스 (3×2) ====== -->
             <div class="sdg" data-team="브랜드마케팅팀 / 그로스팀" style="left:330px;top:220px;width:360px;height:128px;"></div>
-            <div class="sk vacant" style="left:338px;top:228px;width:108px;height:50px;">공석</div>
+            <div class="sk blank" style="left:338px;top:228px;width:108px;height:50px;"></div>
             <div class="sk" data-name="김범석" style="left:456px;top:228px;width:108px;height:50px;background:#DB2777;">김범석<span class="sk-pos">매니저</span></div>
             <div class="sk" data-name="이재훈" style="left:574px;top:228px;width:108px;height:50px;background:#DB2777;">이재훈<span class="sk-pos">리드 매니저</span></div>
             <div class="sk" data-name="최경선" style="left:338px;top:288px;width:108px;height:50px;background:#CA8A04;">최경선<span class="sk-pos">매니저</span></div>
@@ -851,25 +861,20 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 
             <!-- ====== 중앙 데스크 (3×2, 브랜드커머스/모여라딜/브랜드마케팅) ====== -->
             <div class="sdg" data-team="브랜드커머스 / 모여라딜 / 브랜드마케팅" style="left:330px;top:415px;width:360px;height:128px;"></div>
-            <div class="sk blank" style="left:338px;top:423px;width:108px;height:50px;"></div>
-            <div class="sk blank" style="left:456px;top:423px;width:108px;height:50px;"></div>
+            <div class="sk vacant" style="left:338px;top:423px;width:108px;height:50px;">공석</div>
+            <div class="sk vacant" style="left:456px;top:423px;width:108px;height:50px;">공석</div>
             <div class="sk" data-name="권혜영" style="left:574px;top:423px;width:108px;height:50px;background:#CA8A04;">권혜영<span class="sk-pos">리드 매니저</span></div>
             <div class="sk" data-name="이채은" style="left:338px;top:483px;width:108px;height:50px;background:#DC2626;">이채은<span class="sk-pos">매니저</span></div>
             <div class="sk" data-name="김송희" style="left:456px;top:483px;width:108px;height:50px;background:#DC2626;">김송희<span class="sk-pos">리드 매니저</span></div>
-            <div class="sk blank" style="left:574px;top:483px;width:108px;height:50px;"></div>
-
-            <!-- ====== 탕비실 ====== -->
-            <div class="sdg" style="left:190px;top:440px;width:120px;height:95px;">
-                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px;color:#90a4ae;font-weight:600;">탕비실</div>
-            </div>
+            <div class="sk vacant" style="left:574px;top:483px;width:108px;height:50px;">공석</div>
 
             <!-- ====== 이승우 대표이사실 (우측 하단) ====== -->
             <div class="sdg" data-team="대표이사실" style="left:730px;top:490px;width:252px;height:196px;"></div>
-            <div class="sk" data-name="이승우" style="left:755px;top:565px;width:120px;height:56px;background:#475569;font-size:14px;">이승우<span class="sk-pos">대표이사</span></div>
+            <div class="sk" data-name="이승우" style="left:796px;top:560px;width:120px;height:56px;background:#475569;font-size:14px;">이승우<span class="sk-pos">대표이사</span></div>
 
             <!-- ====== 하단 데스크 (4×2, 미디어커머스/브랜드커머스/해외사업) ====== -->
             <div class="sdg" data-team="미디어커머스 / 브랜드커머스 / 해외사업" style="left:220px;top:558px;width:480px;height:130px;"></div>
-            <div class="sk empty" style="left:228px;top:566px;width:108px;height:50px;"></div>
+            <div class="sk vacant" style="left:228px;top:566px;width:108px;height:50px;">공석</div>
             <div class="sk" data-name="김채원" style="left:346px;top:566px;width:108px;height:50px;background:#EA580C;">김채원<span class="sk-pos">매니저</span></div>
             <div class="sk" data-name="쩐티리" style="left:464px;top:566px;width:108px;height:50px;background:#EA580C;">쩐티리<span class="sk-pos">매니저</span></div>
             <div class="sk" data-name="이란" style="left:582px;top:566px;width:108px;height:50px;background:#6D28D9;">이란<span class="sk-pos">매니저</span></div>
