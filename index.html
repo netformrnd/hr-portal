@@ -1347,6 +1347,14 @@ function renderOrgTreeDivMembers(div){
     let h=`<div class="orgtree-team-hd"><div class="orgtree-team-nm"><span class="ot-color" style="background:var(--accent)"></span>${div} 전체</div><div class="orgtree-team-cnt">${members.length}명</div></div>`;
     tmKeys.forEach(tm=>{
         const tmMembers=tmMap[tm];
+        const sortTm=tm.replace('(총괄)','');
+        tmMembers.sort((a,b)=>{
+            const ma=teamMemOrder(a.name,sortTm),mb=teamMemOrder(b.name,sortTm);
+            if(ma!==999||mb!==999) return ma-mb;
+            const al=PO.indexOf(a.position)<0?99:PO.indexOf(a.position);
+            const bl=PO.indexOf(b.position)<0?99:PO.indexOf(b.position);
+            return al-bl||(a.name||'').localeCompare(b.name||'','ko');
+        });
         const displayName=tm.includes('총괄')?'총괄':tm;
         const tc=getTC(tm.replace('(총괄)',''));
         h+=`<div style="margin:10px 0 4px 0;font-size:12px;font-weight:700;color:var(--text-sub);display:flex;align-items:center;gap:6px;padding:0 2px;"><span style="width:8px;height:8px;border-radius:50%;background:${tc};display:inline-block;"></span>${displayName} <span style="font-weight:400;color:var(--text-dim)">${tmMembers.length}명</span></div>`;
