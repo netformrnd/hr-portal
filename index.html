@@ -1920,7 +1920,7 @@ document.querySelectorAll('.seat-tab[data-sf]').forEach(t=>t.addEventListener('c
 // Seat map - 좌석별 팀명 자동 매핑
 (function(){
     const colorTeam={'#4f6db5':'경영관리팀','#3182ce':'서비스운영1팀','#805ad5':'서비스운영2팀','#0891b2':'서비스운영3팀','#d97706':'설계/적산팀','#16a34a':'영업팀','#0e7490':'소재기술연구소','#2563eb':'건설기술연구소','#6d28d9':'브랜드커머스팀','#0d9488':'미디어커머스팀','#ea580c':'해외사업팀','#dc2626':'모여라딜팀','#ca8a04':'브랜드마케팅팀','#db2777':'그로스팀','#475569':'대표이사실'};
-    const nameTeam={'백정석':'경영관리본부','황윤선':'경영관리본부','이승우':'대표이사실'};
+    const nameTeam={'백정석':'경영관리본부','황윤선':'영업본부','이승우':'대표이사실'};
     document.querySelectorAll('.seat-bp .sk[data-name]').forEach(sk=>{
         const nm=sk.dataset.name;
         if(nameTeam[nm]){sk.dataset.team=nameTeam[nm];return;}
