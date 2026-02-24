@@ -1316,8 +1316,7 @@ function renderOrgTreeNav(list){
         const ai=DIV_ORDER.indexOf(a),bi=DIV_ORDER.indexOf(b);
         return(ai<0?99:ai)-(bi<0?99:bi);
     });
-    let h='<div class="orgtree-nav-title">조직도</div>';
-    h+='<div class="acc-ctrl" style="padding:4px 14px 6px;"><button class="acc-ctrl-btn" onclick="otToggleAll(true)">전체 펼치기</button><button class="acc-ctrl-btn" onclick="otToggleAll(false)">전체 묶기</button></div>';
+    let h='<div class="acc-ctrl" style="padding:8px 14px 6px;"><button class="acc-ctrl-btn" onclick="otToggleAll(true)">전체 펼치기</button><button class="acc-ctrl-btn" onclick="otToggleAll(false)">전체 묶기</button></div>';
     divKeys.forEach(div=>{
         const members=divMap[div];
         const tmMap={};
@@ -1337,12 +1336,14 @@ function renderOrgTreeNav(list){
             h+=`</div>`;
             h+=`<div class="orgtree-div-body" style="display:none;"></div></div>`;
         } else {
+        const isSelDiv=_orgTreeSelected&&_orgTreeSelected.startsWith('DIV__'+div)||_orgTreeSelected&&_orgTreeSelected.startsWith(div+'__');
+        const colCls=isSelDiv?'':' collapsed';
         h+=`<div class="orgtree-div">`;
-        h+=`<div class="orgtree-div-hd${_orgTreeSelected==='DIV__'+div?' on':''}" onclick="selectOrgTreeDiv('${div}',this)" data-otdiv="${div}">`;
+        h+=`<div class="orgtree-div-hd${colCls}${_orgTreeSelected==='DIV__'+div?' on':''}" onclick="selectOrgTreeDiv('${div}',this)" data-otdiv="${div}">`;
         h+=`<svg class="ot-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`;
         h+=`${div} <span class="ot-cnt">${members.length}</span>`;
         h+=`</div>`;
-        h+=`<div class="orgtree-div-body">`;
+        h+=`<div class="orgtree-div-body${colCls}">`;
         tmKeys.forEach(tm=>{
             if(CHILD_TEAMS.has(tm)) return; // 하위팀은 부모팀 아래서 렌더
             if(tm===div && tmKeys.length>1){
