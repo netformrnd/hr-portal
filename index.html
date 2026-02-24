@@ -125,6 +125,11 @@ a{color:var(--accent);text-decoration:none;}
 .acc-ctrl{display:flex;gap:4px;padding:6px 14px 8px;}
 .acc-ctrl-btn{padding:4px 12px;border-radius:14px;border:none;background:var(--bg-elevated);color:var(--text-sub);font-size:11px;font-weight:500;cursor:pointer;transition:.15s;font-family:inherit;letter-spacing:-.2px;}
 .acc-ctrl-btn:hover{background:var(--accent);color:#fff;}
+.acc-solo{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:.1s;background:var(--bg-elevated);}
+.acc-solo:hover{background:var(--bg-hover);}
+.acc-solo .av{width:28px;height:28px;font-size:11px;}
+.acc-solo-nm{font-size:13px;font-weight:700;color:var(--text);}
+.acc-solo-div{font-size:10.5px;color:var(--text-sub);margin-left:2px;}
 
 /* admin 직원목록 테이블 */
 .adm-emp-list{margin-top:10px;max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);}
@@ -939,7 +944,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
         <h3>관리자 인증 필요</h3>
         <p>직원 정보 수정 및 데이터 관리는 관리자만 접근할 수 있습니다.</p>
         <div class="adm-form"><input type="password" id="admPw" placeholder="관리자 비밀번호" onkeydown="if(event.key==='Enter')admLogin()"><button class="btn btn-p" onclick="admLogin()">로그인</button></div>
-        <p style="margin-top:10px;font-size:11px;color:var(--text-dim)">초기 비밀번호: admin</p>
+        <p style="margin-top:10px;font-size:11px;color:var(--text-dim)">초기 비밀번호: ice080303!</p>
     </div>
     <div id="admC" class="adm-c">
         <!-- 직원 목록 (수정용) -->
@@ -1087,7 +1092,7 @@ function _mergeDefaults(stored){
 }
 const G=()=>{try{const d=JSON.parse(localStorage.getItem(SK));if(d&&d.length){if(_mergeDefaults(d))localStorage.setItem(SK,JSON.stringify(d));return d;}localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e}));}catch(e){localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e}));}};
 const S=d=>{localStorage.setItem(SK,JSON.stringify(d));fbEmpRef.set(d).catch(e=>console.error('FB emp write err:',e));};
-const gPw=()=>localStorage.getItem(PK)||'admin';
+const gPw=()=>localStorage.getItem(PK)||'ice080303!';
 
 // Tab (nav-btn + sidebar)
 const BREADCRUMB_MAP={directory:'직원 목록',orgchart:'조직도',seatmap:'자리배치도',contacts:'업무 연락처',admin:'직원 관리'};
@@ -2424,6 +2429,19 @@ function renderAccView(list){
     let h='<div class="acc-ctrl"><button class="acc-ctrl-btn" onclick="accToggleAll(true)">전체 펼치기</button><button class="acc-ctrl-btn" onclick="accToggleAll(false)">전체 묶기</button></div>';
     divKeys.forEach(div=>{
         const members=divMap[div];
+        // 1명짜리 부문은 단일 카드로 표시
+        if(members.length===1){
+            const m=members[0];
+            const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['리드 매니저','공장장','선임연구원'].includes(m.position)?'cp-l':'cp-m';
+            const ini=m.name?m.name[0]:'?';
+            h+=`<div class="acc-solo" onclick="showD('${m.id}')">`;
+            h+=`<div class="av">${m.photo?`<img src="${m.photo}">`:ini}</div>`;
+            h+=`<span class="acc-solo-nm">${m.name}</span>`;
+            h+=`<span class="acc-mem-pos cp ${pc}">${m.position||''}</span>`;
+            h+=`<span class="acc-solo-div">${div}</span>`;
+            h+=`</div>`;
+            return;
+        }
         // 팀별 그룹
         const tmMap={};
         // 부문 총괄(team===div 또는 team 없음)은 부문명 그룹에 강제 배치
