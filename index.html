@@ -2084,8 +2084,13 @@ async function downloadDirectoryPDF(){
                     const tr=document.createElement('tr');
                     tr.style.cssText='border-bottom:1px solid #ebebeb;'+(i%2===1?'background:#fafbfc;':'');
                     const tasks=(m.primaryTasks||[]).slice(0,2).join(', ');
+                    const ini=m.name?m.name[0]:'?';
+                    const photoTd=m.photo
+                        ?`<td style="padding:4px 6px 4px 10px;width:30px;${tmKeys.length>1&&tm!==div?'padding-left:18px;':''}"><img src="${m.photo}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;display:block;"></td>`
+                        :`<td style="padding:4px 6px 4px 10px;width:30px;${tmKeys.length>1&&tm!==div?'padding-left:18px;':''}"><div style="width:24px;height:24px;border-radius:50%;background:#4a5568;color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;">${ini}</div></td>`;
                     tr.innerHTML=
-                        `<td style="padding:5px 10px;font-weight:600;color:#1a1a1a;width:70px;${tmKeys.length>1&&tm!==div?'padding-left:18px;':''}">${m.name}</td>`+
+                        photoTd+
+                        `<td style="padding:5px 6px;font-weight:600;color:#1a1a1a;width:70px;">${m.name}</td>`+
                         `<td style="padding:5px 6px;color:#787878;width:80px;">${m.position||'-'}</td>`+
                         `<td style="padding:5px 6px;color:#787878;width:110px;">${m.phone||'-'}</td>`+
                         `<td style="padding:5px 6px;color:#787878;">${tasks||'-'}</td>`;
