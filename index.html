@@ -1883,7 +1883,7 @@ function renderOrg(){
 }
 function filterTeam(t){F.team=t;document.getElementById('lblTeam').textContent=t;switchPanel('directory');refresh();}
 
-// 조직도 내 이름 검색
+// 조직도 내 이름/부서/팀명 검색
 function searchOrgChart(q){
     const area=document.getElementById('orgArea');if(!area)return;
     const mems=area.querySelectorAll('.o-mem');
@@ -1892,14 +1892,26 @@ function searchOrgChart(q){
     const all=[...mems,...heads,...ceo];
     // clear previous
     all.forEach(el=>{el.classList.remove('org-hl','org-dim');});
+    area.querySelectorAll('.o-div,.o-subdiv,.o-tm').forEach(el=>el.classList.remove('org-hl'));
     if(!q||!q.trim()){return;}
     const query=q.trim().toLowerCase();
+    // 부서/팀명 매칭 → 해당 그룹 내 멤버 모두 하이라이트
+    const matchedGroups=new Set();
+    area.querySelectorAll('.o-div,.o-subdiv,.o-tm').forEach(el=>{
+        const nm=el.querySelector('.o-nm');
+        if(nm&&nm.textContent.trim().toLowerCase().includes(query)){
+            el.classList.add('org-hl');
+            // 이 그룹의 부모 컨테이너에서 모든 멤버를 매칭으로 등록
+            const container=el.closest('.o-col')||el.closest('.o-grp')||el.parentElement;
+            if(container) container.querySelectorAll('.o-mem,.o-head').forEach(m=>matchedGroups.add(m));
+        }
+    });
     let found=null;
     all.forEach(el=>{
         const nm=el.querySelector('.o-nm');
         const name=nm?nm.textContent.trim().toLowerCase():'';
         const txt=el.textContent.trim().toLowerCase();
-        if(name.includes(query)||txt.includes(query)){
+        if(name.includes(query)||txt.includes(query)||matchedGroups.has(el)){
             el.classList.add('org-hl');
             if(!found)found=el;
         } else {
