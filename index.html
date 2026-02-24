@@ -1813,7 +1813,7 @@ function renderOrg(){
         const tc=getTC('브랜드마케팅팀');
         // 다른 컬럼의 row3 구조: vl → (hl) → o-row → o-col → vl → o-tm
         // 이 컬럼은: vl → (hl placeholder) → vl → o-tm  (높이 맞춤)
-        h+=`<div style="display:flex;flex-direction:column;align-items:center;">`;
+        h+=`<div class="o-col" style="display:flex;flex-direction:column;align-items:center;">`;
         h+=`<div class="vl"></div>`;
         h+=`<div style="height:2px;"></div>`; // hl placeholder for height alignment
         h+=`<div class="vl"></div>`;
