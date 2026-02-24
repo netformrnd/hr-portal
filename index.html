@@ -694,7 +694,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
     <div class="sbar org-toolbar" style="justify-content:space-between">
         <div class="sbox" style="max-width:280px;min-width:160px">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="orgChartSearch" placeholder="이름으로 검색" oninput="searchOrgChart(this.value)">
+            <input type="text" id="orgChartSearch" placeholder="이름, 부서, 팀명으로 검색" oninput="searchOrgChart(this.value)">
         </div>
         <div style="display:flex;gap:6px;">
             <button class="btn" onclick="printOrg()">인쇄</button>
@@ -713,7 +713,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
         </div>
         <div class="seat-search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" id="seatSI" placeholder="이름 검색 (예: 김유림)">
+            <input type="text" id="seatSI" placeholder="이름, 팀명으로 검색">
         </div>
         <div id="seatResult"></div>
         <div style="font-size:12px;color:var(--text-sub);padding:4px 0;white-space:nowrap;">💡 좌석을 클릭하면 상세 정보를 확인할 수 있습니다</div>
@@ -1896,7 +1896,8 @@ function searchOrgChart(q){
     all.forEach(el=>{
         const nm=el.querySelector('.o-nm');
         const name=nm?nm.textContent.trim().toLowerCase():'';
-        if(name.includes(query)){
+        const txt=el.textContent.trim().toLowerCase();
+        if(name.includes(query)||txt.includes(query)){
             el.classList.add('org-hl');
             if(!found)found=el;
         } else {
@@ -1963,7 +1964,7 @@ function seatSearch(q){
     const all=document.querySelectorAll('.seat-bp .sk[data-name]');
     if(!q){all.forEach(s=>s.classList.remove('hl','dm'));r.textContent='';r.className='';return;}
     const hits=[];
-    all.forEach(s=>{if(s.dataset.name.includes(q)){hits.push(s);s.classList.add('hl');s.classList.remove('dm');}else{s.classList.add('dm');s.classList.remove('hl');}});
+    all.forEach(s=>{const nm=s.dataset.name||'';const tm=s.dataset.team||'';if(nm.includes(q)||tm.includes(q)){hits.push(s);s.classList.add('hl');s.classList.remove('dm');}else{s.classList.add('dm');s.classList.remove('hl');}});
     if(hits.length){
         const fw=hits[0].closest('.seat-floor');
         if(fw&&!fw.classList.contains('on')){
