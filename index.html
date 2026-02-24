@@ -125,11 +125,6 @@ a{color:var(--accent);text-decoration:none;}
 .acc-ctrl{display:flex;gap:4px;padding:6px 14px 8px;}
 .acc-ctrl-btn{padding:4px 12px;border-radius:14px;border:none;background:var(--bg-elevated);color:var(--text-sub);font-size:11px;font-weight:500;cursor:pointer;transition:.15s;font-family:inherit;letter-spacing:-.2px;}
 .acc-ctrl-btn:hover{background:var(--accent);color:#fff;}
-.acc-solo{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:.1s;background:var(--bg-elevated);}
-.acc-solo:hover{background:var(--bg-hover);}
-.acc-solo .av{width:28px;height:28px;font-size:11px;}
-.acc-solo-nm{font-size:13px;font-weight:700;color:var(--text);}
-.acc-solo-div{font-size:10.5px;color:var(--text-sub);margin-left:2px;}
 
 /* admin 직원목록 테이블 */
 .adm-emp-list{margin-top:10px;max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);}
@@ -1322,6 +1317,7 @@ function renderOrgTreeNav(list){
         return(ai<0?99:ai)-(bi<0?99:bi);
     });
     let h='<div class="orgtree-nav-title">조직도</div>';
+    h+='<div class="acc-ctrl" style="padding:4px 14px 6px;"><button class="acc-ctrl-btn" onclick="otToggleAll(true)">전체 펼치기</button><button class="acc-ctrl-btn" onclick="otToggleAll(false)">전체 묶기</button></div>';
     divKeys.forEach(div=>{
         const members=divMap[div];
         const tmMap={};
@@ -1333,6 +1329,14 @@ function renderOrgTreeNav(list){
             if(a===div&&b!==div)return -1;if(b===div&&a!==div)return 1;
             const ai=TO.indexOf(a),bi=TO.indexOf(b);return(ai<0?99:ai)-(bi<0?99:bi);
         });
+        // 1명 부문: 큰 버튼 하나만 (하위 팀 목록 없음)
+        if(members.length===1){
+            h+=`<div class="orgtree-div">`;
+            h+=`<div class="orgtree-div-hd${_orgTreeSelected==='DIV__'+div?' on':''}" onclick="selectOrgTreeDiv('${div}',this)" data-otdiv="${div}" style="padding-left:18px;">`;
+            h+=`${div} <span class="ot-cnt">${members.length}</span>`;
+            h+=`</div>`;
+            h+=`<div class="orgtree-div-body" style="display:none;"></div></div>`;
+        } else {
         h+=`<div class="orgtree-div">`;
         h+=`<div class="orgtree-div-hd${_orgTreeSelected==='DIV__'+div?' on':''}" onclick="selectOrgTreeDiv('${div}',this)" data-otdiv="${div}">`;
         h+=`<svg class="ot-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`;
@@ -1367,6 +1371,7 @@ function renderOrgTreeNav(list){
             }
         });
         h+=`</div></div>`;
+        }
     });
     nav.innerHTML=h;
     // 검색 중이면 전체 검색 결과를 오른쪽에 표시
@@ -2429,19 +2434,6 @@ function renderAccView(list){
     let h='<div class="acc-ctrl"><button class="acc-ctrl-btn" onclick="accToggleAll(true)">전체 펼치기</button><button class="acc-ctrl-btn" onclick="accToggleAll(false)">전체 묶기</button></div>';
     divKeys.forEach(div=>{
         const members=divMap[div];
-        // 1명짜리 부문은 단일 카드로 표시
-        if(members.length===1){
-            const m=members[0];
-            const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['리드 매니저','공장장','선임연구원'].includes(m.position)?'cp-l':'cp-m';
-            const ini=m.name?m.name[0]:'?';
-            h+=`<div class="acc-solo" onclick="showD('${m.id}')">`;
-            h+=`<div class="av">${m.photo?`<img src="${m.photo}">`:ini}</div>`;
-            h+=`<span class="acc-solo-nm">${m.name}</span>`;
-            h+=`<span class="acc-mem-pos cp ${pc}">${m.position||''}</span>`;
-            h+=`<span class="acc-solo-div">${div}</span>`;
-            h+=`</div>`;
-            return;
-        }
         // 팀별 그룹
         const tmMap={};
         // 부문 총괄(team===div 또는 team 없음)은 부문명 그룹에 강제 배치
@@ -2501,6 +2493,14 @@ function accToggleAll(open){
     const area=document.getElementById('accArea');if(!area)return;
     area.querySelectorAll('.acc-div-hd,.acc-tm-hd,.acc-div-body,.acc-tm-body').forEach(el=>{
         if(open)el.classList.add('open');else el.classList.remove('open');
+    });
+}
+function otToggleAll(open){
+    const nav=document.getElementById('orgTreeNav');if(!nav)return;
+    nav.querySelectorAll('.orgtree-div-hd').forEach(hd=>{
+        const body=hd.nextElementSibling;
+        if(open){hd.classList.remove('collapsed');if(body)body.classList.remove('collapsed');}
+        else{hd.classList.add('collapsed');if(body)body.classList.add('collapsed');}
     });
 }
 
