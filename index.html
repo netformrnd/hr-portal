@@ -284,9 +284,6 @@ table.dt{width:100%;border-collapse:collapse;}
 /* org chart search highlight */
 .o-mem.org-hl,.o-head.org-hl,.o-ceo.org-hl{background:#fff3cd!important;border:2px solid #f59e0b!important;box-shadow:0 0 0 4px rgba(245,158,11,.25),0 0 16px rgba(245,158,11,.4);z-index:10;position:relative;animation:org-glow 1.2s ease-in-out infinite;}
 .o-tm.org-hl,.o-div.org-hl,.o-subdiv.org-hl{background:#fff3cd!important;border:2px solid #f59e0b!important;box-shadow:0 0 0 4px rgba(245,158,11,.25),0 0 16px rgba(245,158,11,.4);z-index:10;position:relative;animation:org-glow 1.2s ease-in-out infinite;}
-.o-mem.org-dim,.o-head.org-dim,.o-ceo.org-dim{opacity:.2;}
-.o-tm.org-dim,.o-div.org-dim,.o-subdiv.org-dim{opacity:.2;}
-.o-col.org-dim{opacity:.2;}
 @keyframes org-glow{0%,100%{box-shadow:0 0 0 4px rgba(245,158,11,.25),0 0 16px rgba(245,158,11,.4);}50%{box-shadow:0 0 0 6px rgba(245,158,11,.4),0 0 24px rgba(245,158,11,.6);}}
 
 /* === SEAT MAP === */
@@ -1924,18 +1921,7 @@ function searchOrgChart(q){
             if(!found)found=el;
         }
     });
-    // 4) 매칭 안된 요소 dim 처리
-    area.querySelectorAll('.o-col').forEach(col=>{
-        if(!matchedCols.has(col)){
-            col.classList.add('org-dim');
-        }
-    });
-    area.querySelectorAll('.o-mem,.o-head,.o-ceo').forEach(el=>{
-        if(!el.classList.contains('org-hl')&&!el.closest('.org-dim')){
-            el.classList.add('org-dim');
-        }
-    });
-    // 5) 스크롤
+    // 4) 스크롤
     if(found){found.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});}
 }
 
