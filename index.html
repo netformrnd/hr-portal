@@ -282,8 +282,11 @@ table.dt{width:100%;border-collapse:collapse;}
 .o-col{display:flex;flex-direction:column;align-items:center;padding:0 4px;}
 
 /* org chart search highlight */
-.o-mem.org-hl{background:#fff3cd!important;border:2px solid #f59e0b!important;box-shadow:0 0 0 4px rgba(245,158,11,.25),0 0 16px rgba(245,158,11,.4);z-index:10;position:relative;animation:org-glow 1.2s ease-in-out infinite;}
+.o-mem.org-hl,.o-head.org-hl,.o-ceo.org-hl{background:#fff3cd!important;border:2px solid #f59e0b!important;box-shadow:0 0 0 4px rgba(245,158,11,.25),0 0 16px rgba(245,158,11,.4);z-index:10;position:relative;animation:org-glow 1.2s ease-in-out infinite;}
+.o-tm.org-hl,.o-div.org-hl,.o-subdiv.org-hl{background:#fff3cd!important;border:2px solid #f59e0b!important;box-shadow:0 0 0 4px rgba(245,158,11,.25),0 0 16px rgba(245,158,11,.4);z-index:10;position:relative;animation:org-glow 1.2s ease-in-out infinite;}
 .o-mem.org-dim,.o-head.org-dim,.o-ceo.org-dim{opacity:.2;}
+.o-tm.org-dim,.o-div.org-dim,.o-subdiv.org-dim{opacity:.2;}
+.o-col.org-dim{opacity:.2;}
 @keyframes org-glow{0%,100%{box-shadow:0 0 0 4px rgba(245,158,11,.25),0 0 16px rgba(245,158,11,.4);}50%{box-shadow:0 0 0 6px rgba(245,158,11,.4),0 0 24px rgba(245,158,11,.6);}}
 
 /* === SEAT MAP === */
@@ -1886,38 +1889,53 @@ function filterTeam(t){F.team=t;document.getElementById('lblTeam').textContent=t
 // 조직도 내 이름/부서/팀명 검색
 function searchOrgChart(q){
     const area=document.getElementById('orgArea');if(!area)return;
-    const mems=area.querySelectorAll('.o-mem');
-    const heads=area.querySelectorAll('.o-head');
-    const ceo=area.querySelectorAll('.o-ceo');
-    const all=[...mems,...heads,...ceo];
-    // clear previous
-    all.forEach(el=>{el.classList.remove('org-hl','org-dim');});
-    area.querySelectorAll('.o-div,.o-subdiv,.o-tm').forEach(el=>el.classList.remove('org-hl'));
+    // clear all previous highlights
+    area.querySelectorAll('.org-hl,.org-dim').forEach(el=>el.classList.remove('org-hl','org-dim'));
     if(!q||!q.trim()){return;}
     const query=q.trim().toLowerCase();
-    // 부서/팀명 매칭 → 해당 그룹 내 멤버 모두 하이라이트
-    const matchedGroups=new Set();
-    area.querySelectorAll('.o-div,.o-subdiv,.o-tm').forEach(el=>{
-        const nm=el.querySelector('.o-nm');
+    let found=null;
+    const matchedCols=new Set();
+    // 1) 팀명(.o-tm) 매칭 → 해당 .o-col 전체를 하이라이트
+    area.querySelectorAll('.o-tm').forEach(tm=>{
+        const nm=tm.querySelector('.o-nm');
         if(nm&&nm.textContent.trim().toLowerCase().includes(query)){
-            el.classList.add('org-hl');
-            // 이 그룹의 부모 컨테이너에서 모든 멤버를 매칭으로 등록
-            const container=el.closest('.o-col')||el.closest('.o-grp')||el.parentElement;
-            if(container) container.querySelectorAll('.o-mem,.o-head').forEach(m=>matchedGroups.add(m));
+            tm.classList.add('org-hl');
+            const col=tm.closest('.o-col');
+            if(col){matchedCols.add(col);col.querySelectorAll('.o-mem,.o-head').forEach(m=>m.classList.add('org-hl'));}
+            if(!found)found=tm;
         }
     });
-    let found=null;
-    all.forEach(el=>{
-        const nm=el.querySelector('.o-nm');
-        const name=nm?nm.textContent.trim().toLowerCase():'';
+    // 2) 부문/본부명(.o-div,.o-subdiv) 매칭
+    area.querySelectorAll('.o-div,.o-subdiv').forEach(dv=>{
+        const nm=dv.querySelector('.o-nm');
+        if(nm&&nm.textContent.trim().toLowerCase().includes(query)){
+            dv.classList.add('org-hl');
+            if(!found)found=dv;
+        }
+    });
+    // 3) 개별 멤버(.o-mem,.o-head,.o-ceo) 이름/텍스트 매칭
+    area.querySelectorAll('.o-mem,.o-head,.o-ceo').forEach(el=>{
+        if(el.classList.contains('org-hl'))return; // 이미 팀 매칭으로 하이라이트됨
         const txt=el.textContent.trim().toLowerCase();
-        if(name.includes(query)||txt.includes(query)||matchedGroups.has(el)){
+        if(txt.includes(query)){
             el.classList.add('org-hl');
+            const col=el.closest('.o-col');
+            if(col)matchedCols.add(col);
             if(!found)found=el;
-        } else {
+        }
+    });
+    // 4) 매칭 안된 요소 dim 처리
+    area.querySelectorAll('.o-col').forEach(col=>{
+        if(!matchedCols.has(col)){
+            col.classList.add('org-dim');
+        }
+    });
+    area.querySelectorAll('.o-mem,.o-head,.o-ceo').forEach(el=>{
+        if(!el.classList.contains('org-hl')&&!el.closest('.org-dim')){
             el.classList.add('org-dim');
         }
     });
+    // 5) 스크롤
     if(found){found.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});}
 }
 
