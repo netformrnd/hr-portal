@@ -95,8 +95,8 @@ a{color:var(--accent);text-decoration:none;}
 /* === STATS (inline) === */
 .stats{display:flex;gap:16px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
 .st{display:flex;align-items:center;gap:6px;padding:0;background:none;border:none;border-radius:0;min-width:0;flex:none;max-width:none;}
-.st-n{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
-.st-l{font-size:10px;color:var(--text-sub);font-weight:500;}
+.st-n{font-size:20px;font-weight:800;color:var(--text);letter-spacing:-.3px;}
+.st-l{font-size:11px;color:var(--text-sub);font-weight:500;}
 .st-icon{display:none;}
 
 /* === ACCORDION 직원목록 === */
@@ -105,26 +105,26 @@ a{color:var(--accent);text-decoration:none;}
 .acc-div:last-child{border-bottom:none;}
 .acc-div-hd{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;cursor:pointer;background:var(--bg-elevated);transition:.15s;user-select:none;}
 .acc-div-hd:hover{background:#e4e6ea;}
-.acc-div-hd .acc-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;}
-.acc-div-hd .acc-badge{font-size:10px;font-weight:600;padding:1px 7px;border-radius:10px;background:var(--accent-dim);color:var(--accent);}
+.acc-div-hd .acc-title{font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;}
+.acc-div-hd .acc-badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--accent-dim);color:var(--accent);}
 .acc-div-hd .acc-arrow{width:16px;height:16px;color:var(--text-dim);transition:transform .2s;flex-shrink:0;}
 .acc-div-hd.open .acc-arrow{transform:rotate(180deg);}
 .acc-tm{border-top:1px solid var(--border);}
 .acc-tm-hd{display:flex;align-items:center;justify-content:space-between;padding:6px 14px 6px 26px;cursor:pointer;transition:.12s;user-select:none;}
 .acc-tm-hd:hover{background:var(--bg-hover);}
-.acc-tm-hd .acc-tm-title{font-size:12px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:5px;}
+.acc-tm-hd .acc-tm-title{font-size:13.5px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:5px;}
 .acc-tm-hd .acc-tm-badge{font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(0,0,0,.05);color:var(--text-sub);}
 .acc-tm-hd .acc-arrow{width:15px;height:15px;color:var(--text-dim);transition:transform .2s;flex-shrink:0;}
 .acc-tm-hd.open .acc-arrow{transform:rotate(180deg);}
 .acc-tm-body{display:none;}.acc-tm-body.open{display:block;}
 .acc-div-body{display:none;}.acc-div-body.open{display:block;}
-.acc-mem{display:flex;align-items:center;gap:8px;padding:5px 14px 5px 40px;border-top:1px solid rgba(0,0,0,.03);transition:.1s;cursor:pointer;}
+.acc-mem{display:flex;align-items:center;gap:10px;padding:6px 14px 6px 40px;border-top:1px solid rgba(0,0,0,.03);transition:.1s;cursor:pointer;}
 .acc-mem:hover{background:var(--bg-hover);}
-.acc-mem .av{width:24px;height:24px;font-size:9px;border-radius:50%;}
-.acc-mem-info{flex:1;display:flex;align-items:center;gap:6px;min-width:0;}
-.acc-mem-nm{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;}
-.acc-mem-pos{font-size:10px;padding:1px 6px;border-radius:3px;white-space:nowrap;}
-.acc-mem-task{font-size:11px;color:var(--text-sub);}
+.acc-mem .av{width:28px;height:28px;font-size:10px;border-radius:50%;}
+.acc-mem-info{flex:1;display:flex;align-items:center;gap:7px;min-width:0;}
+.acc-mem-nm{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;}
+.acc-mem-pos{font-size:11px;padding:2px 7px;border-radius:3px;white-space:nowrap;}
+.acc-mem-task{font-size:12px;color:var(--text-sub);}
 
 /* 아코디언 전체 펼치기/묶기 버튼 */
 .acc-ctrl{display:flex;gap:4px;padding:6px 14px 8px;}
@@ -152,7 +152,7 @@ a{color:var(--accent);text-decoration:none;}
 
 /* filter dropdowns */
 .fdd{position:relative;}
-.fdd-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-sub);font-size:12px;font-weight:500;cursor:pointer;min-width:100px;justify-content:space-between;transition:.12s;font-family:inherit;}
+.fdd-btn{display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-sub);font-size:13px;font-weight:500;cursor:pointer;min-width:100px;justify-content:space-between;transition:.12s;font-family:inherit;}
 .fdd-btn:hover{border-color:#999;color:var(--text);}
 .fdd-btn.open{border-color:var(--accent);background:var(--accent-dim);color:var(--accent);}
 .fdd-btn.filtered{border-color:var(--accent);background:var(--accent-dim);color:var(--accent);}
@@ -533,9 +533,9 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
   .orgtree-mem-tasks{font-size:11px;}
   .dt th,.dt td{padding:6px 8px;font-size:12px;}
   .ct-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .acc-mem .av{width:22px;height:22px;font-size:8px;border-radius:50%;}
-  .acc-mem-nm{font-size:12px;}
-  .acc-mem-task{font-size:10px;}
+  .acc-mem .av{width:24px;height:24px;font-size:9px;border-radius:50%;}
+  .acc-mem-nm{font-size:13px;}
+  .acc-mem-task{font-size:11px;}
   .fgi input,.fgi select,.fgi textarea{font-size:16px;}
   .fg{grid-template-columns:1fr;}
   .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;}
