@@ -1827,7 +1827,7 @@ function renderOrg(){
     bonsaData.forEach(bd=>{
         h+=`<div style="display:flex;flex-direction:column;align-items:center;">`;
         h+=`<div class="vl"></div>`;
-        h+=`<div class="o-div"><div class="o-nm">${bd.div}</div></div>`;
+        h+=`<div class="o-div" onclick="filterDiv('${bd.div}')" style="cursor:pointer"><div class="o-nm">${bd.div}</div></div>`;
         h+=`</div>`;
     });
     // 브랜드마케팅팀 - Row 1+2를 하나의 셀로 통합 (줄 끊김 방지), Row 3은 별도 (높이 맞춤)
@@ -1934,6 +1934,7 @@ function renderOrg(){
     }
     requestAnimationFrame(()=>{ layoutHLines(); setTimeout(layoutHLines,100); });
 }
+function filterDiv(d){F.div=d;F.team='';document.getElementById('lblDiv').textContent=d;document.getElementById('lblTeam').textContent='전체 팀';switchPanel('directory');refresh();if(curView==='orgtree'){const el=document.querySelector(`.orgtree-div-hd[data-otdiv="${d}"]`);if(el)selectOrgTreeDiv(d,el);}}
 function filterTeam(t){F.team=t;document.getElementById('lblTeam').textContent=t;switchPanel('directory');refresh();if(curView==='orgtree'){const emp=G().find(e=>e.team===t);if(emp)selectOrgTreeTeam(emp.division,t);}}
 
 // 조직도 내 이름/부서/팀명 검색
