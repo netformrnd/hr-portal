@@ -2402,7 +2402,7 @@ function saveEmp(){
     const oldEmp=eid?all.find(x=>x.id===eid):null;
     const data={id:eid||gid(),name:n,division:d,team:t||d,position:p,phone:document.getElementById('fPh').value.trim(),email:document.getElementById('fEm').value.trim(),joinDate:eid?(all.find(x=>x.id===eid)||{}).joinDate||'':'',extension:document.getElementById('fEx').value.trim(),birthDate:document.getElementById('fBirth').value.trim(),primaryTasks:getTaskValues('fPrRows'),secondaryTasks:getTaskValues('fScRows'),memo:document.getElementById('fMe').value.trim(),photo:photo,sortOrder:eid?(all.find(e=>e.id===eid)||{}).sortOrder||0:all.length};
     const isNew=!eid;
-    const divChanged=oldEmp&&(oldEmp.division!==d||oldEmp.team!==(t||d));
+    const divChanged=oldEmp&&(oldEmp.division!==d||oldEmp.team!==(t||d)||oldEmp.position!==p);
     if(eid){const i=all.findIndex(e=>e.id===eid);if(i!==-1)all[i]=data;toast(n+' 수정 완료','ok');}else{all.push(data);toast(n+' 등록 완료','ok');}
     if(isNew||divChanged) setOrgDate();
     S(all);resetF();refresh();renderAdmEmpList();
