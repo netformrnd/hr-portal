@@ -1172,7 +1172,7 @@ function switchPanel(p){
     document.getElementById('p-'+p).classList.add('on');
     // breadcrumb
     const bc=document.getElementById('breadcrumbTitle');if(bc)bc.textContent=BREADCRUMB_MAP[p]||p;
-    if(p==='orgchart')renderOrg();
+    if(p==='orgchart'){resetFilters();renderOrg();}
     if(p==='directory')refresh();
     if(p==='contacts')renderContacts();
 }
