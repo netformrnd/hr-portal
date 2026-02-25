@@ -1400,11 +1400,12 @@ function renderOrgTreeNav(list){
             h+=`</div>`;
             h+=`<div class="orgtree-div-body" style="display:none;"></div></div>`;
         } else if(div==='브랜드마케팅팀'){
-            // 브랜드마케팅팀은 부문 헤더 없이 팀명만 표시
+            // 브랜드마케팅팀은 다른 부문과 동일 스타일, 하위 펼침 없이 1개만
             h+=`<div class="orgtree-div">`;
-            h+=`<div class="orgtree-tm${_orgTreeSelected===div+'__'+div?' on':''}" onclick="selectOrgTreeTeam('${div}','${div}')" data-otkey="${div}__${div}">`;
-            h+=`<span class="ot-dot" style="background:${getTC(div)}"></span>${div} <span class="ot-tm-cnt">${members.length}</span>`;
-            h+=`</div></div>`;
+            h+=`<div class="orgtree-div-hd${_orgTreeSelected==='DIV__'+div?' on':''}" onclick="selectOrgTreeDiv('${div}',this)" data-otdiv="${div}" style="padding-left:18px;">`;
+            h+=`${div} <span class="ot-cnt">${members.length}</span>`;
+            h+=`</div>`;
+            h+=`<div class="orgtree-div-body" style="display:none;"></div></div>`;
         } else {
         const isSelDiv=_orgTreeSelected&&_orgTreeSelected.startsWith('DIV__'+div)||_orgTreeSelected&&_orgTreeSelected.startsWith(div+'__');
         const colCls='';
