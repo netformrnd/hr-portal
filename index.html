@@ -598,6 +598,10 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
         <button class="sb-item" data-p="contacts"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>업무 연락처</button>
     </div>
     <div class="sb-section">
+        <div class="sb-section-title">내 정보</div>
+        <button class="sb-item" data-p="myinfo"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>내 정보 수정</button>
+    </div>
+    <div class="sb-section">
         <div class="sb-section-title">관리</div>
         <button class="sb-item" data-p="admin"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>직원 관리</button>
     </div>
@@ -943,6 +947,55 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
     </div>
 </div>
 
+<!-- ===== 내 정보 수정 ===== -->
+<div id="p-myinfo" class="panel">
+    <div id="myVerify" class="adm-lock">
+        <div class="adm-lock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <h3>본인 확인</h3>
+        <p>본인 확인을 위해 아래 정보를 입력해주세요.</p>
+        <div style="max-width:320px;margin:16px auto 0;display:flex;flex-direction:column;gap:10px;">
+            <div class="fgi"><label>성명</label><input id="myName" placeholder="이름을 입력하세요" autocomplete="off"></div>
+            <div class="fgi"><label>생년월일</label><input id="myBirth" type="date" autocomplete="off"></div>
+            <div class="fgi"><label>휴대폰 뒷자리 4자리</label><input id="myPhone4" maxlength="4" placeholder="0000" inputmode="numeric" autocomplete="off" onkeydown="if(event.key==='Enter')verifyMyInfo()"></div>
+            <button class="btn btn-p" style="margin-top:4px;width:100%" onclick="verifyMyInfo()">확인</button>
+        </div>
+    </div>
+    <div id="myEditArea" style="display:none;">
+        <div class="adm-sec">
+            <div class="adm-sec-t" id="myEditTitle">내 정보 수정</div>
+            <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px;">
+                <div class="photo-upload" style="flex-shrink:0;">
+                    <div class="photo-preview" id="myPhotoPreview" onclick="document.getElementById('myPhotoFile').click()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    </div>
+                    <div class="photo-actions">
+                        <button type="button" class="btn" onclick="document.getElementById('myPhotoFile').click()">사진 변경</button>
+                        <button type="button" class="btn" id="myPhotoDelBtn" style="display:none" onclick="clearMyPhoto()">사진 삭제</button>
+                    </div>
+                    <input type="file" id="myPhotoFile" accept="image/*" style="display:none" onchange="handleMyPhoto(event)">
+                    <input type="hidden" id="myPhoto" value="">
+                </div>
+                <div style="flex:1;min-width:200px;">
+                    <div style="margin-bottom:12px;padding:12px;background:var(--bg-elevated);border-radius:var(--radius-lg);">
+                        <div style="font-size:12px;color:var(--text-sub);margin-bottom:6px;">기본 정보 (수정 불가)</div>
+                        <div style="font-size:15px;font-weight:600;margin-bottom:2px;" id="myDispName"></div>
+                        <div style="font-size:13px;color:var(--text-sub);" id="myDispInfo"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="fg">
+                <div class="fgi full"><label>주요 업무 (2개)</label><div><div class="task-rows" id="myPrRows"><input class="task-input" placeholder="주업무 1"><input class="task-input" placeholder="주업무 2"></div></div></div>
+                <div class="fgi full"><label>기타 업무</label><div><div class="task-rows" id="myScRows"><input class="task-input" placeholder="기타 업무 1"></div><button type="button" class="btn-task-add" onclick="addTaskRow('myScRows')">+ 업무 추가</button></div></div>
+            </div>
+            <div class="fa" style="margin-top:16px;">
+                <button class="btn btn-p" onclick="saveMyInfo()">저장</button>
+                <button class="btn" onclick="logoutMyInfo()">다른 사람으로 변경</button>
+            </div>
+            <input type="hidden" id="myEditId" value="">
+        </div>
+    </div>
+</div>
+
 <!-- ===== 관리 ===== -->
 <div id="p-admin" class="panel">
     <div id="admLock" class="adm-lock">
@@ -980,6 +1033,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
                 <div class="fgi"><label>연락처</label><input id="fPh" type="tel" placeholder="010-0000-0000"></div>
                 <div class="fgi"><label>이메일</label><input id="fEm"></div>
                 <div class="fgi"><label>내선번호</label><input id="fEx"></div>
+                <div class="fgi"><label>생년월일</label><input id="fBirth" type="date"></div>
                 <div class="fgi full"><label>주요 업무 (2개)</label><div id="fPrWrap"><div class="task-rows" id="fPrRows"><input class="task-input" placeholder="주업무 1"><input class="task-input" placeholder="주업무 2"></div></div></div>
                 <div class="fgi full"><label>기타 업무</label><div id="fScWrap"><div class="task-rows" id="fScRows"><input class="task-input" placeholder="기타 업무 1"></div><button type="button" class="btn-task-add" onclick="addTaskRow('fScRows')">+ 업무 추가</button></div></div>
                 <div class="fgi full"><label>메모</label><textarea id="fMe"></textarea></div>
@@ -1100,7 +1154,7 @@ const S=d=>{localStorage.setItem(SK,JSON.stringify(d));fbEmpRef.set(d).catch(e=>
 const gPw=()=>localStorage.getItem(PK)||'ice080303!';
 
 // Tab (nav-btn + sidebar)
-const BREADCRUMB_MAP={directory:'직원 목록',orgchart:'조직도',seatmap:'자리배치도',contacts:'업무 연락처',admin:'직원 관리'};
+const BREADCRUMB_MAP={directory:'직원 목록',orgchart:'조직도',seatmap:'자리배치도',contacts:'업무 연락처',myinfo:'내 정보 수정',admin:'직원 관리'};
 function switchPanel(p){
     document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('on'));
     document.querySelectorAll('.sb-item').forEach(x=>x.classList.remove('on'));
@@ -2189,6 +2243,93 @@ async function downloadDirectoryPDF(withPhoto=true){
     }catch(err){toast('PDF 생성 실패: '+err.message,'err');}
 }
 
+// === 내 정보 수정 ===
+function verifyMyInfo(){
+    const name=document.getElementById('myName').value.trim();
+    const birth=document.getElementById('myBirth').value;
+    const phone4=document.getElementById('myPhone4').value.trim();
+    if(!name||!birth||!phone4){toast('모든 항목을 입력해주세요.','err');return;}
+    if(phone4.length!==4||!/^\d{4}$/.test(phone4)){toast('휴대폰 뒷자리 4자리를 정확히 입력하세요.','err');return;}
+    const all=G();
+    const emp=all.find(e=>{
+        if(e.name!==name)return false;
+        if(e.birthDate!==birth)return false;
+        const ph=(e.phone||'').replace(/[^0-9]/g,'');
+        return ph.length>=4&&ph.slice(-4)===phone4;
+    });
+    if(!emp){toast('일치하는 직원 정보를 찾을 수 없습니다.\n관리자에게 생년월일/연락처 등록을 요청하세요.','err');return;}
+    // 인증 성공 → 편집 모드 전환
+    document.getElementById('myVerify').style.display='none';
+    document.getElementById('myEditArea').style.display='block';
+    document.getElementById('myEditId').value=emp.id;
+    document.getElementById('myEditTitle').textContent=emp.name+' 님의 정보 수정';
+    document.getElementById('myDispName').textContent=emp.name+' · '+emp.position;
+    document.getElementById('myDispInfo').textContent=emp.division+(emp.team&&emp.team!==emp.division?' / '+emp.team:'');
+    // 사진
+    if(emp.photo){
+        document.getElementById('myPhoto').value=emp.photo;
+        document.getElementById('myPhotoPreview').innerHTML='<img src="'+emp.photo+'">';
+        document.getElementById('myPhotoDelBtn').style.display='inline-flex';
+    }else{clearMyPhoto();}
+    // 업무
+    setTaskRows('myPrRows',emp.primaryTasks||[],2);
+    setTaskRows('myScRows',emp.secondaryTasks||[],1);
+    toast(emp.name+'님 인증 완료','ok');
+}
+function saveMyInfo(){
+    const eid=document.getElementById('myEditId').value;
+    if(!eid){toast('인증 정보가 없습니다.','err');return;}
+    const all=G();
+    const idx=all.findIndex(e=>e.id===eid);
+    if(idx===-1){toast('직원 데이터를 찾을 수 없습니다.','err');return;}
+    all[idx].primaryTasks=getTaskValues('myPrRows');
+    all[idx].secondaryTasks=getTaskValues('myScRows');
+    const newPhoto=document.getElementById('myPhoto').value;
+    all[idx].photo=newPhoto;
+    S(all);
+    toast('저장되었습니다!','ok');
+    refresh();
+}
+function logoutMyInfo(){
+    document.getElementById('myVerify').style.display='';
+    document.getElementById('myEditArea').style.display='none';
+    document.getElementById('myEditId').value='';
+    ['myName','myPhone4'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('myBirth').value='';
+    clearMyPhoto();
+    setTaskRows('myPrRows',[],2);
+    setTaskRows('myScRows',[],1);
+}
+function handleMyPhoto(e){
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+        const img=new Image();
+        img.onload=function(){
+            const targetW=150,targetH=200,c=document.createElement('canvas');
+            c.width=targetW;c.height=targetH;
+            const ctx=c.getContext('2d');
+            const srcRatio=3/4;
+            let sw,sh,sx,sy;
+            if(img.width/img.height>srcRatio){sh=img.height;sw=img.height*srcRatio;sx=(img.width-sw)/2;sy=0;}
+            else{sw=img.width;sh=img.width/srcRatio;sx=0;sy=0;}
+            ctx.drawImage(img,sx,sy,sw,sh,0,0,targetW,targetH);
+            const data=c.toDataURL('image/jpeg',0.75);
+            document.getElementById('myPhoto').value=data;
+            document.getElementById('myPhotoPreview').innerHTML='<img src="'+data+'">';
+            document.getElementById('myPhotoDelBtn').style.display='inline-flex';
+        };
+        img.src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+function clearMyPhoto(){
+    document.getElementById('myPhoto').value='';
+    document.getElementById('myPhotoFile').value='';
+    document.getElementById('myPhotoPreview').innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+    document.getElementById('myPhotoDelBtn').style.display='none';
+}
+
 // Admin
 function admLogin(){if(document.getElementById('admPw').value===gPw()){document.getElementById('admLock').style.display='none';document.getElementById('admC').classList.add('unlocked');toast('관리자 로그인 완료','ok');renderAdmEmpList();}else toast('비밀번호가 올바르지 않습니다.','err');}
 function chgPw(){const p=document.getElementById('nPw').value.trim();if(!p){toast('비밀번호를 입력하세요.','err');return;}localStorage.setItem(PK,p);fbPwRef.set(p).catch(e=>console.error('FB pw err:',e));document.getElementById('nPw').value='';toast('비밀번호 변경됨','ok');}
@@ -2262,13 +2403,13 @@ function saveEmp(){
     if(!n||!d||!p){toast('필수 항목(성명, 부문, 직위)을 입력하세요.','err');return;}
     const all=G(),eid=document.getElementById('editId').value;
     const photo=document.getElementById('fPhoto').value||((eid&&all.find(x=>x.id===eid))?all.find(x=>x.id===eid).photo:'');
-    const data={id:eid||gid(),name:n,division:d,team:t||d,position:p,phone:document.getElementById('fPh').value.trim(),email:document.getElementById('fEm').value.trim(),joinDate:eid?(all.find(x=>x.id===eid)||{}).joinDate||'':'',extension:document.getElementById('fEx').value.trim(),primaryTasks:getTaskValues('fPrRows'),secondaryTasks:getTaskValues('fScRows'),memo:document.getElementById('fMe').value.trim(),photo:photo,sortOrder:eid?(all.find(e=>e.id===eid)||{}).sortOrder||0:all.length};
+    const data={id:eid||gid(),name:n,division:d,team:t||d,position:p,phone:document.getElementById('fPh').value.trim(),email:document.getElementById('fEm').value.trim(),joinDate:eid?(all.find(x=>x.id===eid)||{}).joinDate||'':'',extension:document.getElementById('fEx').value.trim(),birthDate:document.getElementById('fBirth').value.trim(),primaryTasks:getTaskValues('fPrRows'),secondaryTasks:getTaskValues('fScRows'),memo:document.getElementById('fMe').value.trim(),photo:photo,sortOrder:eid?(all.find(e=>e.id===eid)||{}).sortOrder||0:all.length};
     if(eid){const i=all.findIndex(e=>e.id===eid);if(i!==-1)all[i]=data;toast(n+' 수정 완료','ok');}else{all.push(data);toast(n+' 등록 완료','ok');}
     S(all);resetF();refresh();renderAdmEmpList();
 }
-function editD(id){closeD();const e=G().find(x=>x.id===id);if(!e)return;switchPanel('admin');document.getElementById('fTitle').textContent='직원 정보 수정';document.getElementById('editId').value=e.id;document.getElementById('fN').value=e.name;document.getElementById('fD').value=e.division;document.getElementById('fT').value=e.team;document.getElementById('fP').value=e.position;document.getElementById('fPh').value=e.phone||'';document.getElementById('fEm').value=e.email||'';document.getElementById('fEx').value=e.extension||'';setTaskRows('fPrRows',e.primaryTasks||[],2);setTaskRows('fScRows',e.secondaryTasks||[],1);document.getElementById('fMe').value=e.memo||'';if(e.photo){document.getElementById('fPhoto').value=e.photo;document.getElementById('fPhotoPreview').innerHTML=`<img src="${e.photo}">`;document.getElementById('fPhotoDelBtn').style.display='inline-flex';}else{clearPhoto();}document.getElementById('delBtn').style.display='inline-flex';window.scrollTo({top:0,behavior:'smooth'});}
+function editD(id){closeD();const e=G().find(x=>x.id===id);if(!e)return;switchPanel('admin');document.getElementById('fTitle').textContent='직원 정보 수정';document.getElementById('editId').value=e.id;document.getElementById('fN').value=e.name;document.getElementById('fD').value=e.division;document.getElementById('fT').value=e.team;document.getElementById('fP').value=e.position;document.getElementById('fPh').value=e.phone||'';document.getElementById('fEm').value=e.email||'';document.getElementById('fEx').value=e.extension||'';document.getElementById('fBirth').value=e.birthDate||'';setTaskRows('fPrRows',e.primaryTasks||[],2);setTaskRows('fScRows',e.secondaryTasks||[],1);document.getElementById('fMe').value=e.memo||'';if(e.photo){document.getElementById('fPhoto').value=e.photo;document.getElementById('fPhotoPreview').innerHTML=`<img src="${e.photo}">`;document.getElementById('fPhotoDelBtn').style.display='inline-flex';}else{clearPhoto();}document.getElementById('delBtn').style.display='inline-flex';window.scrollTo({top:0,behavior:'smooth'});}
 function delEmp(){const eid=document.getElementById('editId').value;if(!eid||!confirm('삭제하시겠습니까?'))return;S(G().filter(e=>e.id!==eid));toast('삭제 완료','ok');resetF();refresh();renderAdmEmpList();}
-function resetF(){document.getElementById('fTitle').textContent='신규 직원 등록';document.getElementById('editId').value='';['fN','fT','fPh','fEm','fEx','fMe'].forEach(i=>document.getElementById(i).value='');setTaskRows('fPrRows',[],2);setTaskRows('fScRows',[],1);clearPhoto();document.getElementById('fD').value='';document.getElementById('fP').value='';document.getElementById('delBtn').style.display='none';}
+function resetF(){document.getElementById('fTitle').textContent='신규 직원 등록';document.getElementById('editId').value='';['fN','fT','fPh','fEm','fEx','fBirth','fMe'].forEach(i=>document.getElementById(i).value='');setTaskRows('fPrRows',[],2);setTaskRows('fScRows',[],1);clearPhoto();document.getElementById('fD').value='';document.getElementById('fP').value='';document.getElementById('delBtn').style.display='none';}
 
 // Excel
 const xd=document.getElementById('xDrop');
