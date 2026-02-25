@@ -1775,7 +1775,7 @@ function renderOrg(){
     const yHead=yong.find(x=>x.position==='부사장');
 
     h+=`<div class="o-col" style="padding:0 10px">`;
-    h+=`<div class="vl"></div><div class="o-grp">용인사업장</div><div class="vl"></div>`;
+    h+=`<div class="vl"></div><div class="o-grp" onclick="filterDiv('용인사업장')" style="cursor:pointer">용인사업장</div><div class="vl"></div>`;
     if(yHead) h+=headCard(yHead)+`<div class="vl"></div>`;
     h+=`<div style="display:flex;justify-content:center"><div class="hl" style="width:0"></div></div>`;
     h+=`<div class="o-row">`;
