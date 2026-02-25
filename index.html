@@ -1402,7 +1402,7 @@ function renderOrgTreeNav(list){
         } else if(div==='브랜드마케팅팀'){
             // 브랜드마케팅팀은 부문 헤더 없이 팀명만 표시
             h+=`<div class="orgtree-div">`;
-            h+=`<div class="orgtree-tm${_orgTreeSelected===div+'__'+div?' on':''}" onclick="selectOrgTreeTeam('${div}','${div}')" data-otkey="${div}__${div}" style="padding:9px 14px;">`;
+            h+=`<div class="orgtree-tm${_orgTreeSelected===div+'__'+div?' on':''}" onclick="selectOrgTreeTeam('${div}','${div}')" data-otkey="${div}__${div}">`;
             h+=`<span class="ot-dot" style="background:${getTC(div)}"></span>${div} <span class="ot-tm-cnt">${members.length}</span>`;
             h+=`</div></div>`;
         } else {
