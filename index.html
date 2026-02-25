@@ -1870,7 +1870,7 @@ function renderOrg(){
         h+=`<div class="vl"></div>`;
         h+=`<div style="height:2px;"></div>`;
         h+=`<div class="vl"></div>`;
-        h+=`<div class="o-tm" style="border-left:4px solid ${tc}" onclick="filterTeam('브랜드마케팅팀')"><div class="o-nm">브랜드마케팅팀</div></div>`;
+        h+=`<div class="o-tm" style="border-left:4px solid ${tc}" onclick="filterDiv('브랜드마케팅팀')"><div class="o-nm">브랜드마케팅팀</div></div>`;
         if(bmMembers.length){
             h+=`<div class="vl"></div><div class="o-mems">`;
             if(bmLd) h+=memCard(bmLd);
@@ -1934,7 +1934,7 @@ function renderOrg(){
     requestAnimationFrame(()=>{ layoutHLines(); setTimeout(layoutHLines,100); });
 }
 function filterDiv(d){F.div=d;F.team='';document.getElementById('lblDiv').textContent=d;document.getElementById('lblTeam').textContent='전체 팀';switchPanel('directory');refresh();if(curView==='orgtree'){const el=document.querySelector(`.orgtree-div-hd[data-otdiv="${d}"]`);if(el)selectOrgTreeDiv(d,el);}}
-function filterTeam(t){F.team=t;document.getElementById('lblTeam').textContent=t;switchPanel('directory');refresh();if(curView==='orgtree'){const emp=G().find(e=>e.team===t);if(emp)selectOrgTreeTeam(emp.division,t);}}
+function filterTeam(t){F.div='';F.team=t;document.getElementById('lblDiv').textContent='전체 부문';document.getElementById('lblTeam').textContent=t;switchPanel('directory');refresh();if(curView==='orgtree'){const emp=G().find(e=>e.team===t);if(emp)selectOrgTreeTeam(emp.division,t);}}
 
 // 조직도 내 이름/부서/팀명 검색
 function searchOrgChart(q){
