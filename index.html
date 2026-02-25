@@ -72,8 +72,8 @@ a{color:var(--accent);text-decoration:none;}
 .hd-cal:hover{background:linear-gradient(135deg,#4f46e5,#7c3aed);transform:translateY(-1px);box-shadow:0 4px 14px rgba(99,102,241,.4);}
 .hd-cal svg{flex-shrink:0;}
 .hd-admin-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:50%;color:var(--text-dim);opacity:.4;transition:all .2s;margin-left:4px;display:inline-flex;align-items:center;}.hd-admin-btn:hover{opacity:1;color:var(--text);background:var(--bg-hover);}
-#pdfDd .pdf-menu{display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100;min-width:140px;overflow:hidden;}
-#pdfDd.open .pdf-menu{display:block;}
+#pdfDd .pdf-menu,#seatPdfDd .pdf-menu{display:none;position:absolute;top:100%;right:0;margin-top:4px;background:#fff;border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100;min-width:140px;overflow:hidden;}
+#pdfDd.open .pdf-menu,#seatPdfDd.open .pdf-menu{display:block;}
 .pdf-menu-item{padding:8px 14px;font-size:12px;cursor:pointer;transition:.1s;white-space:nowrap;}
 .pdf-menu-item:hover{background:var(--bg-hover);}
 .pdf-menu-item:first-child{border-bottom:1px solid var(--border);}
@@ -726,7 +726,6 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
         <div id="seatResult"></div>
         <div style="font-size:12px;color:var(--text-sub);padding:4px 0;white-space:nowrap;">💡 좌석을 클릭하면 상세 정보를 확인할 수 있습니다</div>
         <div style="margin-left:auto;display:flex;gap:6px;">
-            <button class="btn" onclick="printSeat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> 출력</button>
             <div style="position:relative;display:inline-block;" id="seatPdfDd">
                 <button class="btn btn-p" onclick="event.stopPropagation();document.getElementById('seatPdfDd').classList.toggle('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 배치도 다운받기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;"><polyline points="6 9 12 15 18 9"/></svg></button>
                 <div class="pdf-menu"><div class="pdf-menu-item" onclick="downloadSeatFloor('sf2');document.getElementById('seatPdfDd').classList.remove('open')">🏢 2층 배치도</div><div class="pdf-menu-item" onclick="downloadSeatFloor('sf3');document.getElementById('seatPdfDd').classList.remove('open')">🏢 3층 배치도</div></div>
