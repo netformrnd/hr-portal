@@ -2622,21 +2622,12 @@ function renderAccView(list){
             if(a===div&&b!==div)return -1;if(b===div&&a!==div)return 1;
             const ai=TO.indexOf(a),bi=TO.indexOf(b);return(ai<0?99:ai)-(bi<0?99:bi);
         });
-        const isBM=div==='브랜드마케팅팀';
         h+=`<div class="acc-div">`;
-        if(isBM){
-            h+=`<div class="acc-tm-hd open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')" style="padding-left:14px;">`;
-            h+=`<div class="acc-tm-title"><span class="ot-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${TEAM_COLORS[div]||'#999'};margin-right:6px;"></span>${div} <span class="acc-tm-badge">${members.length}</span></div>`;
-            h+=`<svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`;
-            h+=`</div>`;
-            h+=`<div class="acc-tm-body open">`;
-        } else {
-            h+=`<div class="acc-div-hd open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">`;
-            h+=`<div class="acc-title">${div} <span class="acc-badge">${members.length}명</span></div>`;
-            h+=`<svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`;
-            h+=`</div>`;
-            h+=`<div class="acc-div-body open">`;
-        }
+        h+=`<div class="acc-div-hd open" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">`;
+        h+=`<div class="acc-title">${div} <span class="acc-badge">${members.length}명</span></div>`;
+        h+=`<svg class="acc-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>`;
+        h+=`</div>`;
+        h+=`<div class="acc-div-body open">`;
         tmKeys.forEach(tm=>{
             const tMembers=tmMap[tm];
             // 정렬: 조직도 수동 순서 → 직위순 → 가나다순 폴백
