@@ -1078,7 +1078,10 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 <script>
 const SK='nf_emp_v4',PK='nf_apw';
 firebase.initializeApp({apiKey:"AIzaSyBqPaSodmaZDtVNc2UEfmHKe_JxOM6k8Io",authDomain:"hr-portal-5f785.firebaseapp.com",databaseURL:"https://hr-portal-5f785-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"hr-portal-5f785",storageBucket:"hr-portal-5f785.firebasestorage.app",messagingSenderId:"193320235811",appId:"1:193320235811:web:fbd35e3ef69a98abbe1296"});
-const fbDb=firebase.database(),fbEmpRef=fbDb.ref('employees'),fbCtRef=fbDb.ref('contacts'),fbPwRef=fbDb.ref('adminPassword');
+const fbDb=firebase.database(),fbEmpRef=fbDb.ref('employees'),fbCtRef=fbDb.ref('contacts'),fbPwRef=fbDb.ref('adminPassword'),fbOrgDateRef=fbDb.ref('orgChartDate');
+const ORG_DATE_KEY='nf_org_date';
+function getOrgDate(){return localStorage.getItem(ORG_DATE_KEY)||'2026.02.25';}
+function setOrgDate(){const d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');const ds=y+'.'+m+'.'+dd;localStorage.setItem(ORG_DATE_KEY,ds);fbOrgDateRef.set(ds).catch(e=>console.error('FB orgDate err:',e));}
 const gid=()=>'e'+Date.now().toString(36)+Math.random().toString(36).substr(2,5);
 const DEFAULT_EMP=[
 {id:"emlfzblh9dvxqi",name:"이승우",division:"경영총괄",team:"",position:"대표이사",phone:"010-2636-4179",email:"swl@netformrnd.com",joinDate:"",extension:"",primaryTasks:[],secondaryTasks:[],memo:"",photo:"",sortOrder:0},
@@ -1394,13 +1397,6 @@ function renderOrgTreeNav(list){
         });
         // 1명 부문: 큰 버튼 하나만 (하위 팀 목록 없음)
         if(members.length===1){
-            h+=`<div class="orgtree-div">`;
-            h+=`<div class="orgtree-div-hd${_orgTreeSelected==='DIV__'+div?' on':''}" onclick="selectOrgTreeDiv('${div}',this)" data-otdiv="${div}" style="padding-left:18px;">`;
-            h+=`${div} <span class="ot-cnt">${members.length}</span>`;
-            h+=`</div>`;
-            h+=`<div class="orgtree-div-body" style="display:none;"></div></div>`;
-        } else if(div==='브랜드마케팅팀'){
-            // 브랜드마케팅팀은 다른 부문과 동일 스타일, 하위 펼침 없이 1개만
             h+=`<div class="orgtree-div">`;
             h+=`<div class="orgtree-div-hd${_orgTreeSelected==='DIV__'+div?' on':''}" onclick="selectOrgTreeDiv('${div}',this)" data-otdiv="${div}" style="padding-left:18px;">`;
             h+=`${div} <span class="ot-cnt">${members.length}</span>`;
@@ -1762,7 +1758,7 @@ function renderOrg(){
         return s;
     }
 
-    let h='<div style="align-self:stretch;text-align:left;padding:0 0 8px;font-size:11px;color:var(--text-dim);font-weight:500;">v2026.02.25</div>';
+    let h='<div style="align-self:stretch;text-align:left;padding:0 0 8px;font-size:11px;color:var(--text-dim);font-weight:500;">v'+getOrgDate()+'</div>';
 
     // === CEO ===
     if(ceo) h+=`<div class="o-ceo" onclick="showD('${ceo.id}')"><span class="o-star">★</span> <span class="o-nm">${ceo.name}</span> <span class="o-pos">${ceo.position}</span></div><div class="vl"></div>`;
@@ -2403,12 +2399,16 @@ function saveEmp(){
     if(!n||!d||!p){toast('필수 항목(성명, 부문, 직위)을 입력하세요.','err');return;}
     const all=G(),eid=document.getElementById('editId').value;
     const photo=document.getElementById('fPhoto').value||((eid&&all.find(x=>x.id===eid))?all.find(x=>x.id===eid).photo:'');
+    const oldEmp=eid?all.find(x=>x.id===eid):null;
     const data={id:eid||gid(),name:n,division:d,team:t||d,position:p,phone:document.getElementById('fPh').value.trim(),email:document.getElementById('fEm').value.trim(),joinDate:eid?(all.find(x=>x.id===eid)||{}).joinDate||'':'',extension:document.getElementById('fEx').value.trim(),birthDate:document.getElementById('fBirth').value.trim(),primaryTasks:getTaskValues('fPrRows'),secondaryTasks:getTaskValues('fScRows'),memo:document.getElementById('fMe').value.trim(),photo:photo,sortOrder:eid?(all.find(e=>e.id===eid)||{}).sortOrder||0:all.length};
+    const isNew=!eid;
+    const divChanged=oldEmp&&(oldEmp.division!==d||oldEmp.team!==(t||d));
     if(eid){const i=all.findIndex(e=>e.id===eid);if(i!==-1)all[i]=data;toast(n+' 수정 완료','ok');}else{all.push(data);toast(n+' 등록 완료','ok');}
+    if(isNew||divChanged) setOrgDate();
     S(all);resetF();refresh();renderAdmEmpList();
 }
 function editD(id){closeD();const e=G().find(x=>x.id===id);if(!e)return;switchPanel('admin');document.getElementById('fTitle').textContent='직원 정보 수정';document.getElementById('editId').value=e.id;document.getElementById('fN').value=e.name;document.getElementById('fD').value=e.division;document.getElementById('fT').value=e.team;document.getElementById('fP').value=e.position;document.getElementById('fPh').value=e.phone||'';document.getElementById('fEm').value=e.email||'';document.getElementById('fEx').value=e.extension||'';document.getElementById('fBirth').value=e.birthDate||'';setTaskRows('fPrRows',e.primaryTasks||[],2);setTaskRows('fScRows',e.secondaryTasks||[],1);document.getElementById('fMe').value=e.memo||'';if(e.photo){document.getElementById('fPhoto').value=e.photo;document.getElementById('fPhotoPreview').innerHTML=`<img src="${e.photo}">`;document.getElementById('fPhotoDelBtn').style.display='inline-flex';}else{clearPhoto();}document.getElementById('delBtn').style.display='inline-flex';window.scrollTo({top:0,behavior:'smooth'});}
-function delEmp(){const eid=document.getElementById('editId').value;if(!eid||!confirm('삭제하시겠습니까?'))return;S(G().filter(e=>e.id!==eid));toast('삭제 완료','ok');resetF();refresh();renderAdmEmpList();}
+function delEmp(){const eid=document.getElementById('editId').value;if(!eid||!confirm('삭제하시겠습니까?'))return;setOrgDate();S(G().filter(e=>e.id!==eid));toast('삭제 완료','ok');resetF();refresh();renderAdmEmpList();}
 function resetF(){document.getElementById('fTitle').textContent='신규 직원 등록';document.getElementById('editId').value='';['fN','fT','fPh','fEm','fEx','fBirth','fMe'].forEach(i=>document.getElementById(i).value='');setTaskRows('fPrRows',[],2);setTaskRows('fScRows',[],1);clearPhoto();document.getElementById('fD').value='';document.getElementById('fP').value='';document.getElementById('delBtn').style.display='none';}
 
 // Excel
@@ -2950,6 +2950,12 @@ fbPwRef.on('value',snap=>{
   if(data)localStorage.setItem(PK,data);
 },err=>console.error('FB pw listener err:',err));
 
+// 조직도 업데이트 날짜 동기화
+fbOrgDateRef.on('value',snap=>{
+  const data=snap.val();
+  if(data)localStorage.setItem(ORG_DATE_KEY,data);
+},err=>console.error('FB orgDate listener err:',err));
+
 // 최초 마이그레이션: Firebase 비어있으면 현재 데이터 업로드
 fbEmpRef.once('value',snap=>{
   if(!snap.val()){const d=G();if(d&&d.length)fbEmpRef.set(d);}
@@ -2959,6 +2965,9 @@ fbCtRef.once('value',snap=>{
 });
 fbPwRef.once('value',snap=>{
   if(!snap.val()){const p=localStorage.getItem(PK);if(p)fbPwRef.set(p);}
+});
+fbOrgDateRef.once('value',snap=>{
+  if(!snap.val()){const d=localStorage.getItem(ORG_DATE_KEY);if(d)fbOrgDateRef.set(d);}
 });
 })();
 </script>
