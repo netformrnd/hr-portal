@@ -1774,7 +1774,7 @@ function renderOrg(){
         return s;
     }
 
-    let h='<div style="align-self:stretch;display:flex;justify-content:space-between;align-items:center;padding:0 0 12px;">';
+    let h='<div style="align-self:stretch;display:flex;justify-content:space-between;align-items:center;padding:0 0 28px;">';
     h+='<div style="display:inline-flex;gap:8px;align-items:center;">';
     h+='<div style="display:flex;align-items:center;justify-content:center;width:110px;padding:6px 0;border-radius:8px;font-size:12px;font-weight:600;background:rgba(21,128,61,0.06);border:1.5px solid #15803d;color:#15803d;">★ 임원</div>';
     h+='<div style="display:flex;align-items:center;justify-content:center;width:110px;padding:6px 0;border-radius:8px;font-size:12px;font-weight:600;background:rgba(124,58,237,0.06);border:1.5px solid #7c3aed;color:#7c3aed;">◆ 수석 매니저</div>';
@@ -2068,7 +2068,6 @@ ${styles.join('\n')}
 </style>
 </head>
 <body>
-<div style="text-align:center;margin-bottom:16px;font-size:10px;color:#999;">v${dateStr.replace(/-/g,'.')} 조직도</div>
 <div class="org-print-area">${snapshot}</div>
 <script>
 document.querySelectorAll('[onclick]').forEach(el=>el.removeAttribute('onclick'));
