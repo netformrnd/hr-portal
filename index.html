@@ -187,7 +187,7 @@ table.dt{width:100%;border-collapse:collapse;}
 .cp{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;}
 .cp-e{background:var(--amber-dim);color:var(--amber);}
 .cp-s{background:rgba(109,40,217,0.08);color:#7c3aed;}
-.cp-l{background:var(--accent-dim);color:var(--accent);}
+.cp-l{background:rgba(230,126,34,0.08);color:#e67e22;}
 .cp-m{background:var(--bg-hover);color:var(--text-sub);}
 .tg{display:flex;gap:3px;flex-wrap:nowrap;overflow:hidden;}
 .tg span{padding:2px 7px;border-radius:4px;font-size:11px;background:var(--bg-hover);color:var(--text-sub);white-space:nowrap;}
@@ -235,7 +235,7 @@ table.dt{width:100%;border-collapse:collapse;}
 
 /* CEO 박스 */
 .o-ceo{background:#1a1a1a;border-radius:10px;padding:12px 32px;text-align:center;cursor:pointer;display:inline-block;box-shadow:0 2px 8px rgba(0,0,0,.12);}
-.o-ceo .o-star{color:#f59e0b;font-size:13px;}
+.o-ceo .o-badge{color:#f59e0b;font-size:13px;}
 .o-ceo .o-nm{font-size:15px;font-weight:700;color:#fff;margin:0 4px;}
 .o-ceo .o-pos{font-size:11px;color:#999;font-weight:500;}
 
@@ -244,7 +244,8 @@ table.dt{width:100%;border-collapse:collapse;}
 
 /* 부문 헤드 (부사장/상무이사/이사) - 녹색 */
 .o-head{background:var(--green-dim);border:1.5px solid var(--green);border-radius:8px;padding:6px 14px;text-align:center;cursor:pointer;display:inline-block;white-space:nowrap;}
-.o-head .o-star{color:#f59e0b;font-size:12px;vertical-align:middle;}
+.o-head .o-badge{color:var(--green);font-size:12px;vertical-align:middle;}
+.o-head.is-sm .o-badge{color:#7c3aed;}
 .o-head .o-nm{font-size:12px;font-weight:700;color:var(--green);margin:0 3px;}
 .o-head .o-pos{font-size:9px;color:var(--green);font-weight:500;opacity:.7;}
 
@@ -271,11 +272,11 @@ table.dt{width:100%;border-collapse:collapse;}
 .o-mem:hover{border-color:var(--accent);background:var(--accent-dim);}
 .o-mem .o-nm{font-size:9px;font-weight:600;color:var(--text);}
 .o-mem .o-pos{font-size:7.5px;color:var(--text-sub);font-weight:400;}
-.o-mem.is-ld{border-left:3px solid #f59e0b;background:#fffde7;}
-.o-mem.is-ld .o-star{color:#f59e0b;font-size:8px;}
-.o-mem.is-ld .o-nm{color:#1565c0;font-weight:700;}
+.o-mem.is-ld{border-left:3px solid #e67e22;background:rgba(230,126,34,0.06);}
+.o-mem.is-ld .o-badge{color:#e67e22;font-size:9px;}
+.o-mem.is-ld .o-nm{color:#e67e22;font-weight:700;}
 .o-mem.is-sm{border-left:3px solid #7c3aed;background:rgba(124,58,237,0.06);}
-.o-mem.is-sm .o-star{color:#7c3aed;font-size:8px;}
+.o-mem.is-sm .o-badge{color:#7c3aed;font-size:8px;}
 .o-mem.is-sm .o-nm{color:#7c3aed;font-weight:700;}
 .o-head.is-sm{background:rgba(124,58,237,0.08);border-color:#7c3aed;}
 .o-head.is-sm .o-nm{color:#7c3aed;}
@@ -1698,21 +1699,23 @@ function renderOrg(){
         });
     }
 
-    // 멤버 카드: 리드 = ★ + 노란 배경
+    // 멤버 카드: 수석매니저=◆, 리드=▲
     function memCard(m){
         const sm=m.position==='수석 매니저';
         const ld=!sm&&isLead(m.position);
+        const badge=sm?'◆':ld?'●':'';
         return `<div class="o-mem${sm?' is-sm':''}${ld?' is-ld':''}" onclick="showD('${m.id}')">
-            ${sm||ld?'<span class="o-star">★</span> ':''}<span class="o-nm">${m.name}</span> <span class="o-pos">${m.position}</span>
+            ${badge?'<span class="o-badge">'+badge+'</span> ':''}<span class="o-nm">${m.name}</span> <span class="o-pos">${m.position}</span>
         </div>`;
     }
 
-    // 헤드 카드 (★ 별표 + 녹색 배경)
+    // 헤드 카드: 임원=★, 수석매니저=◆
     function headCard(person){
         if(!person)return '';
         const sm=person.position==='수석 매니저';
+        const badge=sm?'◆':'★';
         return `<div class="o-head${sm?' is-sm':''}"${person.id?` onclick="showD('${person.id}')"`:''}>
-            <span class="o-star">★</span> <span class="o-nm">${person.name}</span> <span class="o-pos">${person.position}</span>
+            <span class="o-badge">${badge}</span> <span class="o-nm">${person.name}</span> <span class="o-pos">${person.position}</span>
         </div>`;
     }
 
@@ -1771,10 +1774,16 @@ function renderOrg(){
         return s;
     }
 
-    let h='<div style="align-self:stretch;text-align:left;padding:0 0 8px;font-size:11px;color:var(--text-dim);font-weight:500;">v'+getOrgDate()+'</div>';
+    let h='<div style="align-self:stretch;display:flex;justify-content:space-between;align-items:center;padding:0 0 12px;">';
+    h+='<div style="font-size:11px;color:var(--text-dim);font-weight:500;">v'+getOrgDate()+'</div>';
+    h+='<div style="display:inline-flex;gap:8px;align-items:center;">';
+    h+='<div style="display:flex;align-items:center;justify-content:center;width:110px;padding:6px 0;border-radius:8px;font-size:12px;font-weight:600;background:rgba(21,128,61,0.06);border:1.5px solid #15803d;color:#15803d;">★ 임원</div>';
+    h+='<div style="display:flex;align-items:center;justify-content:center;width:110px;padding:6px 0;border-radius:8px;font-size:12px;font-weight:600;background:rgba(124,58,237,0.06);border:1.5px solid #7c3aed;color:#7c3aed;">◆ 수석 매니저</div>';
+    h+='<div style="display:flex;align-items:center;justify-content:center;width:110px;padding:6px 0;border-radius:8px;font-size:12px;font-weight:600;background:rgba(230,126,34,0.06);border:1.5px solid #e67e22;color:#e67e22;">● 리드 매니저</div>';
+    h+='</div></div>';
 
     // === CEO ===
-    if(ceo) h+=`<div class="o-ceo" onclick="showD('${ceo.id}')"><span class="o-star">★</span> <span class="o-nm">${ceo.name}</span> <span class="o-pos">${ceo.position}</span></div><div class="vl"></div>`;
+    if(ceo) h+=`<div class="o-ceo" onclick="showD('${ceo.id}')"><span class="o-nm">${ceo.name}</span> <span class="o-pos">${ceo.position}</span></div><div class="vl"></div>`;
 
     // === 2대 그룹 ===
     h+=`<div style="display:flex;justify-content:center"><div class="hl" style="width:0"></div></div>`;
