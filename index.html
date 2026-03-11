@@ -186,6 +186,7 @@ table.dt{width:100%;border-collapse:collapse;}
 .av img{width:100%;height:100%;object-fit:cover;object-position:top;}
 .cp{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;}
 .cp-e{background:var(--amber-dim);color:var(--amber);}
+.cp-s{background:rgba(109,40,217,0.08);color:#7c3aed;}
 .cp-l{background:var(--accent-dim);color:var(--accent);}
 .cp-m{background:var(--bg-hover);color:var(--text-sub);}
 .tg{display:flex;gap:3px;flex-wrap:nowrap;overflow:hidden;}
@@ -1273,7 +1274,8 @@ const TEAM_MEM_ORDER={
     '경영관리팀':['신나영','주유진','최영옥','김유림'],
     '그로스팀':['이재훈','김범석'],
     '브랜드커머스팀':['이란','김민지'],
-    '미디어커머스팀':['허지은','김소연','남윤정'],
+    '커머스사업본부':['허지은'],
+    '미디어커머스팀':['김소연','남윤정'],
     '해외사업팀':['김채원','쩐티리'],
     '모여라딜팀':['김송희','이채은'],
     '브랜드마케팅팀':['권혜영','함지민','김소라','손예진','최경선']
@@ -1287,7 +1289,7 @@ function teamMemOrder(name,team){
 const TEAM_CHILDREN={'용인공장':['관리팀','생산/품질관리팀']};
 const CHILD_TEAMS=new Set(Object.values(TEAM_CHILDREN).flat());
 // 본부 총괄 직위 (부문 맨 위에 고정)
-const HEAD_POS=['부사장','상무이사','이사','기술연구소장'];
+const HEAD_POS=['부사장','상무이사','이사','수석 매니저','기술연구소장'];
 function isHeadOf(e){return (HEAD_POS.includes(e.position)||(e.position||'').includes('연구소장'))&&(e.team===e.division||!e.team);}
 function defaultSort(a,b){
     if(a.position==='대표이사'&&b.position!=='대표이사')return -1;
@@ -1353,7 +1355,7 @@ function refresh(){
     if(!list.length){tb.innerHTML='';em.style.display='block';em.querySelector('p').textContent=all.length?'검색 결과가 없습니다.':'등록된 직원이 없습니다.';return;}
     em.style.display='none';
     tb.innerHTML=list.map(e=>{
-        const pc=['대표이사','부사장','상무이사','이사'].includes(e.position)||(e.position||'').includes('연구소장')?'cp-e':['수석 매니저','리드 매니저','공장장','선임연구원'].includes(e.position)?'cp-l':'cp-m';
+        const pc=['대표이사','부사장','상무이사','이사'].includes(e.position)||(e.position||'').includes('연구소장')?'cp-e':e.position==='수석 매니저'?'cp-s':['리드 매니저','공장장','선임연구원'].includes(e.position)?'cp-l':'cp-m';
         const ini=e.name?e.name[0]:'?';
         const priTasks=(e.primaryTasks||[]).filter(Boolean).slice(0,2);
         // match badge + matched tasks for search
@@ -1469,7 +1471,7 @@ function renderOrgTreeSearchResults(list){
     list.forEach(m=>{
         const ini=m.name?m.name[0]:'?';
         const tc=getTC(m.team);
-        const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['리드 매니저','공장장','선임연구원'].includes(m.position)?'cp-l':'cp-m';
+        const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':m.position==='수석 매니저'?'cp-s':['리드 매니저','공장장','선임연구원'].includes(m.position)?'cp-l':'cp-m';
         const tasks=(m.primaryTasks||[]).filter(Boolean).slice(0,3).join(', ');
         h+=`<div class="orgtree-mem" style="border-top:3px solid ${tc}" onclick="showD('${m.id}')">`;
         h+=`<div class="av" style="background:${tc}">${m.photo?`<img src="${m.photo}">`:ini}</div>`;
@@ -1538,7 +1540,7 @@ function renderOrgTreeDivMembers(div){
         h+=`<div class="orgtree-members">`;
         tmMembers.forEach(m=>{
             const ini=m.name?m.name[0]:'?';
-            const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['리드 매니저','공장장','선임연구원'].includes(m.position)?'cp-l':'cp-m';
+            const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':m.position==='수석 매니저'?'cp-s':['리드 매니저','공장장','선임연구원'].includes(m.position)?'cp-l':'cp-m';
             const tasks=(m.primaryTasks||[]).filter(Boolean).slice(0,3).join(', ');
             h+=`<div class="orgtree-mem" style="border-top:3px solid ${tc}" onclick="showD('${m.id}')">`;
             h+=`<div class="av" style="background:${tc}">${m.photo?`<img src="${m.photo}">`:ini}</div>`;
@@ -1619,7 +1621,7 @@ function renderMemCards(members,tc){
     let h=`<div class="orgtree-members">`;
     members.forEach(m=>{
         const ini=m.name?m.name[0]:'?';
-        const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['리드 매니저','공장장','선임연구원'].includes(m.position)?'cp-l':'cp-m';
+        const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':m.position==='수석 매니저'?'cp-s':['리드 매니저','공장장','선임연구원'].includes(m.position)?'cp-l':'cp-m';
         const tasks=(m.primaryTasks||[]).filter(Boolean).slice(0,3).join(', ');
         h+=`<div class="orgtree-mem" style="border-top:3px solid ${tc}" onclick="showD('${m.id}')">`;
         h+=`<div class="av" style="background:${tc}">${m.photo?`<img src="${m.photo}">`:ini}</div>`;
@@ -1667,7 +1669,7 @@ function getTC(tm){return TEAM_COLORS[tm]||'#90a4ae';}
 function renderOrg(){
     const e=G();if(!e.length){document.getElementById('orgArea').innerHTML='<div class="empty">직원 데이터가 없습니다.</div>';return;}
     const ceo=e.find(x=>x.position==='대표이사');
-    const headPos=['부사장','상무이사','이사'];
+    const headPos=['부사장','상무이사','이사','수석 매니저'];
     const ldPos=['기술연구소장','공장장','수석 매니저','리드 매니저','선임연구원'];
     const isLead=p=>p==='수석 매니저'||p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장';
 
@@ -1808,7 +1810,7 @@ function renderOrg(){
     // 본사 각 부문 데이터 미리 수집
     const bonsaData=activeBonsa.map(div=>{
         const de=e.filter(x=>x.division===div&&x.position!=='대표이사');
-        const dh=de.find(x=>headPos.includes(x.position));
+        const dh=de.find(x=>headPos.includes(x.position)&&(x.team===div||!x.team));
         let tms=[...new Set(de.map(x=>x.team))].filter(t=>t&&t!==div);
         if(div==='영업본부') tms.sort((a,b)=>{const ai=salesTmOrder.indexOf(a),bi=salesTmOrder.indexOf(b);return(ai<0?99:ai)-(bi<0?99:bi);});
         return {div,de,dh,tms};
@@ -2659,7 +2661,7 @@ function renderAccView(list){
                 h+=`<div class="acc-tm-body open">`;
             }
             tMembers.forEach(m=>{
-                const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['리드 매니저','공장장','선임연구원'].includes(m.position)?'cp-l':'cp-m';
+                const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':m.position==='수석 매니저'?'cp-s':['리드 매니저','공장장','선임연구원'].includes(m.position)?'cp-l':'cp-m';
                 const ini=m.name?m.name[0]:'?';
                 const tasks=(m.primaryTasks||[]).slice(0,2).join(', ');
                 h+=`<div class="acc-mem" onclick="showD('${m.id}')">`;
