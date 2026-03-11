@@ -2023,24 +2023,26 @@ function downloadOrgHTML(){
     for(const sheet of document.styleSheets){
         try{for(const rule of sheet.cssRules)styles.push(rule.cssText);}catch(e){}
     }
+    const aw=orgEl.scrollWidth;
     const dateStr=new Date().toISOString().slice(0,10);
     const html=`<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=${aw+40},initial-scale=1.0">
 <title>조직도_${dateStr}</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;padding:20px;}
+body{background:#fff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;padding:20px;min-width:${aw+40}px;}
 ${styles.join('\n')}
 .o-head,.o-mem,.o-ceo{cursor:default!important;}
-@media print{body{padding:0;} @page{size:landscape;margin:10mm;}}
+.org-print-area{display:flex;flex-direction:column;align-items:center;min-width:${aw}px;padding:20px 10px;}
+@media print{body{padding:10px;min-width:auto;transform:scale(0.6);transform-origin:top left;} @page{size:landscape;margin:5mm;}}
 </style>
 </head>
 <body>
 <div style="text-align:center;margin-bottom:16px;font-size:10px;color:#999;">v${dateStr.replace(/-/g,'.')} 조직도</div>
-${orgEl.innerHTML}
+<div class="org-print-area">${orgEl.innerHTML}</div>
 <script>document.querySelectorAll('[onclick]').forEach(el=>el.removeAttribute('onclick'));<\/script>
 </body>
 </html>`;
