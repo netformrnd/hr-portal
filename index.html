@@ -1031,7 +1031,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
                 <div class="fgi"><label>성명 *</label><input id="fN"></div>
                 <div class="fgi"><label>부문 *</label><select id="fD"><option value="">선택</option><option>경영총괄</option><option>용인사업장</option><option>영업본부</option><option>경영관리본부</option><option>커머스사업본부</option><option>브랜드마케팅팀</option></select></div>
                 <div class="fgi"><label>팀명</label><input id="fT" placeholder="본부 총괄자는 비워두세요"></div>
-                <div class="fgi"><label>직위 *</label><select id="fP"><option value="">선택</option><option>대표이사</option><option>부사장</option><option>상무이사</option><option>이사</option><option>공장장</option><option>기술연구소장</option><option>리드 매니저</option><option>선임연구원</option><option>매니저</option><option>연구원</option></select></div>
+                <div class="fgi"><label>직위 *</label><select id="fP"><option value="">선택</option><option>대표이사</option><option>부사장</option><option>상무이사</option><option>이사</option><option>공장장</option><option>기술연구소장</option><option>수석 매니저</option><option>리드 매니저</option><option>선임연구원</option><option>매니저</option><option>연구원</option></select></div>
                 <div class="fgi"><label>연락처</label><input id="fPh" type="tel" placeholder="010-0000-0000"></div>
                 <div class="fgi"><label>이메일</label><input id="fEm"></div>
                 <div class="fgi"><label>내선번호</label><input id="fEx"></div>
@@ -1194,7 +1194,7 @@ function buildDD(){
     // teams: if division selected, show only teams in that division
     filteredForTeam=F.div?e.filter(x=>x.division===F.div):e,
     teams=[...new Set(filteredForTeam.map(x=>x.team))].filter(Boolean).sort(),
-    po=['대표이사','부사장','상무이사','이사','기술연구소장','공장장','리드 매니저','선임연구원','매니저','연구원'],
+    po=['대표이사','부사장','상무이사','이사','기술연구소장','공장장','수석 매니저','리드 매니저','선임연구원','매니저','연구원'],
     poss=[...new Set(e.map(x=>x.position))].filter(Boolean).sort((a,b)=>(po.indexOf(a)<0?99:po.indexOf(a))-(po.indexOf(b)<0?99:po.indexOf(b)));
     const cnt=(arr,k)=>{const m={};arr.forEach(x=>m[x[k]]=(m[x[k]]||0)+1);return m;};
     const cd=cnt(e,'division'),ct=cnt(filteredForTeam,'team'),cp=cnt(e,'position');
@@ -1251,7 +1251,7 @@ document.getElementById('mainSearch').addEventListener('input',e=>{F.q=e.target.
 function resetFilters(){F.div='';F.team='';F.pos='';F.q='';document.getElementById('mainSearch').value='';document.getElementById('lblDiv').textContent='전체 부문';document.getElementById('lblTeam').textContent='전체 팀';document.getElementById('lblPos').textContent='전체 직위';document.querySelectorAll('.fdd-btn').forEach(b=>b.classList.remove('filtered'));refresh();}
 
 // 기본정렬: 조직도(TEAM_MEM_ORDER) 수동 순서와 동일
-const PO=['대표이사','부사장','상무이사','이사','공장장','기술연구소장','리드 매니저','선임연구원','매니저','연구원'];
+const PO=['대표이사','부사장','상무이사','이사','공장장','기술연구소장','수석 매니저','리드 매니저','선임연구원','매니저','연구원'];
 const DO=['경영총괄','용인사업장','영업본부','경영관리본부','커머스사업본부','브랜드마케팅팀'];
 const TO=['경영총괄','용인사업장','용인공장','관리팀','생산/품질관리팀','소재 기술연구소','건설 기술연구소','영업본부','서비스운영1팀','서비스운영2팀','서비스운영3팀','설계/적산팀','영업팀','경영관리본부','경영관리팀','그로스팀','커머스사업본부','브랜드커머스팀','미디어커머스팀','해외사업팀','모여라딜팀','브랜드마케팅팀'];
 // 팀 내 멤버 수동 정렬 맵 (조직도와 동일)
@@ -1353,7 +1353,7 @@ function refresh(){
     if(!list.length){tb.innerHTML='';em.style.display='block';em.querySelector('p').textContent=all.length?'검색 결과가 없습니다.':'등록된 직원이 없습니다.';return;}
     em.style.display='none';
     tb.innerHTML=list.map(e=>{
-        const pc=['대표이사','부사장','상무이사','이사'].includes(e.position)||(e.position||'').includes('연구소장')?'cp-e':['리드 매니저','공장장','선임연구원'].includes(e.position)?'cp-l':'cp-m';
+        const pc=['대표이사','부사장','상무이사','이사'].includes(e.position)||(e.position||'').includes('연구소장')?'cp-e':['수석 매니저','리드 매니저','공장장','선임연구원'].includes(e.position)?'cp-l':'cp-m';
         const ini=e.name?e.name[0]:'?';
         const priTasks=(e.primaryTasks||[]).filter(Boolean).slice(0,2);
         // match badge + matched tasks for search
@@ -1668,8 +1668,8 @@ function renderOrg(){
     const e=G();if(!e.length){document.getElementById('orgArea').innerHTML='<div class="empty">직원 데이터가 없습니다.</div>';return;}
     const ceo=e.find(x=>x.position==='대표이사');
     const headPos=['부사장','상무이사','이사'];
-    const ldPos=['기술연구소장','공장장','리드 매니저','선임연구원'];
-    const isLead=p=>p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장';
+    const ldPos=['기술연구소장','공장장','수석 매니저','리드 매니저','선임연구원'];
+    const isLead=p=>p==='수석 매니저'||p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장';
 
     function dedup(arr){const s=new Set();return arr.filter(x=>{const k=x.name+'|'+x.position;if(s.has(k))return false;s.add(k);return true;});}
 
