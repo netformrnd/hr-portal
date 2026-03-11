@@ -2024,8 +2024,20 @@ function downloadOrgHTML(){
         try{for(const rule of sheet.cssRules)styles.push(rule.cssText);}catch(e){}
     }
     const dateStr=new Date().toISOString().slice(0,10);
-    // HL 인라인 스타일이 이미 적용된 상태의 innerHTML을 캡처
+    // HL 인라인 스타일 초기화 후 캡처 (내보낸 HTML에서 재계산)
+    const hlEls=orgEl.querySelectorAll('.hl');
+    const hlBackup=[];
+    hlEls.forEach((hl,i)=>{
+        hlBackup.push({el:hl,style:hl.getAttribute('style')||'',pStyle:hl.parentElement.getAttribute('style')||''});
+        hl.removeAttribute('style');
+        hl.parentElement.style.cssText='';
+    });
     const snapshot=orgEl.innerHTML;
+    // 복원
+    hlBackup.forEach(b=>{
+        b.el.setAttribute('style',b.style);
+        b.el.parentElement.setAttribute('style',b.pStyle);
+    });
     const html=`<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -2048,7 +2060,46 @@ ${styles.join('\n')}
 <body>
 <div style="text-align:center;margin-bottom:16px;font-size:10px;color:#999;">v${dateStr.replace(/-/g,'.')} 조직도</div>
 <div class="org-print-area">${snapshot}</div>
-<script>document.querySelectorAll('[onclick]').forEach(el=>el.removeAttribute('onclick'));<\/script>
+<script>
+document.querySelectorAll('[onclick]').forEach(el=>el.removeAttribute('onclick'));
+function autoHL(hl,cols){
+  if(!cols||cols.length<2){hl.style.width='0';return;}
+  var r=cols.map(function(c){return c.getBoundingClientRect();});
+  var x1=r[0].left+r[0].width/2, x2=r[r.length-1].left+r[r.length-1].width/2;
+  var w=Math.max(0,x2-x1);
+  var pr=hl.parentElement.getBoundingClientRect();
+  hl.style.position='absolute';
+  hl.style.left=(x1-pr.left)+'px';
+  hl.style.width=w+'px';
+  hl.style.top='0';
+}
+function layoutHL(){
+  document.querySelectorAll('.org-print-area .hl').forEach(function(hl){
+    var p=hl.parentElement;
+    p.style.position='relative';
+    p.style.height='2px';
+    p.style.alignSelf='stretch';
+  });
+  document.querySelector('.org-print-area').offsetHeight;
+  document.querySelectorAll('.org-print-area .o-row').forEach(function(row){
+    var prev=row.previousElementSibling;
+    if(!prev)return;
+    var hl=prev.querySelector?prev.querySelector('.hl'):null;
+    if(!hl)return;
+    var cols=Array.from(row.children).filter(function(c){return c.classList.contains('o-col');});
+    autoHL(hl,cols);
+  });
+  var hlB=document.getElementById('hlBonsa');
+  var rowB=document.getElementById('rowBonsa');
+  if(hlB&&rowB){
+    var kids=Array.from(rowB.children);
+    var first=kids[0], last=null;
+    for(var i=kids.length-1;i>=0;i--){if(kids[i].offsetHeight>0){last=kids[i];break;}}
+    if(first&&last)autoHL(hlB,[first,last]);
+  }
+}
+requestAnimationFrame(function(){layoutHL();setTimeout(layoutHL,100);});
+<\/script>
 </body>
 </html>`;
     const blob=new Blob([html],{type:'text/html;charset=utf-8'});
