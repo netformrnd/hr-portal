@@ -1709,7 +1709,7 @@ function renderOrg(){
 
     // 팀 블록 (팀명만, 리드 이름 안 넣음)
     function tmBlock(tm,members){
-        let mm=dedup(members).filter(x=>!headPos.includes(x.position));
+        let mm=dedup(members).filter(x=>!(headPos.includes(x.position)&&(x.team===x.division||!x.team)));
         const tc=getTC(tm);
         const ld=mm.find(x=>isLead(x.position));
         const rest=sortM(mm.filter(x=>x!==ld),tm);
@@ -1737,7 +1737,7 @@ function renderOrg(){
         }
         if(teams&&teams.length){
             // 팀에 속하지 않는 멤버(공장장 등)는 리드급으로 표시
-            const looseMems=dedup(members).filter(x=>!headPos.includes(x.position)&&(!teams.includes(x.team))&&!(headPerson&&x.name===headPerson.name));
+            const looseMems=dedup(members).filter(x=>!(headPos.includes(x.position)&&(x.team===x.division||!x.team))&&(!teams.includes(x.team))&&!(headPerson&&x.name===headPerson.name));
             if(looseMems.length){
                 s+=`<div class="vl"></div><div class="o-mems">`;
                 sortM(looseMems,title).forEach(m=>{s+=memCard(m);});
@@ -1750,7 +1750,7 @@ function renderOrg(){
             s+=`</div>`;
         } else {
             const hpName=headPerson?headPerson.name:null;
-            let mm=dedup(members).filter(x=>!headPos.includes(x.position)&&!(hpName&&x.name===hpName&&['기술연구소장','연구소장'].includes(x.position)));
+            let mm=dedup(members).filter(x=>!(headPos.includes(x.position)&&(x.team===x.division||!x.team))&&!(hpName&&x.name===hpName&&['기술연구소장','연구소장'].includes(x.position)));
             mm=sortM(mm,title);
             if(mm.length){
                 s+=`<div class="vl"></div><div class="o-mems">`;
@@ -1863,7 +1863,7 @@ function renderOrg(){
     });
     // 브랜드마케팅팀 Row 3: 팀박스+멤버 (다른 팀과 같은 높이)
     {
-        const bmMembers=hasBM?dedup(bmTeam).filter(x=>!headPos.includes(x.position)):[];
+        const bmMembers=hasBM?dedup(bmTeam).filter(x=>!(headPos.includes(x.position)&&(x.team===x.division||!x.team))):[];
         const bmLd=bmMembers.find(x=>isLead(x.position));
         const bmRest=hasBM?sortM(bmMembers.filter(x=>x!==bmLd),'브랜드마케팅팀'):[];
         const tc=getTC('브랜드마케팅팀');
