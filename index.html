@@ -274,6 +274,12 @@ table.dt{width:100%;border-collapse:collapse;}
 .o-mem.is-ld{border-left:3px solid #f59e0b;background:#fffde7;}
 .o-mem.is-ld .o-star{color:#f59e0b;font-size:8px;}
 .o-mem.is-ld .o-nm{color:#1565c0;font-weight:700;}
+.o-mem.is-sm{border-left:3px solid #7c3aed;background:rgba(124,58,237,0.06);}
+.o-mem.is-sm .o-star{color:#7c3aed;font-size:8px;}
+.o-mem.is-sm .o-nm{color:#7c3aed;font-weight:700;}
+.o-head.is-sm{background:rgba(124,58,237,0.08);border-color:#7c3aed;}
+.o-head.is-sm .o-nm{color:#7c3aed;}
+.o-head.is-sm .o-pos{color:#7c3aed;}
 
 /* 멤버 리스트 */
 .o-mems{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:3px;}
@@ -1693,16 +1699,18 @@ function renderOrg(){
 
     // 멤버 카드: 리드 = ★ + 노란 배경
     function memCard(m){
-        const ld=isLead(m.position);
-        return `<div class="o-mem${ld?' is-ld':''}" onclick="showD('${m.id}')">
-            ${ld?'<span class="o-star">★</span> ':''}<span class="o-nm">${m.name}</span> <span class="o-pos">${m.position}</span>
+        const sm=m.position==='수석 매니저';
+        const ld=!sm&&isLead(m.position);
+        return `<div class="o-mem${sm?' is-sm':''}${ld?' is-ld':''}" onclick="showD('${m.id}')">
+            ${sm||ld?'<span class="o-star">★</span> ':''}<span class="o-nm">${m.name}</span> <span class="o-pos">${m.position}</span>
         </div>`;
     }
 
     // 헤드 카드 (★ 별표 + 녹색 배경)
     function headCard(person){
         if(!person)return '';
-        return `<div class="o-head"${person.id?` onclick="showD('${person.id}')"`:''}>
+        const sm=person.position==='수석 매니저';
+        return `<div class="o-head${sm?' is-sm':''}"${person.id?` onclick="showD('${person.id}')"`:''}>
             <span class="o-star">★</span> <span class="o-nm">${person.name}</span> <span class="o-pos">${person.position}</span>
         </div>`;
     }
