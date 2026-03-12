@@ -3102,9 +3102,12 @@ fbOrgDateRef.once('value',snap=>{
     const params = new URLSearchParams(window.location.search);
     if(params.get('action') !== 'orgchart-pdf') return;
 
-    // UI 전체 숨기기
-    document.body.style.visibility = 'hidden';
-    document.body.style.overflow = 'hidden';
+    // 화면에 로딩 메시지만 표시하고 포탈 UI는 화면 밖으로 이동
+    document.body.style.position = 'relative';
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:#fff;z-index:999999;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:18px;color:#555;';
+    overlay.textContent = '조직도 PDF 생성 중...';
+    document.body.appendChild(overlay);
 
     // Firebase 데이터 로드 후 조직도 렌더링 → PDF 다운로드
     let _attempted = false;
@@ -3134,12 +3137,12 @@ fbOrgDateRef.once('value',snap=>{
                 const y = (pdf.internal.pageSize.getHeight() - h) / 2;
                 pdf.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, w, h);
                 pdf.save('조직도_' + new Date().toISOString().slice(0,10) + '.pdf');
+                overlay.textContent = '다운로드 완료!';
             } catch(err) {
-                alert('조직도 PDF 생성 실패: ' + err.message);
+                overlay.textContent = '조직도 PDF 생성 실패: ' + err.message;
             }
-            // 다운로드 후 창 닫기
             setTimeout(() => window.close(), 1500);
-        }, 2000);
+        }, 3000);
     });
 })();
 </script>
