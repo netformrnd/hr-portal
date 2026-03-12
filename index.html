@@ -3102,30 +3102,30 @@ fbOrgDateRef.once('value',snap=>{
     const params = new URLSearchParams(window.location.search);
     if(params.get('action') !== 'orgchart-pdf') return;
 
-    // 화면에 로딩 메시지만 표시하고 포탈 UI는 화면 밖으로 이동
-    document.body.style.position = 'relative';
+    // 로딩 화면 표시 (포탈 UI 위에 덮기)
     const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:#fff;z-index:999999;display:flex;align-items:center;justify-content:center;font-family:sans-serif;font-size:18px;color:#555;';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;background:#fff;z-index:999999;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:18px;color:#555;';
     overlay.textContent = '조직도 PDF 생성 중...';
     document.body.appendChild(overlay);
 
-    // Firebase 데이터 로드 후 조직도 렌더링 → PDF 다운로드
-    let _attempted = false;
-    fbEmpRef.once('value', snap => {
-        if(_attempted) return;
-        _attempted = true;
-        const data = snap.val();
-        if(data && Array.isArray(data) && data.length){
-            _mergeDefaults(data);
-            localStorage.setItem(SK, JSON.stringify(data));
-        }
-        // 조직도 패널 표시 후 렌더링
-        switchPanel('orgchart');
-        // 렌더링 완료 대기 후 PDF 생성
-        setTimeout(async () => {
+    // 조직도 패널로 전환
+    switchPanel('orgchart');
+
+    // orgArea에 실제 콘텐츠가 렌더링될 때까지 대기 (polling)
+    let pollCount = 0;
+    const pollInterval = setInterval(async () => {
+        pollCount++;
+        const el = document.getElementById('orgArea');
+        // orgArea에 .o-ceo 요소가 있으면 조직도가 렌더링된 것
+        if(el && el.querySelector('.o-ceo')) {
+            clearInterval(pollInterval);
+            // 렌더링 안정화 대기
+            await new Promise(r => setTimeout(r, 1000));
             try {
-                const el = document.getElementById('orgArea');
+                // 오버레이를 캡처 전에 잠시 숨김 (캡처에 영향 방지)
+                overlay.style.display = 'none';
                 const canvas = await html2canvas(el, {backgroundColor:'#ffffff', scale:2, useCORS:true, logging:false});
+                overlay.style.display = 'flex';
                 const {jsPDF} = window.jspdf;
                 const pdf = new jsPDF({orientation:'landscape', unit:'mm', format:'a4'});
                 const pw = pdf.internal.pageSize.getWidth() - 20;
@@ -3139,11 +3139,16 @@ fbOrgDateRef.once('value',snap=>{
                 pdf.save('조직도_' + new Date().toISOString().slice(0,10) + '.pdf');
                 overlay.textContent = '다운로드 완료!';
             } catch(err) {
-                overlay.textContent = '조직도 PDF 생성 실패: ' + err.message;
+                overlay.textContent = 'PDF 생성 실패: ' + err.message;
             }
             setTimeout(() => window.close(), 1500);
-        }, 3000);
-    });
+        }
+        // 30초 타임아웃
+        if(pollCount > 60) {
+            clearInterval(pollInterval);
+            overlay.textContent = '조직도 데이터 로드 실패. 페이지를 새로고침 해주세요.';
+        }
+    }, 500);
 })();
 </script>
 </body>
