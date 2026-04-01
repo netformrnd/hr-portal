@@ -879,7 +879,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
             <!-- ====== 그로스팀 / 회의실 (우측 중간) ====== -->
             <div class="sdg" data-team="그로스팀 / 회의실" style="left:730px;top:265px;width:252px;height:205px;"></div>
             <!-- 그로스팀 (상단 2×2) -->
-            <div class="sk" data-name="김다예" style="left:738px;top:273px;width:108px;height:50px;background:#DB2777;">김다예<span class="sk-pos">매니저</span></div>
+            <div class="sk blank" style="left:738px;top:273px;width:108px;height:50px;"></div>
             <div class="sk" data-name="이재훈" style="left:856px;top:273px;width:108px;height:50px;background:#DB2777;">이재훈<span class="sk-pos">수석 매니저</span></div>
             <div class="sk blank" style="left:738px;top:335px;width:108px;height:50px;"></div>
             <div class="sk" data-name="김범석" style="left:856px;top:335px;width:108px;height:50px;background:#DB2777;">김범석<span class="sk-pos">매니저</span></div>
@@ -899,7 +899,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
             <div class="sk vacant" style="left:338px;top:423px;width:108px;height:50px;">공석</div>
             <div class="sk vacant" style="left:456px;top:423px;width:108px;height:50px;">공석</div>
             <div class="sk" data-name="권혜영" style="left:574px;top:423px;width:108px;height:50px;background:#CA8A04;">권혜영<span class="sk-pos">리드 매니저</span></div>
-            <div class="sk" data-name="변유림" style="left:338px;top:483px;width:108px;height:50px;background:#DC2626;">변유림<span class="sk-pos">매니저</span></div>
+            <div class="sk" data-name="변유림" style="left:338px;top:483px;width:108px;height:50px;background:#EA580C;">변유림<span class="sk-pos">매니저</span></div>
             <div class="sk vacant" style="left:456px;top:483px;width:108px;height:50px;">공석</div>
             <div class="sk vacant" style="left:574px;top:483px;width:108px;height:50px;">공석</div>
 
@@ -1307,7 +1307,7 @@ function teamMemOrder(name,team){
     return 999;
 }
 // 하위팀 매핑 (부모팀 → 자식팀들)
-const TEAM_CHILDREN={'용인공장':['관리팀','생산/품질관리팀'],'서비스본부':['서비스운영1팀','서비스운영2팀','서비스운영3팀']};
+const TEAM_CHILDREN={'용인공장':['관리팀','생산/품질관리팀'],'서비스본부':['서비스운영1팀','서비스운영2팀','서비스운영3팀','설계/적산팀']};
 const CHILD_TEAMS=new Set(Object.values(TEAM_CHILDREN).flat());
 // 본부 총괄 직위 (부문 맨 위에 고정)
 const HEAD_POS=['부사장','상무이사','이사','수석 매니저','기술연구소장'];
@@ -1882,7 +1882,7 @@ function renderOrg(){
 
     // --- ROW 3: 팀 나열 (모두 같은 높이!) ---
     // 서비스본부 하위팀 정의
-    const SUB_DIV_CHILDREN={'서비스본부':['서비스운영1팀','서비스운영2팀','서비스운영3팀']};
+    const SUB_DIV_CHILDREN={'서비스본부':['서비스운영1팀','서비스운영2팀','서비스운영3팀','설계/적산팀']};
     const subChildSet=new Set(Object.values(SUB_DIV_CHILDREN).flat());
 
     bonsaData.forEach(bd=>{
