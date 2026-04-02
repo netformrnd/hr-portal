@@ -1390,6 +1390,7 @@ function refresh(){
         return `<tr data-id="${e.id}"><td><div class="cn"><div class="av">${e.photo?`<img src="${e.photo}">`:ini}</div>${e.name}${matchBadge}</div></td><td>${e.division||'-'}</td><td>${e.team||'-'}</td><td><span class="cp ${pc}">${e.position||'-'}</span></td><td>${e.phone?`<a href="tel:${e.phone}">${e.phone}</a>`:'-'}</td><td><div class="tg">${taskHtml}</div></td></tr>`;
     }).join('');
     tb.querySelectorAll('tr').forEach(tr=>tr.onclick=()=>showD(tr.dataset.id));
+    syncSeatMap();
 }
 
 let _orgTreeData=[];
@@ -2164,6 +2165,21 @@ document.querySelectorAll('.seat-tab[data-sf]').forEach(t=>t.addEventListener('c
     t.classList.add('on');
     document.getElementById(t.dataset.sf).classList.add('on');
 }));
+// Seat map - 퇴사자 자동 공석 처리
+function syncSeatMap(){
+    const names=new Set(G().map(e=>e.name));
+    document.querySelectorAll('.seat-bp .sk[data-name]').forEach(sk=>{
+        const nm=sk.dataset.name;
+        if(!names.has(nm)){
+            // 직원 데이터에 없으면 공석 처리
+            sk.removeAttribute('data-name');
+            sk.className='sk vacant';
+            sk.removeAttribute('onclick');
+            sk.style.background='';
+            sk.innerHTML='공석';
+        }
+    });
+}
 // Seat map - 좌석별 팀명 자동 매핑
 (function(){
     const colorTeam={'#4f6db5':'경영관리팀','#3182ce':'서비스운영1팀','#805ad5':'서비스운영2팀','#0891b2':'서비스운영3팀','#d97706':'설계/적산팀','#16a34a':'영업팀','#0e7490':'소재기술연구소','#2563eb':'건설기술연구소','#6d28d9':'브랜드커머스팀','#0d9488':'미디어커머스팀','#ea580c':'해외사업팀','#dc2626':'모여라딜팀','#ca8a04':'브랜드마케팅팀','#db2777':'그로스팀','#475569':'대표이사실'};
