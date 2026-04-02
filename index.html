@@ -3061,6 +3061,7 @@ function filterSeatEditorList(){
     const el=document.getElementById('seatEditorList');
     let h=filtered.map(e=>`<div class="seat-editor-item" onclick="assignSeat('${_seatEditTarget}','${e.name}')"><span class="se-nm">${e.name}</span><span class="se-tm">${e.team||e.division||''}</span><span class="se-pos">${e.position||''}</span></div>`).join('');
     h+=`<div class="seat-editor-item se-clear" onclick="clearSeat('${_seatEditTarget}')">🚫 공석으로 비우기</div>`;
+    h+=`<div class="seat-editor-item se-clear" onclick="blankSeat('${_seatEditTarget}')">⬜ 빈 자리 (문구 없음)</div>`;
     el.innerHTML=h;
 }
 function assignSeat(seatId,empName){
@@ -3078,6 +3079,14 @@ function clearSeat(seatId){
     rebindSeatClicks();
     closeSeatEditor();
     toast('공석 처리 완료','ok');
+}
+function blankSeat(seatId){
+    _seatAssignments[seatId]='__blank__';
+    saveSeatAssignments();
+    applySeatAssignments();
+    rebindSeatClicks();
+    closeSeatEditor();
+    toast('빈 자리 처리 완료','ok');
 }
 
 // 좌석 클릭 핸들러 (편집/일반 모드 분기)
