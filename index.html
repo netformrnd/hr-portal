@@ -347,6 +347,32 @@ table.dt{width:100%;border-collapse:collapse;}
 .seat-popup-grid .sp-v{padding:4px 0;color:var(--text);border-bottom:1px solid rgba(0,0,0,.04);}
 .seat-popup-tasks{margin-top:6px;display:flex;flex-wrap:wrap;gap:3px;}
 .seat-popup-tasks span{padding:2px 6px;border-radius:3px;font-size:10px;background:var(--accent-dim);color:var(--accent);}
+/* 좌석 편집 모드 */
+.seat-edit-toggle{display:none;margin-left:8px;}
+.seat-edit-toggle.force-show{display:inline-flex;}
+#seatEditBtn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;border:1.5px solid var(--accent);background:#fff;color:var(--accent);cursor:pointer;transition:.15s;}
+#seatEditBtn.on{background:var(--accent);color:#fff;}
+#seatEditBtn:hover{opacity:.85;}
+.seat-bp.editing .sk{cursor:pointer !important;outline:2px dashed transparent;transition:outline .15s;}
+.seat-bp.editing .sk:hover{outline:2px dashed var(--accent);}
+/* 좌석 편집 팝업 */
+.seat-editor-ov{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:300;display:none;align-items:center;justify-content:center;}
+.seat-editor-ov.open{display:flex;}
+.seat-editor{background:#fff;border-radius:12px;box-shadow:0 16px 48px rgba(0,0,0,.2);width:360px;max-height:70vh;display:flex;flex-direction:column;overflow:hidden;}
+.seat-editor-hd{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.seat-editor-hd h4{margin:0;font-size:15px;font-weight:700;}
+.seat-editor-hd button{border:none;background:none;font-size:18px;cursor:pointer;color:var(--text-dim);width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:4px;}
+.seat-editor-hd button:hover{background:var(--bg-hover);}
+.seat-editor-search{padding:10px 14px;border-bottom:1px solid var(--border);}
+.seat-editor-search input{width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;outline:none;}
+.seat-editor-search input:focus{border-color:var(--accent);}
+.seat-editor-list{flex:1;overflow-y:auto;padding:6px 0;}
+.seat-editor-item{padding:9px 18px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13px;transition:background .1s;}
+.seat-editor-item:hover{background:var(--bg-hover);}
+.seat-editor-item .se-nm{font-weight:600;flex:1;}
+.seat-editor-item .se-tm{color:var(--text-sub);font-size:11px;}
+.seat-editor-item .se-pos{color:var(--text-sub);font-size:11px;}
+.seat-editor-item.se-clear{color:#e53e3e;font-weight:600;border-top:1px solid var(--border);margin-top:4px;padding-top:12px;}
 @keyframes seatglow{
     0%,100%{box-shadow:0 0 0 4px rgba(255,23,68,.25),0 0 20px rgba(255,23,68,.5);}
     50%{box-shadow:0 0 0 6px rgba(255,23,68,.4),0 0 30px rgba(255,23,68,.8);}
@@ -733,6 +759,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
         </div>
         <div id="seatResult"></div>
         <div style="font-size:12px;color:var(--text-sub);padding:4px 0;white-space:nowrap;">💡 좌석을 클릭하면 상세 정보를 확인할 수 있습니다</div>
+        <div class="seat-edit-toggle"><button id="seatEditBtn" onclick="toggleSeatEdit()">✏️ 배치 편집</button></div>
         <div style="margin-left:auto;display:flex;gap:6px;">
             <div style="position:relative;display:inline-block;" id="seatPdfDd">
                 <button class="btn btn-p" onclick="event.stopPropagation();document.getElementById('seatPdfDd').classList.toggle('open')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> 배치도 다운받기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:10px;height:10px;"><polyline points="6 9 12 15 18 9"/></svg></button>
@@ -1091,6 +1118,13 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 <div class="dpn" id="dPn"><div class="dph"><h3>직원 상세 정보</h3><button class="dcl" onclick="closeD()">&times;</button></div><div class="dbd" id="dBd"></div><div class="dact" id="dAct"></div></div>
 
 <div class="seat-popup" id="seatPopup"><button class="seat-popup-close" onclick="closeSeatPopup()">&times;</button><div id="seatPopupBody"></div></div>
+<div class="seat-editor-ov" id="seatEditorOv" onclick="if(event.target===this)closeSeatEditor()">
+    <div class="seat-editor">
+        <div class="seat-editor-hd"><h4>좌석 배정</h4><button onclick="closeSeatEditor()">&times;</button></div>
+        <div class="seat-editor-search"><input id="seatEditorSearch" placeholder="직원 이름으로 검색..." oninput="filterSeatEditorList()"></div>
+        <div class="seat-editor-list" id="seatEditorList"></div>
+    </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1099,7 +1133,7 @@ function getDeleted(){try{return JSON.parse(localStorage.getItem(DEL_KEY))||[];}
 function addDeleted(nameDiv){const d=getDeleted();if(!d.includes(nameDiv)){d.push(nameDiv);localStorage.setItem(DEL_KEY,JSON.stringify(d));}}
 
 firebase.initializeApp({apiKey:"AIzaSyBqPaSodmaZDtVNc2UEfmHKe_JxOM6k8Io",authDomain:"hr-portal-5f785.firebaseapp.com",databaseURL:"https://hr-portal-5f785-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"hr-portal-5f785",storageBucket:"hr-portal-5f785.firebasestorage.app",messagingSenderId:"193320235811",appId:"1:193320235811:web:fbd35e3ef69a98abbe1296"});
-const fbDb=firebase.database(),fbEmpRef=fbDb.ref('employees'),fbCtRef=fbDb.ref('contacts'),fbPwRef=fbDb.ref('adminPassword'),fbOrgDateRef=fbDb.ref('orgChartDate');
+const fbDb=firebase.database(),fbEmpRef=fbDb.ref('employees'),fbCtRef=fbDb.ref('contacts'),fbPwRef=fbDb.ref('adminPassword'),fbOrgDateRef=fbDb.ref('orgChartDate'),fbSeatRef=fbDb.ref('seatAssignments');
 const ORG_DATE_KEY='nf_org_date';
 function getOrgDate(){return localStorage.getItem(ORG_DATE_KEY)||'2026.02.25';}
 function setOrgDate(){const d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');const ds=y+'.'+m+'.'+dd;localStorage.setItem(ORG_DATE_KEY,ds);fbOrgDateRef.set(ds).catch(e=>console.error('FB orgDate err:',e));}
@@ -2506,7 +2540,7 @@ function clearMyPhoto(){
 }
 
 // Admin
-function admLogin(){if(document.getElementById('admPw').value===gPw()){document.getElementById('admLock').style.display='none';document.getElementById('admC').classList.add('unlocked');toast('관리자 로그인 완료','ok');renderAdmEmpList();}else toast('비밀번호가 올바르지 않습니다.','err');}
+function admLogin(){if(document.getElementById('admPw').value===gPw()){document.getElementById('admLock').style.display='none';document.getElementById('admC').classList.add('unlocked');toast('관리자 로그인 완료','ok');renderAdmEmpList();document.querySelectorAll('.seat-edit-toggle').forEach(el=>el.classList.add('force-show'));}else toast('비밀번호가 올바르지 않습니다.','err');}
 function chgPw(){const p=document.getElementById('nPw').value.trim();if(!p){toast('비밀번호를 입력하세요.','err');return;}localStorage.setItem(PK,p);fbPwRef.set(p).catch(e=>console.error('FB pw err:',e));document.getElementById('nPw').value='';toast('비밀번호 변경됨','ok');}
 
 // Photo helpers
@@ -2929,15 +2963,144 @@ document.addEventListener('click',function(ev){
     if(!ev.target.closest('.seat-popup')&&!ev.target.closest('.sk[data-name]')){closeSeatPopup();}
 });
 
-// 좌석 클릭 이벤트 재등록 (팝업 방식)
-document.querySelectorAll('.seat-bp .sk[data-name]').forEach(s=>{
-    s.onclick=function(ev){
-        ev.stopPropagation();
-        document.getElementById('seatSI').value=s.dataset.name;
-        seatSearch(s.dataset.name);
-        showSeatPopup(s.dataset.name,s);
-    };
-});
+// 좌석 편집 시스템
+const SEAT_SK='nf_seat_v1';
+let _seatEditMode=false;
+let _seatEditTarget=null;
+let _seatAssignments=JSON.parse(localStorage.getItem(SEAT_SK)||'{}');
+
+// 좌석 ID 초기화 (좌표 기반)
+function initSeatIds(){
+    document.querySelectorAll('.seat-bp .sk').forEach(sk=>{
+        if(sk.dataset.seatId)return;
+        const floor=sk.closest('.seat-floor');
+        const fid=floor?floor.id:'sf0';
+        const left=parseInt(sk.style.left)||0;
+        const top=parseInt(sk.style.top)||0;
+        sk.dataset.seatId=fid+'_'+left+'_'+top;
+    });
+}
+initSeatIds();
+
+// 팀별 색상 매핑
+const SEAT_TEAM_COLORS={'경영관리팀':'#4F6DB5','서비스본부':'#2B6CB0','서비스운영1팀':'#3182CE','서비스운영2팀':'#805AD5','서비스운영3팀':'#0891B2','설계/적산팀':'#D97706','영업팀':'#16A34A','소재 기술연구소':'#0E7490','건설 기술연구소':'#2563EB','브랜드커머스팀':'#6D28D9','미디어커머스팀':'#0D9488','해외사업팀':'#EA580C','모여라딜팀':'#DC2626','브랜드마케팅팀':'#CA8A04','그로스팀':'#DB2777','경영총괄':'#475569','경영관리본부':'#4F6DB5','영업본부':'#475569','커머스사업본부':'#6D28D9'};
+
+function getEmpColor(emp){
+    return SEAT_TEAM_COLORS[emp.team]||SEAT_TEAM_COLORS[emp.division]||'#90a4ae';
+}
+
+// 저장된 배정 데이터 적용
+function applySeatAssignments(){
+    const emps=G();
+    Object.entries(_seatAssignments).forEach(([seatId,empName])=>{
+        const sk=document.querySelector(`.sk[data-seat-id="${seatId}"]`);
+        if(!sk)return;
+        if(!empName||empName==='__vacant__'){
+            // 공석
+            sk.removeAttribute('data-name');
+            sk.className='sk vacant';
+            sk.style.background='';
+            sk.innerHTML='공석';
+            return;
+        }
+        if(empName==='__blank__'){
+            sk.removeAttribute('data-name');
+            sk.className='sk blank';
+            sk.style.background='';
+            sk.innerHTML='';
+            return;
+        }
+        const emp=emps.find(e=>e.name===empName);
+        if(!emp){
+            sk.removeAttribute('data-name');
+            sk.className='sk vacant';
+            sk.style.background='';
+            sk.innerHTML='공석';
+            return;
+        }
+        sk.dataset.name=emp.name;
+        sk.className='sk';
+        sk.style.background=getEmpColor(emp);
+        const isBig=['대표이사','부사장','상무이사','이사'].includes(emp.position);
+        sk.style.fontSize=isBig?'14px':'';
+        sk.innerHTML=emp.name+'<span class="sk-pos">'+emp.position+'</span>';
+    });
+}
+
+function saveSeatAssignments(){
+    localStorage.setItem(SEAT_SK,JSON.stringify(_seatAssignments));
+    fbSeatRef.set(_seatAssignments).catch(e=>console.error('FB seat write err:',e));
+}
+
+// 편집 모드 토글
+function toggleSeatEdit(){
+    _seatEditMode=!_seatEditMode;
+    const btn=document.getElementById('seatEditBtn');
+    btn.classList.toggle('on',_seatEditMode);
+    btn.textContent=_seatEditMode?'✏️ 편집 중 (클릭하여 종료)':'✏️ 배치 편집';
+    document.querySelectorAll('.seat-bp').forEach(bp=>bp.classList.toggle('editing',_seatEditMode));
+}
+
+// 좌석 편집 팝업
+function openSeatEditor(seatId){
+    _seatEditTarget=seatId;
+    const ov=document.getElementById('seatEditorOv');
+    ov.classList.add('open');
+    document.getElementById('seatEditorSearch').value='';
+    filterSeatEditorList();
+    setTimeout(()=>document.getElementById('seatEditorSearch').focus(),100);
+}
+function closeSeatEditor(){
+    document.getElementById('seatEditorOv').classList.remove('open');
+    _seatEditTarget=null;
+}
+function filterSeatEditorList(){
+    const q=(document.getElementById('seatEditorSearch').value||'').trim().toLowerCase();
+    const emps=G().sort((a,b)=>(a.name||'').localeCompare(b.name||'','ko'));
+    const filtered=q?emps.filter(e=>(e.name||'').toLowerCase().includes(q)):emps;
+    const el=document.getElementById('seatEditorList');
+    let h=filtered.map(e=>`<div class="seat-editor-item" onclick="assignSeat('${_seatEditTarget}','${e.name}')"><span class="se-nm">${e.name}</span><span class="se-tm">${e.team||e.division||''}</span><span class="se-pos">${e.position||''}</span></div>`).join('');
+    h+=`<div class="seat-editor-item se-clear" onclick="clearSeat('${_seatEditTarget}')">🚫 공석으로 비우기</div>`;
+    el.innerHTML=h;
+}
+function assignSeat(seatId,empName){
+    _seatAssignments[seatId]=empName;
+    saveSeatAssignments();
+    applySeatAssignments();
+    rebindSeatClicks();
+    closeSeatEditor();
+    toast(empName+' 배치 완료','ok');
+}
+function clearSeat(seatId){
+    _seatAssignments[seatId]='__vacant__';
+    saveSeatAssignments();
+    applySeatAssignments();
+    rebindSeatClicks();
+    closeSeatEditor();
+    toast('공석 처리 완료','ok');
+}
+
+// 좌석 클릭 핸들러 (편집/일반 모드 분기)
+function rebindSeatClicks(){
+    document.querySelectorAll('.seat-bp .sk').forEach(s=>{
+        s.onclick=function(ev){
+            ev.stopPropagation();
+            if(_seatEditMode){
+                const sid=s.dataset.seatId;
+                if(sid) openSeatEditor(sid);
+                return;
+            }
+            if(s.dataset.name){
+                document.getElementById('seatSI').value=s.dataset.name;
+                seatSearch(s.dataset.name);
+                showSeatPopup(s.dataset.name,s);
+            }
+        };
+    });
+}
+rebindSeatClicks();
+// 좌석 배정 데이터 적용
+applySeatAssignments();
 
 refresh();
 
@@ -3161,6 +3324,14 @@ fbPwRef.once('value',snap=>{
 });
 fbOrgDateRef.once('value',snap=>{
   if(!snap.val()){const d=localStorage.getItem(ORG_DATE_KEY);if(d)fbOrgDateRef.set(d);}
+});
+// 좌석 배정 동기화
+fbSeatRef.on('value',snap=>{
+  const data=snap.val();
+  if(data){_seatAssignments=data;localStorage.setItem(SEAT_SK,JSON.stringify(data));applySeatAssignments();rebindSeatClicks();}
+},err=>console.error('FB seat listener err:',err));
+fbSeatRef.once('value',snap=>{
+  if(!snap.val()){const d=JSON.parse(localStorage.getItem(SEAT_SK)||'{}');if(Object.keys(d).length)fbSeatRef.set(d);}
 });
 })();
 
