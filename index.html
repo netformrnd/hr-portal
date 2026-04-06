@@ -1861,16 +1861,22 @@ function renderOrg(){
     const yConstHead=yConst.find(x=>['기술연구소장','연구소장'].includes(x.position));
     h+=subDivBlock('건설 기술연구소',yConstHead,null,yConst);
 
-    // 용인사업장 - 기존 하드코딩 팀에 속하지 않는 직원 표시
+    // 용인사업장 - 기존 하드코딩 팀에 속하지 않는 직원 표시 (새 팀 + 팀 미지정)
     const yKnownTeams=new Set(['용인공장','관리팀','생산/품질관리팀','소재 기술연구소','건설 기술연구소']);
-    const yUnmapped=yong.filter(x=>!yKnownTeams.has(x.team)&&x.position!=='부사장'&&x.position!=='공장장'&&x.team!=='용인사업장');
+    const yUnmapped=yong.filter(x=>!yKnownTeams.has(x.team)&&x.position!=='부사장'&&x.position!=='공장장');
     if(yUnmapped.length){
         const yUnTeams=[...new Set(yUnmapped.map(x=>x.team).filter(t=>t&&t!=='용인사업장'))];
         if(yUnTeams.length){
             yUnTeams.forEach(tm=>{h+=tmBlock(tm,yUnmapped.filter(x=>x.team===tm));});
-        } else {
-            h+=`<div class="o-col"><div class="vl"></div><div class="o-mems">`;
-            yUnmapped.forEach(m=>{h+=memCard(m);});
+        }
+        // 팀 미지정(team==='용인사업장') 직원 표시
+        const yLoose=yUnmapped.filter(x=>x.team==='용인사업장'||!x.team);
+        if(yLoose.length){
+            const tc=getTC('용인사업장');
+            h+=`<div class="o-col"><div class="vl"></div>`;
+            h+=`<div class="o-tm" style="border-left:4px solid ${tc}" onclick="filterDiv('용인사업장')"><div class="o-nm">용인사업장 소속</div></div>`;
+            h+=`<div class="vl"></div><div class="o-mems">`;
+            yLoose.forEach(m=>{h+=memCard(m);});
             h+=`</div></div>`;
         }
     }
@@ -1947,9 +1953,12 @@ function renderOrg(){
         // 영업본부 정렬 유지
         if(bd.div==='영업본부') visibleTms.sort((a,b)=>{const ai=salesTmOrder.indexOf(a),bi=salesTmOrder.indexOf(b);return(ai<0?99:ai)-(bi<0?99:bi);});
 
-        if(visibleTms.length){
+        // 팀 미지정(team===division) 직원 수집 (headPos 제외 - 이미 headCard로 표시)
+        const looseMems=bd.de.filter(x=>(x.team===bd.div||!x.team)&&!headPos.includes(x.position));
+
+        if(visibleTms.length||looseMems.length){
             h+=`<div class="vl"></div>`;
-            if(visibleTms.length>1) h+=`<div style="display:flex;justify-content:center"><div class="hl" style="width:0"></div></div>`;
+            if(visibleTms.length>1||(visibleTms.length>=1&&looseMems.length)) h+=`<div style="display:flex;justify-content:center"><div class="hl" style="width:0"></div></div>`;
             h+=`<div class="o-row">`;
             visibleTms.forEach(tm=>{
                 const children=SUB_DIV_CHILDREN[tm];
@@ -1962,6 +1971,15 @@ function renderOrg(){
                     h+=tmBlock(tm,bd.de.filter(x=>x.team===tm));
                 }
             });
+            // 팀 미지정 직원(team===division) 별도 표시
+            if(looseMems.length){
+                const tc=getTC(bd.div);
+                h+=`<div class="o-col"><div class="vl"></div>`;
+                h+=`<div class="o-tm" style="border-left:4px solid ${tc}" onclick="filterDiv('${bd.div}')"><div class="o-nm">${bd.div} 소속</div></div>`;
+                h+=`<div class="vl"></div><div class="o-mems">`;
+                sortM(looseMems,bd.div).forEach(m=>{h+=memCard(m);});
+                h+=`</div></div>`;
+            }
             h+=`</div>`;
         }
         h+=`</div>`;
