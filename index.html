@@ -268,8 +268,12 @@ table.dt{width:100%;border-collapse:collapse;}
 .o-tm .o-ld{font-size:8px;color:var(--accent);font-weight:600;margin-top:1px;white-space:nowrap;}
 
 /* 멤버 카드 - 팀박스와 동일 크기 */
-.o-mem{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:3px 4px;text-align:center;cursor:pointer;width:110px;box-sizing:border-box;transition:.1s;}
+.o-mem{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:3px 4px;text-align:center;cursor:pointer;width:110px;box-sizing:border-box;transition:.1s;position:relative;}
 .o-mem:hover{border-color:var(--accent);background:var(--accent-dim);}
+.o-arrows{display:none;position:absolute;right:-18px;top:50%;transform:translateY(-50%);flex-direction:column;gap:1px;}
+.o-mem:hover .o-arrows{display:flex;}
+.o-arr{background:none;border:1px solid var(--border);border-radius:3px;cursor:pointer;font-size:7px;line-height:1;padding:1px 3px;color:var(--text-dim);transition:.15s;}
+.o-arr:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
 .o-mem .o-nm{font-size:9px;font-weight:600;color:var(--text);}
 .o-mem .o-pos{font-size:7.5px;color:var(--text-sub);font-weight:400;}
 .o-mem.is-ld{border-left:3px solid #e67e22;background:rgba(230,126,34,0.06);}
@@ -1133,7 +1137,7 @@ function getDeleted(){try{return JSON.parse(localStorage.getItem(DEL_KEY))||[];}
 function addDeleted(nameDiv){const d=getDeleted();if(!d.includes(nameDiv)){d.push(nameDiv);localStorage.setItem(DEL_KEY,JSON.stringify(d));}}
 
 firebase.initializeApp({apiKey:"AIzaSyBqPaSodmaZDtVNc2UEfmHKe_JxOM6k8Io",authDomain:"hr-portal-5f785.firebaseapp.com",databaseURL:"https://hr-portal-5f785-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"hr-portal-5f785",storageBucket:"hr-portal-5f785.firebasestorage.app",messagingSenderId:"193320235811",appId:"1:193320235811:web:fbd35e3ef69a98abbe1296"});
-const fbDb=firebase.database(),fbEmpRef=fbDb.ref('employees'),fbCtRef=fbDb.ref('contacts'),fbPwRef=fbDb.ref('adminPassword'),fbOrgDateRef=fbDb.ref('orgChartDate'),fbSeatRef=fbDb.ref('seatAssignments');
+const fbDb=firebase.database(),fbEmpRef=fbDb.ref('employees'),fbCtRef=fbDb.ref('contacts'),fbPwRef=fbDb.ref('adminPassword'),fbOrgDateRef=fbDb.ref('orgChartDate'),fbSeatRef=fbDb.ref('seatAssignments'),fbTeamOrderRef=fbDb.ref('teamMemberOrder');
 const ORG_DATE_KEY='nf_org_date';
 function getOrgDate(){return localStorage.getItem(ORG_DATE_KEY)||'2026.02.25';}
 function setOrgDate(){const d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');const ds=y+'.'+m+'.'+dd;localStorage.setItem(ORG_DATE_KEY,ds);fbOrgDateRef.set(ds).catch(e=>console.error('FB orgDate err:',e));}
@@ -1309,8 +1313,8 @@ function resetFilters(){F.div='';F.team='';F.pos='';F.q='';document.getElementBy
 const PO=['대표이사','부사장','상무이사','이사','공장장','기술연구소장','수석 매니저','리드 매니저','선임연구원','매니저','연구원'];
 const DO=['경영총괄','용인사업장','영업본부','경영관리본부','커머스사업본부','브랜드마케팅팀'];
 const TO=['경영총괄','용인사업장','용인공장','관리팀','생산/품질관리팀','소재 기술연구소','건설 기술연구소','영업본부','서비스본부','서비스운영1팀','서비스운영2팀','서비스운영3팀','설계/적산팀','영업팀','경영관리본부','경영관리팀','그로스팀','커머스사업본부','브랜드커머스팀','미디어커머스팀','해외사업팀','모여라딜팀','브랜드마케팅팀'];
-// 팀 내 멤버 수동 정렬 맵 (조직도와 동일)
-const TEAM_MEM_ORDER={
+// 팀 내 멤버 수동 정렬 맵 (Firebase에서 동적 관리)
+const TEAM_MEM_ORDER_DEFAULT={
     '경영총괄':['이승우'],
     '용인사업장':['정영재'],
     '용인공장':['김성준'],
@@ -1335,6 +1339,55 @@ const TEAM_MEM_ORDER={
     '모여라딜팀':['김송희'],
     '브랜드마케팅팀':['권혜영','함지민','김소라','손예진','최경선']
 };
+let TEAM_MEM_ORDER=JSON.parse(JSON.stringify(TEAM_MEM_ORDER_DEFAULT));
+const TEAM_ORDER_SK='nf_team_order_v1';
+// Firebase/localStorage에서 팀 순서 로드
+(function(){try{const d=JSON.parse(localStorage.getItem(TEAM_ORDER_SK));if(d&&typeof d==='object')TEAM_MEM_ORDER={...TEAM_MEM_ORDER_DEFAULT,...d};}catch(e){}})();
+
+function saveTeamOrder(team,names){
+    TEAM_MEM_ORDER[team]=names;
+    // 전체 저장 (DEFAULT와 합쳐서)
+    const toSave={};
+    for(const[k,v] of Object.entries(TEAM_MEM_ORDER)) toSave[k]=v;
+    localStorage.setItem(TEAM_ORDER_SK,JSON.stringify(toSave));
+    fbTeamOrderRef.set(toSave).catch(e=>console.error('FB teamOrder err:',e));
+}
+
+function moveOrgMember(team,name,dir){
+    const all=G();
+    // 현재 팀의 멤버 목록 (렌더링 순서 기준)
+    const headPos=['부사장','상무이사','이사','수석 매니저'];
+    const isLd=p=>p==='수석 매니저'||p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장';
+    let members=all.filter(x=>x.team===team&&!(headPos.includes(x.position)&&(x.team===x.division||!x.team)));
+    // 현재 정렬 적용
+    const mo=TEAM_MEM_ORDER[team];
+    if(mo){
+        members.sort((a,b)=>{
+            const ai=mo.indexOf(a.name),bi=mo.indexOf(b.name);
+            return(ai<0?999:ai)-(bi<0?999:bi)||(a.name||'').localeCompare(b.name||'','ko');
+        });
+    } else {
+        members.sort((a,b)=>{
+            const al=isLd(a.position)?0:1,bl=isLd(b.position)?0:1;
+            if(al!==bl)return al-bl;
+            const PO2=['대표이사','부사장','상무이사','이사','공장장','기술연구소장','수석 매니저','리드 매니저','선임연구원','매니저','연구원'];
+            const ai=PO2.indexOf(a.position),bi=PO2.indexOf(b.position);
+            return(ai<0?99:ai)-(bi<0?99:bi)||(a.name||'').localeCompare(b.name||'','ko');
+        });
+    }
+    const names=members.map(x=>x.name);
+    const idx=names.indexOf(name);
+    if(idx<0)return;
+    const targetIdx=dir==='up'?idx-1:idx+1;
+    if(targetIdx<0||targetIdx>=names.length)return;
+    // 스왑
+    [names[idx],names[targetIdx]]=[names[targetIdx],names[idx]];
+    saveTeamOrder(team,names);
+    setOrgDate();
+    renderOrg();
+    toast(name+' 순서 변경','ok');
+}
+
 function teamMemOrder(name,team){
     const mo=TEAM_MEM_ORDER[team];
     if(mo){const idx=mo.indexOf(name);return idx<0?999:idx;}
@@ -1749,12 +1802,15 @@ function renderOrg(){
     }
 
     // 멤버 카드: 수석매니저=◆, 리드=▲
-    function memCard(m){
+    const _isAdmOrg=document.getElementById('admC').classList.contains('unlocked');
+    function memCard(m,tm){
         const sm=m.position==='수석 매니저';
         const ld=!sm&&isLead(m.position);
         const badge=sm?'◆':ld?'●':'';
+        const teamName=tm||m.team||'';
+        const arrows=_isAdmOrg?`<span class="o-arrows"><button class="o-arr" onclick="event.stopPropagation();moveOrgMember('${teamName.replace(/'/g,"\\'")}','${m.name.replace(/'/g,"\\'")}','up')" title="위로">&#9650;</button><button class="o-arr" onclick="event.stopPropagation();moveOrgMember('${teamName.replace(/'/g,"\\'")}','${m.name.replace(/'/g,"\\'")}','down')" title="아래로">&#9660;</button></span>`:'';
         return `<div class="o-mem${sm?' is-sm':''}${ld?' is-ld':''}" onclick="showD('${m.id}')">
-            ${badge?'<span class="o-badge">'+badge+'</span> ':''}<span class="o-nm">${m.name}</span> <span class="o-pos">${m.position}</span>
+            ${badge?'<span class="o-badge">'+badge+'</span> ':''}<span class="o-nm">${m.name}</span> <span class="o-pos">${m.position}</span>${arrows}
         </div>`;
     }
 
@@ -1777,7 +1833,7 @@ function renderOrg(){
         s+=`<div class="o-tm" style="border-left:4px solid ${tc}" onclick="filterTeam('${tm}')"><div class="o-nm">${tm}</div></div>`;
         if(sorted.length){
             s+='<div class="vl"></div><div class="o-mems">';
-            sorted.forEach(m=>{s+=memCard(m);});
+            sorted.forEach(m=>{s+=memCard(m,tm);});
             s+='</div>';
         }
         s+='</div>';
@@ -1799,7 +1855,7 @@ function renderOrg(){
             const looseMems=dedup(members).filter(x=>!(headPos.includes(x.position)&&(x.team===x.division||!x.team))&&(!teams.includes(x.team))&&!(headPerson&&x.name===headPerson.name));
             if(looseMems.length){
                 s+=`<div class="vl"></div><div class="o-mems">`;
-                sortM(looseMems,title).forEach(m=>{s+=memCard(m);});
+                sortM(looseMems,title).forEach(m=>{s+=memCard(m,title);});
                 s+=`</div>`;
             }
             s+=`<div class="vl"></div>`;
@@ -1813,7 +1869,7 @@ function renderOrg(){
             mm=sortM(mm,title);
             if(mm.length){
                 s+=`<div class="vl"></div><div class="o-mems">`;
-                mm.forEach(m=>{s+=memCard(m);});
+                mm.forEach(m=>{s+=memCard(m,title);});
                 s+=`</div>`;
             }
         }
@@ -1876,7 +1932,7 @@ function renderOrg(){
             h+=`<div class="o-col"><div class="vl"></div>`;
             h+=`<div class="o-tm" style="border-left:4px solid ${tc}" onclick="filterDiv('용인사업장')"><div class="o-nm">용인사업장 소속</div></div>`;
             h+=`<div class="vl"></div><div class="o-mems">`;
-            yLoose.forEach(m=>{h+=memCard(m);});
+            yLoose.forEach(m=>{h+=memCard(m,'용인사업장');});
             h+=`</div></div>`;
         }
     }
@@ -1977,7 +2033,7 @@ function renderOrg(){
                 h+=`<div class="o-col"><div class="vl"></div>`;
                 h+=`<div class="o-tm" style="border-left:4px solid ${tc}" onclick="filterDiv('${bd.div}')"><div class="o-nm">${bd.div} 소속</div></div>`;
                 h+=`<div class="vl"></div><div class="o-mems">`;
-                sortM(looseMems,bd.div).forEach(m=>{h+=memCard(m);});
+                sortM(looseMems,bd.div).forEach(m=>{h+=memCard(m,bd.div);});
                 h+=`</div></div>`;
             }
             h+=`</div>`;
@@ -1997,8 +2053,8 @@ function renderOrg(){
         h+=`<div class="o-tm" style="border-left:4px solid ${tc}" onclick="filterDiv('브랜드마케팅팀')"><div class="o-nm">브랜드마케팅팀</div></div>`;
         if(bmMembers.length){
             h+=`<div class="vl"></div><div class="o-mems">`;
-            if(bmLd) h+=memCard(bmLd);
-            bmRest.forEach(m=>{h+=memCard(m);});
+            if(bmLd) h+=memCard(bmLd,'브랜드마케팅팀');
+            bmRest.forEach(m=>{h+=memCard(m,'브랜드마케팅팀');});
             h+=`</div>`;
         }
         h+=`</div>`;
@@ -2024,13 +2080,13 @@ function renderOrg(){
                 divTms.forEach(tm=>{h+=tmBlock(tm,divEmps.filter(x=>x.team===tm));});
                 // 팀 없는 직원
                 const noTm=divEmps.filter(x=>!x.team||x.team===div);
-                if(noTm.length){h+=`<div class="o-col"><div class="vl"></div><div class="o-mems">`;noTm.forEach(m=>{h+=memCard(m);});h+=`</div></div>`;}
+                if(noTm.length){h+=`<div class="o-col"><div class="vl"></div><div class="o-mems">`;noTm.forEach(m=>{h+=memCard(m,div);});h+=`</div></div>`;}
                 h+=`</div></div>`;
             } else {
                 h+=`<div class="o-col" style="padding:0 10px">`;
                 h+=`<div class="vl"></div><div class="o-grp" onclick="filterDiv('${div}')" style="cursor:pointer">${div}</div>`;
                 h+=`<div class="vl"></div><div class="o-mems">`;
-                divEmps.forEach(m=>{h+=memCard(m);});
+                divEmps.forEach(m=>{h+=memCard(m,div);});
                 h+=`</div></div>`;
             }
         });
@@ -2049,11 +2105,11 @@ function renderOrg(){
             h+=`<div class="vl"></div><div class="o-row">`;
             gmTms.forEach(tm=>{h+=tmBlock(tm,gmEmps.filter(x=>x.team===tm));});
             const gmNoTm=gmEmps.filter(x=>!x.team||x.team==='경영총괄');
-            if(gmNoTm.length){h+=`<div class="o-col"><div class="vl"></div><div class="o-mems">`;gmNoTm.forEach(m=>{h+=memCard(m);});h+=`</div></div>`;}
+            if(gmNoTm.length){h+=`<div class="o-col"><div class="vl"></div><div class="o-mems">`;gmNoTm.forEach(m=>{h+=memCard(m,'경영총괄');});h+=`</div></div>`;}
             h+=`</div>`;
         } else {
             h+=`<div class="vl"></div><div class="o-mems">`;
-            gmEmps.forEach(m=>{h+=memCard(m);});
+            gmEmps.forEach(m=>{h+=memCard(m,'경영총괄');});
             h+=`</div>`;
         }
         h+=`</div></div></div>`;
@@ -3424,6 +3480,23 @@ fbSeatRef.on('value',snap=>{
 },err=>console.error('FB seat listener err:',err));
 fbSeatRef.once('value',snap=>{
   if(!snap.val()){const d=JSON.parse(localStorage.getItem(SEAT_SK)||'{}');if(Object.keys(d).length)fbSeatRef.set(d);}
+});
+// 팀원 순서 실시간 동기화
+fbTeamOrderRef.on('value',snap=>{
+  const data=snap.val();
+  if(data&&typeof data==='object'){
+    TEAM_MEM_ORDER={...TEAM_MEM_ORDER_DEFAULT,...data};
+    localStorage.setItem(TEAM_ORDER_SK,JSON.stringify(TEAM_MEM_ORDER));
+    // 조직도 패널이 열려있으면 재렌더
+    const orgPanel=document.getElementById('p-orgchart');
+    if(orgPanel&&orgPanel.classList.contains('on'))renderOrg();
+  }
+},err=>console.error('FB teamOrder listener err:',err));
+fbTeamOrderRef.once('value',snap=>{
+  if(!snap.val()){
+    // 초기 마이그레이션: 하드코딩 데이터를 Firebase에 저장
+    fbTeamOrderRef.set(TEAM_MEM_ORDER_DEFAULT).catch(e=>console.error('FB teamOrder init err:',e));
+  }
 });
 })();
 
