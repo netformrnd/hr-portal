@@ -268,12 +268,12 @@ table.dt{width:100%;border-collapse:collapse;}
 .o-tm .o-ld{font-size:8px;color:var(--accent);font-weight:600;margin-top:1px;white-space:nowrap;}
 
 /* 멤버 카드 - 팀박스와 동일 크기 */
-.o-mem{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:3px 4px;text-align:center;cursor:pointer;width:110px;box-sizing:border-box;transition:.1s;position:relative;}
+.o-mem{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:3px 4px;text-align:center;cursor:pointer;min-width:110px;box-sizing:border-box;transition:.1s;}
 .o-mem:hover{border-color:var(--accent);background:var(--accent-dim);}
-.o-arrows{display:none;position:absolute;right:-18px;top:50%;transform:translateY(-50%);flex-direction:column;gap:1px;}
-.o-mem:hover .o-arrows{display:flex;}
-.o-arr{background:none;border:1px solid var(--border);border-radius:3px;cursor:pointer;font-size:7px;line-height:1;padding:1px 3px;color:var(--text-dim);transition:.15s;}
-.o-arr:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+.o-arrows{display:inline-flex;gap:2px;margin-left:3px;vertical-align:middle;}
+.o-arr{background:var(--bg-elevated);border:1px solid var(--border);border-radius:3px;cursor:pointer;font-size:8px;line-height:1;padding:2px 4px;color:var(--text-sub);transition:.15s;display:inline-flex;align-items:center;justify-content:center;}
+.o-arr:hover{background:var(--accent);color:#fff;border-color:var(--accent);transform:scale(1.15);}
+@media print{.o-arrows{display:none!important;}}
 .o-mem .o-nm{font-size:9px;font-weight:600;color:var(--text);}
 .o-mem .o-pos{font-size:7.5px;color:var(--text-sub);font-weight:400;}
 .o-mem.is-ld{border-left:3px solid #e67e22;background:rgba(230,126,34,0.06);}
@@ -1346,10 +1346,10 @@ const TEAM_ORDER_SK='nf_team_order_v1';
 
 function saveTeamOrder(team,names){
     TEAM_MEM_ORDER[team]=names;
-    // 전체 저장 (DEFAULT와 합쳐서)
     const toSave={};
     for(const[k,v] of Object.entries(TEAM_MEM_ORDER)) toSave[k]=v;
     localStorage.setItem(TEAM_ORDER_SK,JSON.stringify(toSave));
+    _lastTeamOrderJson=JSON.stringify(toSave); // Firebase 리스너 중복 렌더 방지
     fbTeamOrderRef.set(toSave).catch(e=>console.error('FB teamOrder err:',e));
 }
 
@@ -1384,7 +1384,13 @@ function moveOrgMember(team,name,dir){
     [names[idx],names[targetIdx]]=[names[targetIdx],names[idx]];
     saveTeamOrder(team,names);
     setOrgDate();
+    // 스크롤 위치 보존 후 즉시 재렌더
+    const orgArea=document.getElementById('orgArea');
+    const scrollParent=orgArea?orgArea.closest('.panel'):null;
+    const scrollTop=scrollParent?scrollParent.scrollTop:window.scrollY;
     renderOrg();
+    if(scrollParent)scrollParent.scrollTop=scrollTop;
+    else window.scrollTo(0,scrollTop);
     toast(name+' 순서 변경','ok');
 }
 
@@ -3482,12 +3488,16 @@ fbSeatRef.once('value',snap=>{
   if(!snap.val()){const d=JSON.parse(localStorage.getItem(SEAT_SK)||'{}');if(Object.keys(d).length)fbSeatRef.set(d);}
 });
 // 팀원 순서 실시간 동기화
+let _lastTeamOrderJson='';
 fbTeamOrderRef.on('value',snap=>{
   const data=snap.val();
   if(data&&typeof data==='object'){
+    const json=JSON.stringify(data);
+    if(json===_lastTeamOrderJson)return; // 이미 반영된 데이터면 스킵
+    _lastTeamOrderJson=json;
     TEAM_MEM_ORDER={...TEAM_MEM_ORDER_DEFAULT,...data};
     localStorage.setItem(TEAM_ORDER_SK,JSON.stringify(TEAM_MEM_ORDER));
-    // 조직도 패널이 열려있으면 재렌더
+    // 조직도 패널이 열려있으면 재렌더 (다른 기기에서 변경 시)
     const orgPanel=document.getElementById('p-orgchart');
     if(orgPanel&&orgPanel.classList.contains('on'))renderOrg();
   }
