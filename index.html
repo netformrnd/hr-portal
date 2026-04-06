@@ -1861,6 +1861,20 @@ function renderOrg(){
     const yConstHead=yConst.find(x=>['기술연구소장','연구소장'].includes(x.position));
     h+=subDivBlock('건설 기술연구소',yConstHead,null,yConst);
 
+    // 용인사업장 - 기존 하드코딩 팀에 속하지 않는 직원 표시
+    const yKnownTeams=new Set(['용인공장','관리팀','생산/품질관리팀','소재 기술연구소','건설 기술연구소']);
+    const yUnmapped=yong.filter(x=>!yKnownTeams.has(x.team)&&x.position!=='부사장'&&x.position!=='공장장'&&x.team!=='용인사업장');
+    if(yUnmapped.length){
+        const yUnTeams=[...new Set(yUnmapped.map(x=>x.team).filter(t=>t&&t!=='용인사업장'))];
+        if(yUnTeams.length){
+            yUnTeams.forEach(tm=>{h+=tmBlock(tm,yUnmapped.filter(x=>x.team===tm));});
+        } else {
+            h+=`<div class="o-col"><div class="vl"></div><div class="o-mems">`;
+            yUnmapped.forEach(m=>{h+=memCard(m);});
+            h+=`</div></div>`;
+        }
+    }
+
     h+=`</div></div>`;
 
     // ---- 본사 그룹 ----
@@ -1975,6 +1989,57 @@ function renderOrg(){
     h+=`</div></div>`; // /grid, /본사 o-col
     h+=`</div>`; // /최상위 o-row
 
+    // === 어디에도 속하지 않는 직원 표시 (새 부문/팀 등) ===
+    const knownDivs=new Set(['경영총괄','용인사업장','영업본부','경영관리본부','커머스사업본부','브랜드마케팅팀']);
+    const unmapped=e.filter(x=>!knownDivs.has(x.division)&&x.position!=='대표이사');
+    if(unmapped.length){
+        const unmDivs=[...new Set(unmapped.map(x=>x.division).filter(Boolean))];
+        h+=`<div style="margin-top:24px;"><div class="vl"></div>`;
+        h+=`<div class="o-row">`;
+        unmDivs.forEach(div=>{
+            const divEmps=unmapped.filter(x=>x.division===div);
+            const divTms=[...new Set(divEmps.map(x=>x.team).filter(t=>t&&t!==div))];
+            if(divTms.length){
+                h+=`<div class="o-col" style="padding:0 10px">`;
+                h+=`<div class="vl"></div><div class="o-grp" onclick="filterDiv('${div}')" style="cursor:pointer">${div}</div>`;
+                h+=`<div class="vl"></div><div class="o-row">`;
+                divTms.forEach(tm=>{h+=tmBlock(tm,divEmps.filter(x=>x.team===tm));});
+                // 팀 없는 직원
+                const noTm=divEmps.filter(x=>!x.team||x.team===div);
+                if(noTm.length){h+=`<div class="o-col"><div class="vl"></div><div class="o-mems">`;noTm.forEach(m=>{h+=memCard(m);});h+=`</div></div>`;}
+                h+=`</div></div>`;
+            } else {
+                h+=`<div class="o-col" style="padding:0 10px">`;
+                h+=`<div class="vl"></div><div class="o-grp" onclick="filterDiv('${div}')" style="cursor:pointer">${div}</div>`;
+                h+=`<div class="vl"></div><div class="o-mems">`;
+                divEmps.forEach(m=>{h+=memCard(m);});
+                h+=`</div></div>`;
+            }
+        });
+        h+=`</div></div>`;
+    }
+
+    // === 경영총괄 부문 (대표이사 외 직원) 표시 ===
+    const gmEmps=e.filter(x=>x.division==='경영총괄'&&x.position!=='대표이사');
+    if(gmEmps.length){
+        const gmTms=[...new Set(gmEmps.map(x=>x.team).filter(t=>t&&t!=='경영총괄'))];
+        h+=`<div style="margin-top:16px;"><div class="vl"></div>`;
+        h+=`<div class="o-row">`;
+        h+=`<div class="o-col" style="padding:0 10px">`;
+        h+=`<div class="vl"></div><div class="o-grp" onclick="filterDiv('경영총괄')" style="cursor:pointer">경영총괄</div>`;
+        if(gmTms.length){
+            h+=`<div class="vl"></div><div class="o-row">`;
+            gmTms.forEach(tm=>{h+=tmBlock(tm,gmEmps.filter(x=>x.team===tm));});
+            const gmNoTm=gmEmps.filter(x=>!x.team||x.team==='경영총괄');
+            if(gmNoTm.length){h+=`<div class="o-col"><div class="vl"></div><div class="o-mems">`;gmNoTm.forEach(m=>{h+=memCard(m);});h+=`</div></div>`;}
+            h+=`</div>`;
+        } else {
+            h+=`<div class="vl"></div><div class="o-mems">`;
+            gmEmps.forEach(m=>{h+=memCard(m);});
+            h+=`</div>`;
+        }
+        h+=`</div></div></div>`;
+    }
 
     document.getElementById('orgArea').innerHTML=h;
 
