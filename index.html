@@ -1214,7 +1214,7 @@ function _mergeDefaults(stored){
     return changed;
 }
 const G=()=>{try{const d=JSON.parse(localStorage.getItem(SK));if(d&&d.length){if(_mergeDefaults(d))localStorage.setItem(SK,JSON.stringify(d));return d;}localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e}));}catch(e){localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e}));}};
-const S=d=>{localStorage.setItem(SK,JSON.stringify(d));fbEmpRef.set(d).catch(e=>console.error('FB emp write err:',e));};
+const S=d=>{const clean=d.filter(Boolean);localStorage.setItem(SK,JSON.stringify(clean));const keyed={};clean.forEach(emp=>{if(emp&&emp.id)keyed[emp.id]=emp;});fbEmpRef.set(keyed).catch(e=>console.error('FB emp write err:',e));};
 const gPw=()=>localStorage.getItem(PK)||'ice080303!';
 
 // Tab (nav-btn + sidebar)
@@ -3437,9 +3437,16 @@ let _fbInitDone=false;
 // 직원 데이터 실시간 리스너
 fbEmpRef.on('value',snap=>{
   const data=snap.val();
-  if(data&&Array.isArray(data)&&data.length){
-    _mergeDefaults(data);
-    localStorage.setItem(SK,JSON.stringify(data));
+  if(!data) return;
+  let arr;
+  if(Array.isArray(data)){
+    arr=data.filter(Boolean);
+  } else if(typeof data==='object'){
+    arr=Object.values(data).filter(Boolean);
+  }
+  if(arr&&arr.length){
+    _mergeDefaults(arr);
+    localStorage.setItem(SK,JSON.stringify(arr));
     if(_fbInitDone){try{refresh();renderAdmEmpList();}catch(e){}}
     _fbInitDone=true;
   }
@@ -3448,8 +3455,15 @@ fbEmpRef.on('value',snap=>{
 // 연락처 데이터 실시간 리스너
 fbCtRef.on('value',snap=>{
   const data=snap.val();
-  if(data&&Array.isArray(data)&&data.length){
-    localStorage.setItem(CT_KEY,JSON.stringify(data));
+  if(!data) return;
+  let arr;
+  if(Array.isArray(data)){
+    arr=data.filter(Boolean);
+  } else if(typeof data==='object'){
+    arr=Object.values(data).filter(Boolean);
+  }
+  if(arr&&arr.length){
+    localStorage.setItem(CT_KEY,JSON.stringify(arr));
     if(_fbInitDone){try{renderContacts();}catch(e){}}
   }
 },err=>console.error('FB ct listener err:',err));
