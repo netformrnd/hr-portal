@@ -1359,7 +1359,7 @@ function moveOrgMember(team,name,dir){
     const all=G();
     // 현재 팀의 멤버 목록 (렌더링 순서 기준)
     const headPos=['부사장','상무이사','이사','수석 매니저'];
-    const isLd=p=>p==='수석 매니저'||p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장';
+    const isLd=p=>p==='수석 매니저'||p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장'||p==='부장'||p==='차장';
     let members=all.filter(x=>x.team===team&&!(headPos.includes(x.position)&&(x.team===x.division||!x.team)));
     // 현재 정렬 적용
     const mo=TEAM_MEM_ORDER[team];
@@ -1789,7 +1789,7 @@ function renderOrg(){
     const ceo=e.find(x=>x.position==='대표이사');
     const headPos=['부사장','상무이사','이사','수석 매니저'];
     const ldPos=['기술연구소장','공장장','수석 매니저','리드 매니저','선임연구원'];
-    const isLead=p=>p==='수석 매니저'||p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장';
+    const isLead=p=>p==='수석 매니저'||p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장'||p==='부장'||p==='차장';
 
     function dedup(arr){const s=new Set();return arr.filter(x=>{const k=x.name+'|'+x.position;if(s.has(k))return false;s.add(k);return true;});}
 
@@ -1812,7 +1812,7 @@ function renderOrg(){
     // 멤버 카드: 수석매니저=◆, 리드=▲
     const _isAdmOrg=document.getElementById('admC').classList.contains('unlocked');
     function memCard(m,tm){
-        const sm=m.position==='수석 매니저';
+        const sm=m.position==='수석 매니저'||m.position==='부장';
         const ld=!sm&&isLead(m.position);
         const badge=sm?'◆':ld?'●':'';
         const teamName=tm||m.team||'';
@@ -1825,7 +1825,7 @@ function renderOrg(){
     // 헤드 카드: 임원=★, 수석매니저=◆
     function headCard(person){
         if(!person)return '';
-        const sm=person.position==='수석 매니저';
+        const sm=person.position==='수석 매니저'||person.position==='부장';
         const badge=sm?'◆':'★';
         return `<div class="o-head${sm?' is-sm':''}"${person.id?` onclick="showD('${person.id}')"`:''}>
             <span class="o-badge">${badge}</span> <span class="o-nm">${person.name}</span> <span class="o-pos">${person.position}</span>
