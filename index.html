@@ -743,6 +743,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
             <input type="text" id="orgChartSearch" placeholder="이름, 부서, 팀명으로 검색" oninput="searchOrgChart(this.value)">
         </div>
         <div style="display:flex;gap:6px;">
+            <button id="btnOfficialOrg" class="btn" onclick="openOfficialOrg()" style="display:none;background:#fef3c7;border-color:#f59e0b;color:#92400e;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> 기관제출용 조직도</button>
             <button class="btn btn-p" onclick="downloadPDF()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF 다운로드</button>
             <button class="btn" onclick="downloadOrgHTML()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> HTML 다운로드</button>
         </div>
@@ -1080,7 +1081,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
                 <div class="fgi"><label>부문 *</label><select id="fD" onchange="onDivChange()"><option value="">선택</option><option>경영총괄</option><option>용인사업장</option><option>영업본부</option><option>경영관리본부</option><option>커머스사업본부</option><option>브랜드마케팅팀</option></select></div>
                 <div class="fgi" id="fSubWrap"><label>본부</label><select id="fSub"><option value="">선택</option><option>서비스본부</option></select></div>
                 <div class="fgi"><label>팀명</label><input id="fT" placeholder="본부 총괄자는 비워두세요"></div>
-                <div class="fgi"><label>직위 *</label><select id="fP"><option value="">선택</option><option>대표이사</option><option>부사장</option><option>상무이사</option><option>이사</option><option>공장장</option><option>기술연구소장</option><option>수석 매니저</option><option>부장</option><option>리드 매니저</option><option>차장</option><option>선임연구원</option><option>매니저</option><option>대리</option><option>연구원</option><option>사원</option></select></div>
+                <div class="fgi"><label>직위 *</label><select id="fP"><option value="">선택</option><option>대표이사</option><option>부사장</option><option>상무이사</option><option>이사</option><option>공장장</option><option>기술연구소장</option><option>수석 매니저</option><option>부장</option><option>부장/공장장</option><option>리드 매니저</option><option>차장</option><option>차장/팀장</option><option>선임연구원</option><option>매니저</option><option>대리</option><option>연구원</option><option>사원</option></select></div>
                 <div class="fgi"><label>연락처</label><input id="fPh" type="tel" placeholder="010-0000-0000"></div>
                 <div class="fgi"><label>이메일</label><input id="fEm"></div>
                 <div class="fgi"><label>내선번호</label><input id="fEx"></div>
@@ -1122,6 +1123,23 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 <!-- Detail slide -->
 <div class="dov" id="dOv" onclick="closeD()"></div>
 <div class="dpn" id="dPn"><div class="dph"><h3>직원 상세 정보</h3><button class="dcl" onclick="closeD()">&times;</button></div><div class="dbd" id="dBd"></div><div class="dact" id="dAct"></div></div>
+
+<!-- 기관제출용 조직도 모달 -->
+<div class="ofc-ov" id="ofcOv" onclick="if(event.target===this)closeOfficialOrg()">
+    <div class="ofc-modal">
+        <div class="ofc-hd">
+            <h3>기관제출용 조직도</h3>
+            <div class="ofc-tools">
+                <button class="btn" onclick="ofcRegenerate()" title="현재 직원 데이터로 다시 생성">🔄 자동 재생성</button>
+                <button class="btn" onclick="ofcAddBranch()" title="새 부문 추가">+ 부문 추가</button>
+                <button class="btn btn-p" onclick="ofcPrint()">🖨 인쇄/PDF</button>
+                <button class="ofc-cl" onclick="closeOfficialOrg()">&times;</button>
+            </div>
+        </div>
+        <div class="ofc-help">💡 모든 텍스트를 클릭해서 직접 수정할 수 있습니다. 노드 우측 [×] 버튼으로 삭제, 부문/팀 옆 [+]로 멤버를 추가합니다. 수정사항은 자동 저장됩니다.</div>
+        <div class="ofc-body" id="ofcBody"></div>
+    </div>
+</div>
 
 <div class="seat-popup" id="seatPopup"><button class="seat-popup-close" onclick="closeSeatPopup()">&times;</button><div id="seatPopupBody"></div></div>
 <div class="seat-editor-ov" id="seatEditorOv" onclick="if(event.target===this)closeSeatEditor()">
@@ -1255,7 +1273,7 @@ function buildDD(){
     // teams: if division selected, show only teams in that division
     filteredForTeam=F.div?e.filter(x=>x.division===F.div):e,
     teams=[...new Set(filteredForTeam.map(x=>x.team))].filter(Boolean).sort(),
-    po=['대표이사','부사장','상무이사','이사','기술연구소장','공장장','수석 매니저','부장','리드 매니저','차장','선임연구원','매니저','대리','연구원','사원'],
+    po=['대표이사','부사장','상무이사','이사','기술연구소장','공장장','수석 매니저','부장','부장/공장장','리드 매니저','차장','차장/팀장','선임연구원','매니저','대리','연구원','사원'],
     poss=[...new Set(e.map(x=>x.position))].filter(Boolean).sort((a,b)=>(po.indexOf(a)<0?99:po.indexOf(a))-(po.indexOf(b)<0?99:po.indexOf(b)));
     const cnt=(arr,k)=>{const m={};arr.forEach(x=>m[x[k]]=(m[x[k]]||0)+1);return m;};
     const cd=cnt(e,'division'),ct=cnt(filteredForTeam,'team'),cp=cnt(e,'position');
@@ -1312,7 +1330,7 @@ document.getElementById('mainSearch').addEventListener('input',e=>{F.q=e.target.
 function resetFilters(){F.div='';F.team='';F.pos='';F.q='';document.getElementById('mainSearch').value='';document.getElementById('lblDiv').textContent='전체 부문';document.getElementById('lblTeam').textContent='전체 팀';document.getElementById('lblPos').textContent='전체 직위';document.querySelectorAll('.fdd-btn').forEach(b=>b.classList.remove('filtered'));refresh();}
 
 // 기본정렬: 조직도(TEAM_MEM_ORDER) 수동 순서와 동일
-const PO=['대표이사','부사장','상무이사','이사','공장장','기술연구소장','수석 매니저','부장','리드 매니저','차장','선임연구원','매니저','대리','연구원','사원'];
+const PO=['대표이사','부사장','상무이사','이사','공장장','기술연구소장','수석 매니저','부장','부장/공장장','리드 매니저','차장','차장/팀장','선임연구원','매니저','대리','연구원','사원'];
 const DO=['경영총괄','용인사업장','영업본부','경영관리본부','커머스사업본부','브랜드마케팅팀'];
 const TO=['경영총괄','용인사업장','용인공장','관리팀','생산/품질관리팀','소재 기술연구소','건설 기술연구소','영업본부','서비스본부','서비스운영1팀','서비스운영2팀','서비스운영3팀','설계/적산팀','영업팀','경영관리본부','경영관리팀','그로스팀','커머스사업본부','브랜드커머스팀','미디어커머스팀','해외사업팀','모여라딜팀','브랜드마케팅팀'];
 // 팀 내 멤버 수동 정렬 맵 (Firebase에서 동적 관리)
@@ -1359,7 +1377,7 @@ function moveOrgMember(team,name,dir){
     const all=G();
     // 현재 팀의 멤버 목록 (렌더링 순서 기준)
     const headPos=['부사장','상무이사','이사','수석 매니저'];
-    const isLd=p=>p==='수석 매니저'||p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장'||p==='부장'||p==='차장';
+    const isLd=p=>p==='수석 매니저'||p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장'||p==='부장'||p==='부장/공장장'||p==='차장'||p==='차장/팀장';
     let members=all.filter(x=>x.team===team&&!(headPos.includes(x.position)&&(x.team===x.division||!x.team)));
     // 현재 정렬 적용
     const mo=TEAM_MEM_ORDER[team];
@@ -1372,7 +1390,7 @@ function moveOrgMember(team,name,dir){
         members.sort((a,b)=>{
             const al=isLd(a.position)?0:1,bl=isLd(b.position)?0:1;
             if(al!==bl)return al-bl;
-            const PO2=['대표이사','부사장','상무이사','이사','공장장','기술연구소장','수석 매니저','부장','리드 매니저','차장','선임연구원','매니저','대리','연구원','사원'];
+            const PO2=['대표이사','부사장','상무이사','이사','공장장','기술연구소장','수석 매니저','부장','부장/공장장','리드 매니저','차장','차장/팀장','선임연구원','매니저','대리','연구원','사원'];
             const ai=PO2.indexOf(a.position),bi=PO2.indexOf(b.position);
             return(ai<0?99:ai)-(bi<0?99:bi)||(a.name||'').localeCompare(b.name||'','ko');
         });
@@ -1471,7 +1489,7 @@ function refresh(){
     if(!list.length){tb.innerHTML='';em.style.display='block';em.querySelector('p').textContent=all.length?'검색 결과가 없습니다.':'등록된 직원이 없습니다.';return;}
     em.style.display='none';
     tb.innerHTML=list.map(e=>{
-        const pc=['대표이사','부사장','상무이사','이사'].includes(e.position)||(e.position||'').includes('연구소장')?'cp-e':['수석 매니저','부장'].includes(e.position)?'cp-s':['리드 매니저','공장장','선임연구원','차장'].includes(e.position)?'cp-l':'cp-m';
+        const pc=['대표이사','부사장','상무이사','이사'].includes(e.position)||(e.position||'').includes('연구소장')?'cp-e':['수석 매니저','부장','부장/공장장'].includes(e.position)?'cp-s':['리드 매니저','공장장','선임연구원','차장','차장/팀장'].includes(e.position)?'cp-l':'cp-m';
         const ini=e.name?e.name[0]:'?';
         const priTasks=(e.primaryTasks||[]).filter(Boolean).slice(0,2);
         // match badge + matched tasks for search
@@ -1588,7 +1606,7 @@ function renderOrgTreeSearchResults(list){
     list.forEach(m=>{
         const ini=m.name?m.name[0]:'?';
         const tc=getTC(m.team);
-        const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['수석 매니저','부장'].includes(m.position)?'cp-s':['리드 매니저','공장장','선임연구원','차장'].includes(m.position)?'cp-l':'cp-m';
+        const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['수석 매니저','부장','부장/공장장'].includes(m.position)?'cp-s':['리드 매니저','공장장','선임연구원','차장','차장/팀장'].includes(m.position)?'cp-l':'cp-m';
         const tasks=(m.primaryTasks||[]).filter(Boolean).slice(0,3).join(', ');
         h+=`<div class="orgtree-mem" style="border-top:3px solid ${tc}" onclick="showD('${m.id}')">`;
         h+=`<div class="av" style="background:${tc}">${m.photo?`<img src="${m.photo}">`:ini}</div>`;
@@ -1657,7 +1675,7 @@ function renderOrgTreeDivMembers(div){
         h+=`<div class="orgtree-members">`;
         tmMembers.forEach(m=>{
             const ini=m.name?m.name[0]:'?';
-            const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['수석 매니저','부장'].includes(m.position)?'cp-s':['리드 매니저','공장장','선임연구원','차장'].includes(m.position)?'cp-l':'cp-m';
+            const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['수석 매니저','부장','부장/공장장'].includes(m.position)?'cp-s':['리드 매니저','공장장','선임연구원','차장','차장/팀장'].includes(m.position)?'cp-l':'cp-m';
             const tasks=(m.primaryTasks||[]).filter(Boolean).slice(0,3).join(', ');
             h+=`<div class="orgtree-mem" style="border-top:3px solid ${tc}" onclick="showD('${m.id}')">`;
             h+=`<div class="av" style="background:${tc}">${m.photo?`<img src="${m.photo}">`:ini}</div>`;
@@ -1738,7 +1756,7 @@ function renderMemCards(members,tc){
     let h=`<div class="orgtree-members">`;
     members.forEach(m=>{
         const ini=m.name?m.name[0]:'?';
-        const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['수석 매니저','부장'].includes(m.position)?'cp-s':['리드 매니저','공장장','선임연구원','차장'].includes(m.position)?'cp-l':'cp-m';
+        const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['수석 매니저','부장','부장/공장장'].includes(m.position)?'cp-s':['리드 매니저','공장장','선임연구원','차장','차장/팀장'].includes(m.position)?'cp-l':'cp-m';
         const tasks=(m.primaryTasks||[]).filter(Boolean).slice(0,3).join(', ');
         h+=`<div class="orgtree-mem" style="border-top:3px solid ${tc}" onclick="showD('${m.id}')">`;
         h+=`<div class="av" style="background:${tc}">${m.photo?`<img src="${m.photo}">`:ini}</div>`;
@@ -1789,7 +1807,7 @@ function renderOrg(){
     const ceo=e.find(x=>x.position==='대표이사');
     const headPos=['부사장','상무이사','이사','수석 매니저'];
     const ldPos=['기술연구소장','공장장','수석 매니저','리드 매니저','선임연구원'];
-    const isLead=p=>p==='수석 매니저'||p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장'||p==='부장'||p==='차장';
+    const isLead=p=>p==='수석 매니저'||p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장'||p==='부장'||p==='부장/공장장'||p==='차장'||p==='차장/팀장';
 
     function dedup(arr){const s=new Set();return arr.filter(x=>{const k=x.name+'|'+x.position;if(s.has(k))return false;s.add(k);return true;});}
 
@@ -1812,7 +1830,7 @@ function renderOrg(){
     // 멤버 카드: 수석매니저=◆, 리드=▲
     const _isAdmOrg=document.getElementById('admC').classList.contains('unlocked');
     function memCard(m,tm){
-        const sm=m.position==='수석 매니저'||m.position==='부장';
+        const sm=m.position==='수석 매니저'||m.position==='부장'||m.position==='부장/공장장';
         const ld=!sm&&isLead(m.position);
         const badge=sm?'◆':ld?'●':'';
         const teamName=tm||m.team||'';
@@ -1825,7 +1843,7 @@ function renderOrg(){
     // 헤드 카드: 임원=★, 수석매니저=◆
     function headCard(person){
         if(!person)return '';
-        const sm=person.position==='수석 매니저'||person.position==='부장';
+        const sm=person.position==='수석 매니저'||person.position==='부장'||person.position==='부장/공장장';
         const badge=sm?'◆':'★';
         return `<div class="o-head${sm?' is-sm':''}"${person.id?` onclick="showD('${person.id}')"`:''}>
             <span class="o-badge">${badge}</span> <span class="o-nm">${person.name}</span> <span class="o-pos">${person.position}</span>
@@ -2284,6 +2302,57 @@ ${styles.join('\n')}
   .org-print-area{transform:scale(0.55);transform-origin:top left;min-width:auto;}
   @page{size:landscape;margin:5mm;}
 }
+
+/* ===== 기관제출용 조직도 ===== */
+.ofc-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:10000;align-items:flex-start;justify-content:center;padding:20px;overflow:auto;}
+.ofc-ov.open{display:flex;}
+.ofc-modal{background:#fff;border-radius:8px;width:100%;max-width:1400px;min-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.ofc-hd{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid #e5e7eb;}
+.ofc-hd h3{margin:0;font-size:16px;font-weight:700;}
+.ofc-tools{display:flex;gap:6px;align-items:center;}
+.ofc-cl{background:none;border:none;font-size:24px;cursor:pointer;color:#666;padding:0 6px;line-height:1;}
+.ofc-cl:hover{color:#000;}
+.ofc-help{padding:10px 20px;background:#fffbeb;border-bottom:1px solid #fde68a;font-size:12px;color:#92400e;}
+.ofc-body{flex:1;padding:30px;overflow:auto;background:#fafafa;}
+.ofc-tree{background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:40px 20px;min-width:max-content;}
+.ofc-root{display:flex;flex-direction:column;align-items:center;}
+.ofc-root-line{width:90%;height:2px;background:#222;}
+.ofc-root-vline{width:2px;height:24px;background:#222;}
+.ofc-divs{display:flex;align-items:flex-start;justify-content:center;gap:20px;width:100%;position:relative;}
+.ofc-div{flex:1;min-width:180px;display:flex;flex-direction:column;align-items:center;position:relative;padding-top:24px;}
+.ofc-div::before{content:'';position:absolute;top:0;left:50%;width:2px;height:24px;background:#222;}
+.ofc-div-nm{font-size:18px;font-weight:600;color:#000;padding:6px 14px;text-align:center;position:relative;}
+.ofc-div-head{margin-top:6px;font-size:13px;color:#222;text-align:center;padding:2px 4px;}
+.ofc-div-head-line{width:2px;height:18px;background:#999;margin-top:4px;}
+.ofc-teams{display:flex;justify-content:center;align-items:flex-start;gap:24px;margin-top:6px;width:100%;position:relative;}
+.ofc-teams::before{content:'';position:absolute;top:-6px;left:10%;right:10%;height:2px;background:#999;}
+.ofc-teams.single::before{display:none;}
+.ofc-tm{display:flex;flex-direction:column;align-items:center;position:relative;padding-top:18px;flex:1;min-width:120px;}
+.ofc-tm::before{content:'';position:absolute;top:0;left:50%;width:2px;height:18px;background:#999;}
+.ofc-teams.single .ofc-tm::before{height:6px;top:-6px;}
+.ofc-tm-nm{font-size:15px;font-weight:600;color:#000;padding:4px 10px;text-align:center;}
+.ofc-tm-line{width:2px;height:14px;background:#bbb;margin:6px 0;}
+.ofc-mems{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.ofc-mem{font-size:13px;color:#222;text-align:center;padding:2px 4px;position:relative;}
+.ofc-node{position:relative;display:inline-block;}
+.ofc-node [contenteditable]{outline:none;border-radius:3px;padding:1px 4px;cursor:text;}
+.ofc-node [contenteditable]:hover{background:#fef3c7;}
+.ofc-node [contenteditable]:focus{background:#fff7ed;box-shadow:0 0 0 2px #f59e0b inset;}
+.ofc-del{display:none;position:absolute;top:-6px;right:-18px;background:#ef4444;color:#fff;border:none;width:16px;height:16px;border-radius:50%;font-size:11px;cursor:pointer;line-height:1;padding:0;}
+.ofc-node:hover .ofc-del{display:inline-block;}
+.ofc-add{margin-top:4px;background:none;border:1px dashed #9ca3af;color:#6b7280;font-size:11px;padding:2px 8px;border-radius:10px;cursor:pointer;}
+.ofc-add:hover{background:#f3f4f6;border-color:#374151;color:#111;}
+.ofc-add-tm{margin-top:8px;}
+@media print{
+  body *{visibility:hidden;}
+  .ofc-ov, .ofc-ov *{visibility:visible;}
+  .ofc-ov{position:absolute;background:#fff;padding:0;}
+  .ofc-modal{box-shadow:none;max-width:none;width:100%;min-height:auto;}
+  .ofc-hd, .ofc-help, .ofc-tools, .ofc-del, .ofc-add{display:none !important;}
+  .ofc-body{padding:0;background:#fff;overflow:visible;}
+  .ofc-tree{border:none;padding:10px;}
+  @page{size:landscape;margin:8mm;}
+}
 </style>
 </head>
 <body>
@@ -2337,6 +2406,161 @@ requestAnimationFrame(function(){layoutHL();setTimeout(layoutHL,100);});
     document.body.appendChild(a);a.click();document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
     toast('HTML 다운로드 완료','ok');
+}
+
+// ===== 기관제출용 조직도 =====
+const OFC_KEY='nf_official_org_v1';
+let _ofcData=null;
+
+function ofcLoad(){
+    try{const d=JSON.parse(localStorage.getItem(OFC_KEY));if(d&&d.divs)return d;}catch(e){}
+    return null;
+}
+function ofcSave(){
+    if(!_ofcData)return;
+    try{localStorage.setItem(OFC_KEY,JSON.stringify(_ofcData));}catch(e){}
+}
+function ofcAutoBuild(){
+    const all=G();
+    const data={divs:[]};
+    // 부문별로 그룹핑
+    const divOrder=DO.filter(d=>all.some(x=>x.division===d));
+    divOrder.forEach(divName=>{
+        const divEmps=all.filter(x=>x.division===divName);
+        // 부문 헤드 (총괄)
+        const headEmp=divEmps.find(x=>HEAD_POS.includes(x.position)&&(x.team===divName||!x.team))||divEmps.find(x=>x.position==='대표이사');
+        const div={name:divName,head:headEmp?(headEmp.name+' '+headEmp.position):'',teams:[]};
+        // 팀별
+        const teams=[...new Set(divEmps.map(x=>x.team).filter(t=>t&&t!==divName))];
+        teams.sort((a,b)=>{const ai=TO.indexOf(a),bi=TO.indexOf(b);return(ai<0?99:ai)-(bi<0?99:bi);});
+        teams.forEach(tmName=>{
+            const tmEmps=divEmps.filter(x=>x.team===tmName);
+            // 팀 내 정렬: 직위 순
+            tmEmps.sort((a,b)=>{
+                const ai=PO.indexOf(a.position),bi=PO.indexOf(b.position);
+                return(ai<0?99:ai)-(bi<0?99:bi)||(a.name||'').localeCompare(b.name||'','ko');
+            });
+            div.teams.push({
+                name:tmName,
+                members:tmEmps.map(e=>e.name+' '+e.position)
+            });
+        });
+        // 팀 미배정자 (부문 직속) - 헤드 제외
+        const looseMems=divEmps.filter(x=>(!x.team||x.team===divName)&&x!==headEmp);
+        if(looseMems.length){
+            looseMems.sort((a,b)=>{
+                const ai=PO.indexOf(a.position),bi=PO.indexOf(b.position);
+                return(ai<0?99:ai)-(bi<0?99:bi);
+            });
+            // 부문 직속자는 별도 "팀" 없이 부문 헤드 아래에 표시되도록 첫 팀 앞에 추가
+            div.teams.unshift({name:'(직속)',members:looseMems.map(e=>e.name+' '+e.position)});
+        }
+        data.divs.push(div);
+    });
+    return data;
+}
+function openOfficialOrg(){
+    _ofcData=ofcLoad()||ofcAutoBuild();
+    ofcRender();
+    document.getElementById('ofcOv').classList.add('open');
+}
+function closeOfficialOrg(){
+    document.getElementById('ofcOv').classList.remove('open');
+}
+function ofcRegenerate(){
+    if(!confirm('현재 직원 데이터로 다시 생성하면 수동 편집 내용이 사라집니다. 진행할까요?'))return;
+    _ofcData=ofcAutoBuild();
+    ofcSave();
+    ofcRender();
+    toast('조직도를 자동 재생성했습니다.','ok');
+}
+function ofcEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function ofcRender(){
+    if(!_ofcData)return;
+    const body=document.getElementById('ofcBody');
+    let h='<div class="ofc-tree"><div class="ofc-root">';
+    h+='<div class="ofc-divs">';
+    _ofcData.divs.forEach((div,di)=>{
+        h+='<div class="ofc-div">';
+        h+=`<div class="ofc-node"><span class="ofc-div-nm" contenteditable="true" data-path="div.${di}.name">${ofcEsc(div.name)}</span><button class="ofc-del" onclick="ofcDelDiv(${di})" title="부문 삭제">×</button></div>`;
+        if(div.head!==undefined){
+            h+='<div class="ofc-div-head-line"></div>';
+            h+=`<div class="ofc-node"><span class="ofc-div-head" contenteditable="true" data-path="div.${di}.head">${ofcEsc(div.head)||'(헤드)'}</span></div>`;
+        }
+        if(div.teams&&div.teams.length){
+            const single=div.teams.length===1;
+            h+=`<div class="ofc-teams${single?' single':''}">`;
+            div.teams.forEach((tm,ti)=>{
+                h+='<div class="ofc-tm">';
+                h+=`<div class="ofc-node"><span class="ofc-tm-nm" contenteditable="true" data-path="div.${di}.team.${ti}.name">${ofcEsc(tm.name)}</span><button class="ofc-del" onclick="ofcDelTeam(${di},${ti})" title="팀 삭제">×</button></div>`;
+                if(tm.members&&tm.members.length){
+                    h+='<div class="ofc-tm-line"></div>';
+                    h+='<div class="ofc-mems">';
+                    tm.members.forEach((m,mi)=>{
+                        h+=`<div class="ofc-node"><span class="ofc-mem" contenteditable="true" data-path="div.${di}.team.${ti}.mem.${mi}">${ofcEsc(m)}</span><button class="ofc-del" onclick="ofcDelMem(${di},${ti},${mi})" title="삭제">×</button></div>`;
+                    });
+                    h+='</div>';
+                }
+                h+=`<button class="ofc-add" onclick="ofcAddMem(${di},${ti})">+ 멤버</button>`;
+                h+='</div>';
+            });
+            h+='</div>';
+        }
+        h+=`<button class="ofc-add ofc-add-tm" onclick="ofcAddTeam(${di})">+ 팀</button>`;
+        h+='</div>';
+    });
+    h+='</div></div></div>';
+    body.innerHTML=h;
+    // contenteditable 변경 감지
+    body.querySelectorAll('[contenteditable]').forEach(el=>{
+        el.addEventListener('blur',()=>{
+            const path=el.dataset.path;if(!path)return;
+            const parts=path.split('.');
+            // div.{i}.name | div.{i}.head | div.{i}.team.{j}.name | div.{i}.team.{j}.mem.{k}
+            const di=+parts[1];
+            const div=_ofcData.divs[di];if(!div)return;
+            const val=el.textContent.trim();
+            if(parts[2]==='name'){div.name=val;}
+            else if(parts[2]==='head'){div.head=val;}
+            else if(parts[2]==='team'){
+                const ti=+parts[3];
+                const tm=div.teams[ti];if(!tm)return;
+                if(parts[4]==='name'){tm.name=val;}
+                else if(parts[4]==='mem'){
+                    const mi=+parts[5];tm.members[mi]=val;
+                }
+            }
+            ofcSave();
+        });
+        el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();el.blur();}});
+    });
+}
+function ofcAddBranch(){
+    if(!_ofcData)return;
+    _ofcData.divs.push({name:'새 부문',head:'',teams:[]});
+    ofcSave();ofcRender();
+}
+function ofcDelDiv(di){
+    if(!confirm('이 부문을 삭제할까요?'))return;
+    _ofcData.divs.splice(di,1);ofcSave();ofcRender();
+}
+function ofcAddTeam(di){
+    _ofcData.divs[di].teams.push({name:'새 팀',members:[]});
+    ofcSave();ofcRender();
+}
+function ofcDelTeam(di,ti){
+    if(!confirm('이 팀을 삭제할까요?'))return;
+    _ofcData.divs[di].teams.splice(ti,1);ofcSave();ofcRender();
+}
+function ofcAddMem(di,ti){
+    _ofcData.divs[di].teams[ti].members.push('이름 직위');
+    ofcSave();ofcRender();
+}
+function ofcDelMem(di,ti,mi){
+    _ofcData.divs[di].teams[ti].members.splice(mi,1);ofcSave();ofcRender();
+}
+function ofcPrint(){
+    window.print();
 }
 
 // Seat map - tabs
@@ -2694,7 +2918,7 @@ function clearMyPhoto(){
 }
 
 // Admin
-function admLogin(){if(document.getElementById('admPw').value===gPw()){document.getElementById('admLock').style.display='none';document.getElementById('admC').classList.add('unlocked');toast('관리자 로그인 완료','ok');renderAdmEmpList();document.querySelectorAll('.seat-edit-toggle').forEach(el=>el.classList.add('force-show'));}else toast('비밀번호가 올바르지 않습니다.','err');}
+function admLogin(){if(document.getElementById('admPw').value===gPw()){document.getElementById('admLock').style.display='none';document.getElementById('admC').classList.add('unlocked');toast('관리자 로그인 완료','ok');renderAdmEmpList();document.querySelectorAll('.seat-edit-toggle').forEach(el=>el.classList.add('force-show'));const ofcBtn=document.getElementById('btnOfficialOrg');if(ofcBtn)ofcBtn.style.display='inline-flex';}else toast('비밀번호가 올바르지 않습니다.','err');}
 function chgPw(){const p=document.getElementById('nPw').value.trim();if(!p){toast('비밀번호를 입력하세요.','err');return;}localStorage.setItem(PK,p);fbPwRef.set(p).catch(e=>console.error('FB pw err:',e));document.getElementById('nPw').value='';toast('비밀번호 변경됨','ok');}
 
 // Photo helpers
@@ -3029,7 +3253,7 @@ function renderAccView(list){
                 h+=`<div class="acc-tm-body open">`;
             }
             tMembers.forEach(m=>{
-                const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['수석 매니저','부장'].includes(m.position)?'cp-s':['리드 매니저','공장장','선임연구원','차장'].includes(m.position)?'cp-l':'cp-m';
+                const pc=['대표이사','부사장','상무이사','이사'].includes(m.position)||(m.position||'').includes('연구소장')?'cp-e':['수석 매니저','부장','부장/공장장'].includes(m.position)?'cp-s':['리드 매니저','공장장','선임연구원','차장','차장/팀장'].includes(m.position)?'cp-l':'cp-m';
                 const ini=m.name?m.name[0]:'?';
                 const tasks=(m.primaryTasks||[]).slice(0,2).join(', ');
                 h+=`<div class="acc-mem" onclick="showD('${m.id}')">`;
