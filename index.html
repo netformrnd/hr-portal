@@ -2406,17 +2406,18 @@ function ofcSaveHTML(){
 function ofcAttachHandlers(){
     const body=document.getElementById('ofcBody');
     if(!body)return;
+    // 0) idempotent: 매번 모든 ofc 추가 요소(버튼)와 임시 속성을 제거하고 새로 부착
+    //    저장된 HTML에서 복원될 때 JS 핸들러는 살아있지 않으므로 매번 새로 만들어야 클릭 동작
+    body.querySelectorAll('.ofc-del,.ofc-add').forEach(el=>el.remove());
+    body.querySelectorAll('[data-ofc-wired]').forEach(el=>el.removeAttribute('data-ofc-wired'));
     // 1) 모든 카드의 onclick 제거 (showD 등이 호출되지 않도록)
-    body.querySelectorAll('[onclick]').forEach(el=>{
-        if(!el.classList.contains('ofc-del')&&!el.classList.contains('ofc-add')) el.removeAttribute('onclick');
-    });
+    body.querySelectorAll('[onclick]').forEach(el=>el.removeAttribute('onclick'));
     // 2) 텍스트 요소를 contenteditable로 (이름, 직위, 팀명, 부문명)
     body.querySelectorAll('.o-nm,.o-pos,.o-ceo').forEach(el=>{
         if(!el.hasAttribute('contenteditable')) el.setAttribute('contenteditable','true');
     });
     // 3) 각 카드에 [×] 삭제 버튼 추가
     body.querySelectorAll('.o-mem,.o-head,.o-tm,.o-ceo,.o-subdiv').forEach(card=>{
-        if(card.querySelector(':scope > .ofc-del')) return;
         const del=document.createElement('button');
         del.className='ofc-del';
         del.textContent='×';
@@ -2432,14 +2433,13 @@ function ofcAttachHandlers(){
     });
     // 4) 각 .o-mems 끝에 [+ 멤버] 버튼 추가
     body.querySelectorAll('.o-mems').forEach(mems=>{
-        if(mems.parentElement.querySelector(':scope > .ofc-add-mem')) return;
         const add=document.createElement('button');
         add.className='ofc-add ofc-add-mem';
         add.textContent='+ 멤버 추가';
         add.contentEditable='false';
         add.onclick=function(e){
             e.stopPropagation();e.preventDefault();
-            // 마지막 멤버를 복제하거나, 기본 카드 생성
+            // 마지막 멤버를 복제 (스타일 유지) 또는 기본 카드 생성
             const last=mems.querySelector('.o-mem:last-child');
             let newMem;
             if(last){
@@ -2448,8 +2448,9 @@ function ofcAttachHandlers(){
                 newMem.classList.remove('is-sm','is-ld');
                 const nm=newMem.querySelector('.o-nm');if(nm)nm.textContent='새 이름';
                 const pos=newMem.querySelector('.o-pos');if(pos)pos.textContent='직위';
-                // 배지 제거
                 const bg=newMem.querySelector('.o-badge');if(bg)bg.remove();
+                // 복제된 [×] 등 ofc 잔재 제거 (handlers 다시 부착됨)
+                newMem.querySelectorAll('.ofc-del,.ofc-add').forEach(el=>el.remove());
             }else{
                 newMem=document.createElement('div');
                 newMem.className='o-mem';
@@ -2462,16 +2463,13 @@ function ofcAttachHandlers(){
         // .o-mems 다음(같은 부모 안)에 버튼 삽입
         mems.parentElement.insertBefore(add,mems.nextSibling);
     });
-    // 5) 각 contenteditable에 자동저장 핸들러
+    // 5) 각 contenteditable에 자동저장 핸들러 (직접 할당 → 중복 방지 + 깔끔)
     body.querySelectorAll('[contenteditable="true"]').forEach(el=>{
-        if(el.dataset.ofcWired) return;
-        el.dataset.ofcWired='1';
-        el.addEventListener('blur',ofcSaveHTML);
-        el.addEventListener('keydown',function(e){
+        el.onblur=ofcSaveHTML;
+        el.onkeydown=function(e){
             if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();el.blur();}
-        });
-        // 클릭 시 부모 카드 클릭 이벤트가 안 먹도록
-        el.addEventListener('click',function(e){e.stopPropagation();});
+        };
+        el.onclick=function(e){e.stopPropagation();};
     });
 }
 function openOfficialOrg(){
