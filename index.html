@@ -643,6 +643,27 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
 .ofc-body .ofc-add:hover{background:#f3f4f6;border-color:#374151;color:#111;}
 .ofc-body .ofc-add.ofc-add-mem{margin:6px auto 0 auto;display:flex;}
 .ofc-body .o-arrows{display:none !important;}
+/* 기관제출용: 모든 카드 색상을 흑백/기본으로 통일 (직급 색상 무력화) */
+.ofc-body .o-ceo{background:#fff !important;border:1.5px solid #333 !important;color:#000 !important;box-shadow:none !important;}
+.ofc-body .o-ceo .o-nm{color:#000 !important;}
+.ofc-body .o-ceo .o-pos{color:#555 !important;}
+.ofc-body .o-grp{background:#fff !important;border:1.5px solid #333 !important;color:#000 !important;}
+.ofc-body .o-div,.ofc-body .o-subdiv{background:#fff !important;border:1.5px solid #333 !important;color:#000 !important;}
+.ofc-body .o-div .o-nm,.ofc-body .o-subdiv .o-nm{color:#000 !important;}
+.ofc-body .o-div .o-dh,.ofc-body .o-subdiv .o-dh{color:#555 !important;}
+.ofc-body .o-head,.ofc-body .o-head.is-sm{background:#fff !important;border:1.5px solid #333 !important;border-color:#333 !important;}
+.ofc-body .o-head .o-nm,.ofc-body .o-head.is-sm .o-nm{color:#000 !important;}
+.ofc-body .o-head .o-pos,.ofc-body .o-head.is-sm .o-pos{color:#555 !important;opacity:1 !important;}
+.ofc-body .o-tm{background:#fff !important;border:1.5px solid #333 !important;border-left-color:#333 !important;}
+.ofc-body .o-tm .o-nm{color:#000 !important;}
+.ofc-body .o-mem,.ofc-body .o-mem.is-sm,.ofc-body .o-mem.is-ld{background:#fff !important;border:1px solid #333 !important;border-left:1px solid #333 !important;}
+.ofc-body .o-mem .o-nm,.ofc-body .o-mem.is-sm .o-nm,.ofc-body .o-mem.is-ld .o-nm{color:#000 !important;font-weight:600 !important;}
+.ofc-body .o-mem .o-pos,.ofc-body .o-mem.is-sm .o-pos,.ofc-body .o-mem.is-ld .o-pos{color:#555 !important;}
+/* 배지(★ ◆ ●) 모두 숨김 */
+.ofc-body .o-badge{display:none !important;}
+/* 인라인 style의 border-left 색상도 무력화 */
+.ofc-body [style*="border-left"]{border-left-color:#333 !important;}
+.ofc-body [style*="border-top"]{border-top-color:#333 !important;}
 @media print{
   body *{visibility:hidden;}
   .ofc-ov, .ofc-ov *{visibility:visible;}
@@ -2410,6 +2431,14 @@ function ofcAttachHandlers(){
     //    저장된 HTML에서 복원될 때 JS 핸들러는 살아있지 않으므로 매번 새로 만들어야 클릭 동작
     body.querySelectorAll('.ofc-del,.ofc-add').forEach(el=>el.remove());
     body.querySelectorAll('[data-ofc-wired]').forEach(el=>el.removeAttribute('data-ofc-wired'));
+    // 0-1) 범례(★ 임원 / ◆ 수석 매니저 / ● 리드 매니저) 제거 - 회사 조직도에서 복제된 첫 div
+    const orgArea=body.querySelector('.org-print-area');
+    if(orgArea){
+        const firstDiv=orgArea.firstElementChild;
+        if(firstDiv && /임원|수석 매니저|리드 매니저/.test(firstDiv.textContent||'')){
+            firstDiv.remove();
+        }
+    }
     // 1) 모든 카드의 onclick 제거 (showD 등이 호출되지 않도록)
     body.querySelectorAll('[onclick]').forEach(el=>el.removeAttribute('onclick'));
     // 2) 텍스트 요소를 contenteditable로 (이름, 직위, 팀명, 부문명)
