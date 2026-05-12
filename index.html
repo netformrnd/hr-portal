@@ -1928,10 +1928,17 @@ function renderOrg(){
         let s=`<div class="o-col" style="padding:0 4px">`;
         s+=`<div class="vl"></div>`;
         s+=`<div class="o-subdiv" onclick="filterTeam('${title}')" style="cursor:pointer"><div class="o-nm">${title}</div></div>`;
-        // 헤드(연구소장) 별도 카드
+        // 헤드 별도 카드
+        // 수석 매니저급 중간조직 헤드(예: 서비스본부 주현진)는 같은 위계의 동급자(신명희 등)와
+        // 시각적으로 통일하기 위해 memCard로 렌더링. 연구소장 등 상위 직급은 headCard 유지.
         if(headPerson){
             s+=`<div class="vl"></div>`;
-            s+=headCard(headPerson);
+            const useMem=headPerson.position==='수석 매니저'||headPerson.position==='부장'||headPerson.position==='부장/공장장';
+            if(useMem){
+                s+=`<div class="o-mems">`+memCard(headPerson,title)+`</div>`;
+            } else {
+                s+=headCard(headPerson);
+            }
         }
         if(teams&&teams.length){
             // 팀에 속하지 않는 멤버(공장장 등)는 리드급으로 표시
