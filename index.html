@@ -1935,7 +1935,8 @@ function renderOrg(){
         }
         if(teams&&teams.length){
             // 팀에 속하지 않는 멤버(공장장 등)는 리드급으로 표시
-            const looseMems=dedup(members).filter(x=>!(headPos.includes(x.position)&&(x.team===x.division||!x.team))&&(!teams.includes(x.team))&&!(headPerson&&x.name===headPerson.name));
+            // subDivision(본부)이 지정된 사람은 부서 헤드가 아니라 중간 관리자이므로 looseMems에 포함
+            const looseMems=dedup(members).filter(x=>!(headPos.includes(x.position)&&(x.team===x.division||!x.team)&&!x.subDivision)&&(!teams.includes(x.team))&&!(headPerson&&x.name===headPerson.name));
             if(looseMems.length){
                 s+=`<div class="vl"></div><div class="o-mems">`;
                 sortM(looseMems,title).forEach(m=>{s+=memCard(m,title);});
@@ -2104,7 +2105,15 @@ function renderOrg(){
                 if(children&&children.length){
                     // 중간 조직 (서비스본부): subDivBlock으로 렌더링
                     const subMembers=bd.de.filter(x=>x.team===tm||x.subDivision===tm||children.includes(x.team));
-                    const subHead=subMembers.find(x=>(x.team===tm||x.subDivision===tm)&&isLead(x.position)&&!children.includes(x.team));
+                    // 중간조직 헤드는 직급 최상위 1명만 선택, 동률이면 sortOrder 낮은(=먼저 등록된) 사람이 헤드.
+                    // 같은 직급의 동급자는 헤드 아래(looseMems)에 표시되어 한 단계 낮은 위계로 나타남.
+                    const subHeadCands=subMembers.filter(x=>(x.team===tm||x.subDivision===tm)&&isLead(x.position)&&!children.includes(x.team));
+                    const subPosIdx=p=>{const i=PO.indexOf(p);return i<0?999:i;};
+                    const subHead=subHeadCands.sort((a,b)=>{
+                        const d=subPosIdx(a.position)-subPosIdx(b.position);
+                        if(d!==0)return d;
+                        return (a.sortOrder==null?999:a.sortOrder)-(b.sortOrder==null?999:b.sortOrder);
+                    })[0];
                     h+=subDivBlock(tm,subHead,children,subMembers);
                 } else {
                     h+=tmBlock(tm,bd.de.filter(x=>x.team===tm));
@@ -2980,9 +2989,11 @@ function saveEmp(){
     const photo=document.getElementById('fPhoto').value||((eid&&all.find(x=>x.id===eid))?all.find(x=>x.id===eid).photo:'');
     const oldEmp=eid?all.find(x=>x.id===eid):null;
     const sub=document.getElementById('fSub').value;
-    const data={id:eid||gid(),name:n,division:d,subDivision:sub||'',team:t||d,position:p,phone:document.getElementById('fPh').value.trim(),email:document.getElementById('fEm').value.trim(),joinDate:eid?(all.find(x=>x.id===eid)||{}).joinDate||'':'',extension:document.getElementById('fEx').value.trim(),birthDate:document.getElementById('fBirth').value.trim(),primaryTasks:getTaskValues('fPrRows'),secondaryTasks:getTaskValues('fScRows'),memo:document.getElementById('fMe').value.trim(),photo:photo,sortOrder:eid?(all.find(e=>e.id===eid)||{}).sortOrder||0:all.length};
+    // 팀명은 입력값 그대로 저장. 빈칸이면 빈칸 그대로 (자동 채움 없음).
+    const finalTeam=t;
+    const data={id:eid||gid(),name:n,division:d,subDivision:sub||'',team:finalTeam,position:p,phone:document.getElementById('fPh').value.trim(),email:document.getElementById('fEm').value.trim(),joinDate:eid?(all.find(x=>x.id===eid)||{}).joinDate||'':'',extension:document.getElementById('fEx').value.trim(),birthDate:document.getElementById('fBirth').value.trim(),primaryTasks:getTaskValues('fPrRows'),secondaryTasks:getTaskValues('fScRows'),memo:document.getElementById('fMe').value.trim(),photo:photo,sortOrder:eid?(all.find(e=>e.id===eid)||{}).sortOrder||0:all.length};
     const isNew=!eid;
-    const divChanged=oldEmp&&(oldEmp.division!==d||oldEmp.team!==(t||d)||oldEmp.position!==p);
+    const divChanged=oldEmp&&(oldEmp.division!==d||oldEmp.team!==finalTeam||oldEmp.position!==p);
     if(eid){const i=all.findIndex(e=>e.id===eid);if(i!==-1)all[i]=data;toast(n+' 수정 완료','ok');}else{all.push(data);toast(n+' 등록 완료','ok');}
     if(isNew||divChanged) setOrgDate();
     S(all);resetF();refresh();renderAdmEmpList();
