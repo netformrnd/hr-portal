@@ -3357,11 +3357,15 @@ function resetOrgTree(){
 function renderAdmEmpList(){
     const list=G();
     const q=(document.getElementById('admEmpSearch').value||'').trim().toLowerCase();
-    const filtered=q?list.filter(e=>(e.name||'').toLowerCase().includes(q)||(e.team||'').toLowerCase().includes(q)||(e.division||'').toLowerCase().includes(q)):list;
+    const filtered=q?list.filter(e=>(e.name||'').toLowerCase().includes(q)||(e.team||'').toLowerCase().includes(q)||(e.division||'').toLowerCase().includes(q)||(e.jointTeams||[]).some(t=>t.toLowerCase().includes(q))):list;
     filtered.sort(defaultSort);
     const el=document.getElementById('admEmpList');
     if(!filtered.length){el.innerHTML='<div style="padding:16px;text-align:center;color:var(--text-dim);font-size:13px;">직원이 없습니다.</div>';return;}
-    el.innerHTML=filtered.map(e=>`<div class="adm-emp-item" onclick="editD('${e.id}')"><span class="adm-emp-nm">${e.name}</span><span class="adm-emp-tm">${e.subDivision?e.subDivision+' / ':''}${e.team||'-'}</span><span class="adm-emp-pos">${e.position||'-'}</span></div>`).join('');
+    el.innerHTML=filtered.map(e=>{
+        const jt=Array.isArray(e.jointTeams)?e.jointTeams.filter(Boolean):[];
+        const teamLabel=`${e.subDivision?e.subDivision+' / ':''}${e.team||'-'}${jt.length?` <span style="color:var(--accent);font-weight:600">(겸직)</span> ${jt.join(', ')}`:''}`;
+        return `<div class="adm-emp-item" onclick="editD('${e.id}')"><span class="adm-emp-nm">${e.name}</span><span class="adm-emp-tm">${teamLabel}</span><span class="adm-emp-pos">${e.position||'-'}</span></div>`;
+    }).join('');
 }
 
 // ===== 자리배치도 직원 클릭 시 상세정보 팝업 =====
