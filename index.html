@@ -1450,7 +1450,8 @@ function moveOrgMember(team,name,dir){
     // 현재 팀의 멤버 목록 (렌더링 순서 기준)
     const headPos=['부사장','상무이사','이사','수석 매니저'];
     const isLd=p=>p==='수석 매니저'||p==='리드 매니저'||p==='선임연구원'||p==='기술연구소장'||p==='공장장'||p==='부장'||p==='부장/공장장'||p==='차장'||p==='차장/팀장';
-    let members=all.filter(x=>x.team===team&&!(headPos.includes(x.position)&&(x.team===x.division||!x.team)));
+    // 메인 팀(team) + 겸직(jointTeams) 매치 — 김송희처럼 겸직으로 표시된 멤버도 순서 조작 가능
+    let members=all.filter(x=>hasTm(x,team)&&!(headPos.includes(x.position)&&(x.team===x.division||!x.team)));
     // 현재 정렬 적용
     const mo=TEAM_MEM_ORDER[team];
     if(mo){
