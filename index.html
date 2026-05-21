@@ -415,6 +415,14 @@ table.dt{width:100%;border-collapse:collapse;}
 .task-input:focus{border-color:var(--accent);}
 .btn-task-add{margin-top:4px;padding:4px 12px;background:none;border:1px dashed var(--border);border-radius:var(--radius);color:var(--text-sub);font-size:12px;cursor:pointer;transition:.15s;}
 .btn-task-add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+.joint-team-row{display:flex;gap:6px;align-items:stretch;}
+.joint-team-sel{flex:1;padding:8px 11px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:13px;outline:none;font-family:inherit;}
+.joint-team-sel:focus{border-color:var(--accent);}
+.joint-team-row .btn-task-add{margin-top:0;white-space:nowrap;}
+.joint-team-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;min-height:0;}
+.joint-team-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px 4px 10px;background:var(--accent-dim);color:var(--accent);border-radius:12px;font-size:12px;font-weight:500;}
+.joint-team-chip-x{cursor:pointer;font-size:16px;line-height:1;color:var(--accent);opacity:.6;font-weight:bold;}
+.joint-team-chip-x:hover{opacity:1;}
 .photo-upload{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
 .photo-preview{width:48px;height:64px;border-radius:6px;background:var(--bg-elevated);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;cursor:pointer;transition:.15s;}
 .photo-preview:hover{border-color:var(--accent);}
@@ -1144,6 +1152,13 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
                 <div class="fgi"><label>이메일</label><input id="fEm"></div>
                 <div class="fgi"><label>내선번호</label><input id="fEx"></div>
                 <div class="fgi"><label>생년월일 (6자리)</label><input id="fBirth" maxlength="6" placeholder="예: 930515" inputmode="numeric"></div>
+                <div class="fgi full"><label>겸직 팀</label>
+                    <div class="joint-team-row">
+                        <select id="fJointSel" class="joint-team-sel"><option value="">팀 선택</option></select>
+                        <button type="button" class="btn-task-add" onclick="addJointTeam()">+ 추가</button>
+                    </div>
+                    <div id="fJointChips" class="joint-team-chips"></div>
+                </div>
                 <div class="fgi full"><label>주요 업무 (2개)</label><div id="fPrWrap"><div class="task-rows" id="fPrRows"><input class="task-input" placeholder="주업무 1"><input class="task-input" placeholder="주업무 2"></div></div></div>
                 <div class="fgi full"><label>기타 업무</label><div id="fScWrap"><div class="task-rows" id="fScRows"><input class="task-input" placeholder="기타 업무 1"></div><button type="button" class="btn-task-add" onclick="addTaskRow('fScRows')">+ 업무 추가</button></div></div>
                 <div class="fgi full"><label>메모</label><textarea id="fMe"></textarea></div>
@@ -1517,9 +1532,9 @@ function refresh(){
     const all=G(); buildDD();
     let list=all.filter(e=>{
         if(F.div&&e.division!==F.div)return false;
-        if(F.team){const ch=TEAM_CHILDREN[F.team]||[];if(![F.team,...ch].includes(e.team))return false;}
+        if(F.team){const ch=TEAM_CHILDREN[F.team]||[];const allowed=[F.team,...ch];const jt=e.jointTeams||[];if(!allowed.includes(e.team)&&!jt.some(t=>allowed.includes(t)))return false;}
         if(F.pos&&e.position!==F.pos)return false;
-        if(F.q){const s=[e.name,e.position,e.team,e.division,e.phone||'',...(e.primaryTasks||[]),...(e.secondaryTasks||[])].join(' ').toLowerCase();if(!s.includes(F.q))return false;}
+        if(F.q){const s=[e.name,e.position,e.team,e.division,e.phone||'',...(e.primaryTasks||[]),...(e.secondaryTasks||[]),...(e.jointTeams||[])].join(' ').toLowerCase();if(!s.includes(F.q))return false;}
         return true;
     });
     // Sort
@@ -1557,7 +1572,9 @@ function refresh(){
             matchBadge=matchedTasks.map(t=>`<span class="tg-match">${t}</span>`).join('');
         }
         taskHtml=priTasks.map(t=>`<span>${t}</span>`).join('');
-        return `<tr data-id="${e.id}"><td><div class="cn"><div class="av">${e.photo?`<img src="${e.photo}">`:ini}</div>${e.name}${matchBadge}</div></td><td>${e.division||'-'}</td><td>${e.team||'-'}</td><td><span class="cp ${pc}">${e.position||'-'}</span></td><td>${e.phone?`<a href="tel:${e.phone}">${e.phone}</a>`:'-'}</td><td><div class="tg">${taskHtml}</div></td></tr>`;
+        const jtArr=Array.isArray(e.jointTeams)?e.jointTeams.filter(Boolean):[];
+        const teamCell=(e.team||'-')+(jtArr.length?` <span style="color:var(--accent);font-size:11px;font-weight:600">(겸직)</span> ${jtArr.join(', ')}`:'');
+        return `<tr data-id="${e.id}"><td><div class="cn"><div class="av">${e.photo?`<img src="${e.photo}">`:ini}</div>${e.name}${matchBadge}</div></td><td>${e.division||'-'}</td><td>${teamCell}</td><td><span class="cp ${pc}">${e.position||'-'}</span></td><td>${e.phone?`<a href="tel:${e.phone}">${e.phone}</a>`:'-'}</td><td><div class="tg">${taskHtml}</div></td></tr>`;
     }).join('');
     tb.querySelectorAll('tr').forEach(tr=>tr.onclick=()=>showD(tr.dataset.id));
     syncSeatMap();
@@ -1668,7 +1685,9 @@ function renderOrgTreeSearchResults(list){
         h+=`<div class="orgtree-mem" style="border-top:3px solid ${tc}" onclick="showD('${m.id}')">`;
         h+=`<div class="av" style="background:${tc}">${m.photo?`<img src="${m.photo}">`:ini}</div>`;
         h+=`<div class="orgtree-mem-info"><div class="orgtree-mem-top"><span class="orgtree-mem-nm">${m.name}</span><span class="orgtree-mem-pos cp ${pc}">${m.position||''}</span></div>`;
-        h+=`<div class="orgtree-mem-tasks" style="color:var(--text-dim)">${m.team||''}</div>`;
+        const mJt=Array.isArray(m.jointTeams)?m.jointTeams.filter(Boolean):[];
+        const mTeamLine=(m.team||'')+(mJt.length?` <span style="color:var(--accent);font-weight:600">(겸직)</span> ${mJt.join(', ')}`:'');
+        h+=`<div class="orgtree-mem-tasks" style="color:var(--text-dim)">${mTeamLine}</div>`;
         if(tasks) h+=`<div class="orgtree-mem-tasks">${tasks}</div>`;
         if(m.phone) h+=`<span class="orgtree-mem-phone"><a href="tel:${m.phone}">${m.phone}</a></span>`;
         h+=`</div>`;
@@ -1834,7 +1853,11 @@ document.querySelectorAll('.dt th[data-s]').forEach(th=>th.onclick=()=>{const k=
 function showD(id){
     const e=G().find(x=>x.id===id);if(!e)return;
     const ini=e.name?e.name[0]:'?';
-    document.getElementById('dBd').innerHTML=`<div class="dfoto${e.photo?' has-photo':''}">${e.photo?`<img src="${e.photo}">`:ini}</div><div class="dnm">${e.name}</div><div class="dsub">${e.position} · ${e.team}</div><div class="dgrid"><div class="dlbl">부문</div><div class="dval">${e.division}</div><div class="dlbl">팀명</div><div class="dval">${e.team}</div><div class="dlbl">직위</div><div class="dval">${e.position}</div>${e.phone?`<div class="dlbl">연락처</div><div class="dval"><a href="tel:${e.phone}">${e.phone}</a></div>`:''} ${e.email?`<div class="dlbl">이메일</div><div class="dval"><a href="mailto:${e.email}">${e.email}</a></div>`:''} ${e.extension?`<div class="dlbl">내선</div><div class="dval">${e.extension}</div>`:''} ${e.memo?`<div class="dlbl">메모</div><div class="dval">${e.memo}</div>`:''}</div>${(e.primaryTasks&&e.primaryTasks.length)?`<div class="dsec">주요 업무</div><div class="dtasks">${e.primaryTasks.map(t=>`<span class="dt-p">${t}</span>`).join('')}</div>`:''}${(e.secondaryTasks&&e.secondaryTasks.length)?`<div class="dsec">기타 업무</div><div class="dtasks">${e.secondaryTasks.map(t=>`<span class="dt-s">${t}</span>`).join('')}</div>`:''}`;
+    // 겸직 팀이 있으면 상단 서브타이틀과 그리드 모두에 "(겸직) 팀명" 형태로 표기
+    const jt=Array.isArray(e.jointTeams)?e.jointTeams.filter(Boolean):[];
+    const jointSuffix=jt.length?` <span style="color:var(--accent);font-weight:600">(겸직)</span> ${jt.join(', ')}`:'';
+    const teamDisplay=(e.team||'-')+jointSuffix;
+    document.getElementById('dBd').innerHTML=`<div class="dfoto${e.photo?' has-photo':''}">${e.photo?`<img src="${e.photo}">`:ini}</div><div class="dnm">${e.name}</div><div class="dsub">${e.position} · ${e.team}${jt.length?' (겸직: '+jt.join(', ')+')':''}</div><div class="dgrid"><div class="dlbl">부문</div><div class="dval">${e.division}</div><div class="dlbl">팀명</div><div class="dval">${teamDisplay}</div><div class="dlbl">직위</div><div class="dval">${e.position}</div>${e.phone?`<div class="dlbl">연락처</div><div class="dval"><a href="tel:${e.phone}">${e.phone}</a></div>`:''} ${e.email?`<div class="dlbl">이메일</div><div class="dval"><a href="mailto:${e.email}">${e.email}</a></div>`:''} ${e.extension?`<div class="dlbl">내선</div><div class="dval">${e.extension}</div>`:''} ${e.memo?`<div class="dlbl">메모</div><div class="dval">${e.memo}</div>`:''}</div>${(e.primaryTasks&&e.primaryTasks.length)?`<div class="dsec">주요 업무</div><div class="dtasks">${e.primaryTasks.map(t=>`<span class="dt-p">${t}</span>`).join('')}</div>`:''}${(e.secondaryTasks&&e.secondaryTasks.length)?`<div class="dsec">기타 업무</div><div class="dtasks">${e.secondaryTasks.map(t=>`<span class="dt-s">${t}</span>`).join('')}</div>`:''}`;
     const isAdm=document.getElementById('admC').classList.contains('unlocked');
     document.getElementById('dAct').innerHTML=isAdm?`<button class="btn btn-p" onclick="editD('${e.id}')">수정</button><button class="btn" onclick="closeD()">닫기</button>`:`<button class="btn" onclick="closeD()">닫기</button>`;
     document.getElementById('dOv').classList.add('open');document.getElementById('dPn').classList.add('open');
@@ -1858,6 +1881,14 @@ const TEAM_COLORS={
     '용인공장':'#78716C'
 };
 function getTC(tm){return TEAM_COLORS[tm]||'#90a4ae';}
+// 직원이 특정 팀 소속(메인 또는 겸직)인지 확인하는 헬퍼.
+// 김송희(team='모여라딜팀', jointTeams=['브랜드커머스팀'])는 두 팀 모두에 매치된다.
+function hasTm(emp,tm){
+    if(!emp||!tm)return false;
+    if(emp.team===tm)return true;
+    const jt=emp.jointTeams;
+    return Array.isArray(jt)&&jt.includes(tm);
+}
 
 function renderOrg(){
     const e=G();if(!e.length){document.getElementById('orgArea').innerHTML='<div class="empty">직원 데이터가 없습니다.</div>';return;}
@@ -1952,7 +1983,7 @@ function renderOrg(){
             s+=`<div class="vl"></div>`;
             if(teams.length>1) s+=`<div style="display:flex;justify-content:center"><div class="hl" style="width:0"></div></div>`;
             s+=`<div class="o-row">`;
-            teams.forEach(tm=>{s+=tmBlock(tm,members.filter(x=>x.team===tm));});
+            teams.forEach(tm=>{s+=tmBlock(tm,members.filter(x=>hasTm(x,tm)));});
             s+=`</div>`;
         } else {
             const hpName=headPerson?headPerson.name:null;
@@ -2014,7 +2045,7 @@ function renderOrg(){
     if(yUnmapped.length){
         const yUnTeams=[...new Set(yUnmapped.map(x=>x.team).filter(t=>t&&t!=='용인사업장'))];
         if(yUnTeams.length){
-            yUnTeams.forEach(tm=>{h+=tmBlock(tm,yUnmapped.filter(x=>x.team===tm));});
+            yUnTeams.forEach(tm=>{h+=tmBlock(tm,yUnmapped.filter(x=>hasTm(x,tm)));});
         }
         // 팀 미지정(team==='용인사업장') 직원 표시
         const yLoose=yUnmapped.filter(x=>x.team==='용인사업장'||!x.team);
@@ -2044,7 +2075,8 @@ function renderOrg(){
     const bonsaData=activeBonsa.map(div=>{
         const de=e.filter(x=>x.division===div&&x.position!=='대표이사');
         const dh=de.find(x=>headPos.includes(x.position)&&(x.team===div||!x.team));
-        let tms=[...new Set(de.map(x=>x.team))].filter(t=>t&&t!==div);
+        // 메인 팀 + 겸직 팀(jointTeams) 모두 트리에 표시되도록 합산
+        let tms=[...new Set(de.flatMap(x=>[x.team,...(x.jointTeams||[])]))].filter(t=>t&&t!==div);
         if(div==='영업본부') tms.sort((a,b)=>{const ai=salesTmOrder.indexOf(a),bi=salesTmOrder.indexOf(b);return(ai<0?99:ai)-(bi<0?99:bi);});
         return {div,de,dh,tms};
     });
@@ -2111,10 +2143,11 @@ function renderOrg(){
                 const children=SUB_DIV_CHILDREN[tm];
                 if(children&&children.length){
                     // 중간 조직 (서비스본부): subDivBlock으로 렌더링
-                    const subMembers=bd.de.filter(x=>x.team===tm||x.subDivision===tm||children.includes(x.team));
+                    // hasTm으로 메인 팀 + 겸직 팀 모두 매치
+                    const subMembers=bd.de.filter(x=>hasTm(x,tm)||x.subDivision===tm||children.some(c=>hasTm(x,c)));
                     // 중간조직 헤드는 직급 최상위 1명만 선택, 동률이면 sortOrder 낮은(=먼저 등록된) 사람이 헤드.
                     // 같은 직급의 동급자는 헤드 아래(looseMems)에 표시되어 한 단계 낮은 위계로 나타남.
-                    const subHeadCands=subMembers.filter(x=>(x.team===tm||x.subDivision===tm)&&isLead(x.position)&&!children.includes(x.team));
+                    const subHeadCands=subMembers.filter(x=>(hasTm(x,tm)||x.subDivision===tm)&&isLead(x.position)&&!children.some(c=>hasTm(x,c)));
                     const subPosIdx=p=>{const i=PO.indexOf(p);return i<0?999:i;};
                     const subHead=subHeadCands.sort((a,b)=>{
                         const d=subPosIdx(a.position)-subPosIdx(b.position);
@@ -2123,7 +2156,7 @@ function renderOrg(){
                     })[0];
                     h+=subDivBlock(tm,subHead,children,subMembers);
                 } else {
-                    h+=tmBlock(tm,bd.de.filter(x=>x.team===tm));
+                    h+=tmBlock(tm,bd.de.filter(x=>hasTm(x,tm)));
                 }
             });
             // 팀 미지정 직원(team===division) 별도 표시
@@ -2176,7 +2209,7 @@ function renderOrg(){
                 h+=`<div class="o-col" style="padding:0 10px">`;
                 h+=`<div class="vl"></div><div class="o-grp" onclick="filterDiv('${div}')" style="cursor:pointer">${div}</div>`;
                 h+=`<div class="vl"></div><div class="o-row">`;
-                divTms.forEach(tm=>{h+=tmBlock(tm,divEmps.filter(x=>x.team===tm));});
+                divTms.forEach(tm=>{h+=tmBlock(tm,divEmps.filter(x=>hasTm(x,tm)));});
                 // 팀 없는 직원
                 const noTm=divEmps.filter(x=>!x.team||x.team===div);
                 if(noTm.length){h+=`<div class="o-col"><div class="vl"></div><div class="o-mems">`;noTm.forEach(m=>{h+=memCard(m,div);});h+=`</div></div>`;}
@@ -2202,7 +2235,7 @@ function renderOrg(){
         h+=`<div class="vl"></div><div class="o-grp" onclick="filterDiv('경영총괄')" style="cursor:pointer">경영총괄</div>`;
         if(gmTms.length){
             h+=`<div class="vl"></div><div class="o-row">`;
-            gmTms.forEach(tm=>{h+=tmBlock(tm,gmEmps.filter(x=>x.team===tm));});
+            gmTms.forEach(tm=>{h+=tmBlock(tm,gmEmps.filter(x=>hasTm(x,tm)));});
             const gmNoTm=gmEmps.filter(x=>!x.team||x.team==='경영총괄');
             if(gmNoTm.length){h+=`<div class="o-col"><div class="vl"></div><div class="o-mems">`;gmNoTm.forEach(m=>{h+=memCard(m,'경영총괄');});h+=`</div></div>`;}
             h+=`</div>`;
@@ -2665,9 +2698,9 @@ async function downloadDirectoryPDF(withPhoto=true){
     const all=G();if(!all.length){toast('직원 데이터가 없습니다.','err');return;}
     let list=all.filter(e=>{
         if(F.div&&e.division!==F.div)return false;
-        if(F.team){const ch=TEAM_CHILDREN[F.team]||[];if(![F.team,...ch].includes(e.team))return false;}
+        if(F.team){const ch=TEAM_CHILDREN[F.team]||[];const allowed=[F.team,...ch];const jt=e.jointTeams||[];if(!allowed.includes(e.team)&&!jt.some(t=>allowed.includes(t)))return false;}
         if(F.pos&&e.position!==F.pos)return false;
-        if(F.q){const s=[e.name,e.position,e.team,e.division,e.phone||'',...(e.primaryTasks||[]),...(e.secondaryTasks||[])].join(' ').toLowerCase();if(!s.includes(F.q))return false;}
+        if(F.q){const s=[e.name,e.position,e.team,e.division,e.phone||'',...(e.primaryTasks||[]),...(e.secondaryTasks||[]),...(e.jointTeams||[])].join(' ').toLowerCase();if(!s.includes(F.q))return false;}
         return true;
     });
     list.sort(defaultSort);
@@ -2976,6 +3009,38 @@ function setTaskRows(rowsId,arr,minRows){
     }
 }
 
+// 겸직 팀 관리
+const JOINT_TEAM_OPTIONS=['관리팀','생산/품질관리팀','소재 기술연구소','건설 기술연구소','서비스본부','서비스운영1팀','서비스운영2팀','서비스운영3팀','설계/적산팀','영업팀','경영관리팀','그로스팀','브랜드커머스팀','미디어커머스팀','해외사업팀','모여라딜팀','브랜드마케팅팀'];
+function populateJointTeamSel(){
+    const sel=document.getElementById('fJointSel');if(!sel)return;
+    sel.innerHTML='<option value="">팀 선택</option>'+JOINT_TEAM_OPTIONS.map(t=>`<option>${t}</option>`).join('');
+}
+function getJointTeams(){
+    const box=document.getElementById('fJointChips');if(!box)return[];
+    return [...box.querySelectorAll('.joint-team-chip')].map(c=>c.dataset.team);
+}
+function renderJointTeamChip(team){
+    const box=document.getElementById('fJointChips');if(!box)return;
+    if(getJointTeams().includes(team))return;
+    const chip=document.createElement('div');
+    chip.className='joint-team-chip';chip.dataset.team=team;
+    chip.innerHTML=team+' <span class="joint-team-chip-x" title="제거">&times;</span>';
+    chip.querySelector('.joint-team-chip-x').onclick=()=>chip.remove();
+    box.appendChild(chip);
+}
+function setJointTeams(teams){
+    const box=document.getElementById('fJointChips');if(!box)return;
+    box.innerHTML='';
+    (teams||[]).forEach(t=>renderJointTeamChip(t));
+}
+function addJointTeam(){
+    const sel=document.getElementById('fJointSel');const t=sel?sel.value:'';
+    if(!t){toast('팀을 선택하세요','err');return;}
+    renderJointTeamChip(t);
+    sel.value='';
+}
+document.addEventListener('DOMContentLoaded',populateJointTeamSel);
+
 // 부문→본부 매핑
 const DIV_SUBS={'영업본부':['서비스본부']};
 function onDivChange(){
@@ -2998,16 +3063,18 @@ function saveEmp(){
     const sub=document.getElementById('fSub').value;
     // 팀명은 입력값 그대로 저장. 빈칸이면 빈칸 그대로 (자동 채움 없음).
     const finalTeam=t;
-    const data={id:eid||gid(),name:n,division:d,subDivision:sub||'',team:finalTeam,position:p,phone:document.getElementById('fPh').value.trim(),email:document.getElementById('fEm').value.trim(),joinDate:eid?(all.find(x=>x.id===eid)||{}).joinDate||'':'',extension:document.getElementById('fEx').value.trim(),birthDate:document.getElementById('fBirth').value.trim(),primaryTasks:getTaskValues('fPrRows'),secondaryTasks:getTaskValues('fScRows'),memo:document.getElementById('fMe').value.trim(),photo:photo,sortOrder:eid?(all.find(e=>e.id===eid)||{}).sortOrder||0:all.length};
+    // 겸직 팀: 메인 팀(team)과 동일한 항목은 제외
+    const jointTeams=getJointTeams().filter(jt=>jt&&jt!==finalTeam);
+    const data={id:eid||gid(),name:n,division:d,subDivision:sub||'',team:finalTeam,jointTeams:jointTeams,position:p,phone:document.getElementById('fPh').value.trim(),email:document.getElementById('fEm').value.trim(),joinDate:eid?(all.find(x=>x.id===eid)||{}).joinDate||'':'',extension:document.getElementById('fEx').value.trim(),birthDate:document.getElementById('fBirth').value.trim(),primaryTasks:getTaskValues('fPrRows'),secondaryTasks:getTaskValues('fScRows'),memo:document.getElementById('fMe').value.trim(),photo:photo,sortOrder:eid?(all.find(e=>e.id===eid)||{}).sortOrder||0:all.length};
     const isNew=!eid;
     const divChanged=oldEmp&&(oldEmp.division!==d||oldEmp.team!==finalTeam||oldEmp.position!==p);
     if(eid){const i=all.findIndex(e=>e.id===eid);if(i!==-1)all[i]=data;toast(n+' 수정 완료','ok');}else{all.push(data);toast(n+' 등록 완료','ok');}
     if(isNew||divChanged) setOrgDate();
     S(all);resetF();refresh();renderAdmEmpList();
 }
-function editD(id){closeD();const e=G().find(x=>x.id===id);if(!e)return;switchPanel('admin');document.getElementById('fTitle').textContent='직원 정보 수정';document.getElementById('editId').value=e.id;document.getElementById('fN').value=e.name;document.getElementById('fD').value=e.division;onDivChange();document.getElementById('fSub').value=e.subDivision||'';document.getElementById('fT').value=e.team;document.getElementById('fP').value=e.position;document.getElementById('fPh').value=e.phone||'';document.getElementById('fEm').value=e.email||'';document.getElementById('fEx').value=e.extension||'';document.getElementById('fBirth').value=e.birthDate||'';setTaskRows('fPrRows',e.primaryTasks||[],2);setTaskRows('fScRows',e.secondaryTasks||[],1);document.getElementById('fMe').value=e.memo||'';if(e.photo){document.getElementById('fPhoto').value=e.photo;document.getElementById('fPhotoPreview').innerHTML=`<img src="${e.photo}">`;document.getElementById('fPhotoDelBtn').style.display='inline-flex';}else{clearPhoto();}document.getElementById('delBtn').style.display='inline-flex';window.scrollTo({top:0,behavior:'smooth'});}
+function editD(id){closeD();const e=G().find(x=>x.id===id);if(!e)return;switchPanel('admin');document.getElementById('fTitle').textContent='직원 정보 수정';document.getElementById('editId').value=e.id;document.getElementById('fN').value=e.name;document.getElementById('fD').value=e.division;onDivChange();document.getElementById('fSub').value=e.subDivision||'';document.getElementById('fT').value=e.team;document.getElementById('fP').value=e.position;document.getElementById('fPh').value=e.phone||'';document.getElementById('fEm').value=e.email||'';document.getElementById('fEx').value=e.extension||'';document.getElementById('fBirth').value=e.birthDate||'';setTaskRows('fPrRows',e.primaryTasks||[],2);setTaskRows('fScRows',e.secondaryTasks||[],1);setJointTeams(e.jointTeams||[]);document.getElementById('fMe').value=e.memo||'';if(e.photo){document.getElementById('fPhoto').value=e.photo;document.getElementById('fPhotoPreview').innerHTML=`<img src="${e.photo}">`;document.getElementById('fPhotoDelBtn').style.display='inline-flex';}else{clearPhoto();}document.getElementById('delBtn').style.display='inline-flex';window.scrollTo({top:0,behavior:'smooth'});}
 function delEmp(){const eid=document.getElementById('editId').value;if(!eid||!confirm('삭제하시겠습니까?'))return;const all=G();const emp=all.find(e=>e.id===eid);if(emp)addDeleted(emp.name+'|'+emp.division);setOrgDate();S(all.filter(e=>e.id!==eid));toast('삭제 완료','ok');resetF();refresh();renderAdmEmpList();}
-function resetF(){document.getElementById('fTitle').textContent='신규 직원 등록';document.getElementById('editId').value='';['fN','fT','fPh','fEm','fEx','fBirth','fMe'].forEach(i=>document.getElementById(i).value='');setTaskRows('fPrRows',[],2);setTaskRows('fScRows',[],1);clearPhoto();document.getElementById('fD').value='';document.getElementById('fSub').value='';document.getElementById('fP').value='';document.getElementById('delBtn').style.display='none';}
+function resetF(){document.getElementById('fTitle').textContent='신규 직원 등록';document.getElementById('editId').value='';['fN','fT','fPh','fEm','fEx','fBirth','fMe'].forEach(i=>document.getElementById(i).value='');setTaskRows('fPrRows',[],2);setTaskRows('fScRows',[],1);setJointTeams([]);clearPhoto();document.getElementById('fD').value='';document.getElementById('fSub').value='';document.getElementById('fP').value='';document.getElementById('delBtn').style.display='none';}
 
 // Excel
 const xd=document.getElementById('xDrop');
