@@ -2317,6 +2317,31 @@ function renderOrg(){
             const r1=kids.slice(0,ncols);
             autoHL(hlB,r1);
         }
+
+        // 영업팀 박스를 설계/적산팀과 같은 줄에 정확히 정렬 (영업본부 한정)
+        // 고정 px(height:210px)는 초기 추정값이고, 화면 크기·렌더링 차이로 어긋날 수 있어
+        // 여기서 실제 박스 위치를 측정해 영업팀 위쪽 vl 높이를 자동 보정한다.
+        const allTms=document.querySelectorAll('#orgArea .o-tm');
+        let salesBox=null,refBox=null;
+        allTms.forEach(box=>{
+            const nmEl=box.querySelector('.o-nm');if(!nmEl)return;
+            const text=nmEl.textContent.trim();
+            if(text==='영업팀'&&!salesBox) salesBox=box;
+            else if(text==='설계/적산팀'&&!refBox) refBox=box;
+        });
+        if(salesBox&&refBox){
+            const salesRect=salesBox.getBoundingClientRect();
+            const refRect=refBox.getBoundingClientRect();
+            const diff=refRect.top-salesRect.top;
+            if(Math.abs(diff)>0.5){
+                const wrap=salesBox.parentElement;
+                const firstVl=wrap?wrap.querySelector('.vl'):null;
+                if(firstVl){
+                    const cur=firstVl.offsetHeight;
+                    firstVl.style.height=Math.max(0,cur+diff)+'px';
+                }
+            }
+        }
     }
     requestAnimationFrame(()=>{ layoutHLines(); setTimeout(layoutHLines,100); });
 }
