@@ -2171,11 +2171,13 @@ function renderOrg(){
                     h+=subDivBlock(tm,subHead,children,subMembers);
                 } else {
                     // 일반 팀: 영업팀처럼 멤버 적은 팀이 위쪽에 떠 보이지 않도록,
-                    // 영업본부의 영업팀만 flex-end 정렬해서 서비스본부 4팀 행과 같은 높이로 표시.
-                    // 연결선은 여전히 영업본부 헤드에서 직접 내려와 영업팀이 서비스본부에 속하지 않음을 명확히 함.
+                    // 영업본부의 영업팀은 위쪽 vl(세로 연결선)을 길게 만들어 서비스본부 4팀 박스 줄에 정렬.
+                    // 연결선이 영업본부 헤드에서 영업팀까지 직접 이어지므로 서비스본부 소속이 아님을 명확히 함.
                     const teamHtml=tmBlock(tm,bd.de.filter(x=>hasTm(x,tm)));
                     if(bd.div==='영업본부'&&tm==='영업팀'){
-                        h+=`<div style="display:flex;flex-direction:column;justify-content:flex-end;align-self:stretch;">${teamHtml}</div>`;
+                        // 첫 번째 vl만 height:130px로 늘려 4팀 박스 위치까지 연결선 + spacing 확보
+                        const stretched=teamHtml.replace('<div class="vl"></div>','<div class="vl" style="height:130px;"></div>');
+                        h+=stretched;
                     } else {
                         h+=teamHtml;
                     }
