@@ -1436,13 +1436,19 @@ const TEAM_ORDER_SK='nf_team_order_v1';
 // Firebase/localStorage에서 팀 순서 로드
 (function(){try{const d=JSON.parse(localStorage.getItem(TEAM_ORDER_SK));if(d&&typeof d==='object')TEAM_MEM_ORDER={...TEAM_MEM_ORDER_DEFAULT,...d};}catch(e){}})();
 
+// Firebase Realtime Database 키는 '/','.','#','$','[',']'를 못 씀.
+// 팀명 '생산/품질관리팀', '설계/적산팀'에 슬래시가 있어서 인코딩/디코딩이 필요.
+const fbKeyEncode=k=>String(k).replace(/\//g,'__SLASH__');
+const fbKeyDecode=k=>String(k).replace(/__SLASH__/g,'/');
 function saveTeamOrder(team,names){
     TEAM_MEM_ORDER[team]=names;
-    const toSave={};
-    for(const[k,v] of Object.entries(TEAM_MEM_ORDER)) toSave[k]=v;
-    localStorage.setItem(TEAM_ORDER_SK,JSON.stringify(toSave));
-    _lastTeamOrderJson=JSON.stringify(toSave); // Firebase 리스너 중복 렌더 방지
-    fbTeamOrderRef.set(toSave).catch(e=>console.error('FB teamOrder err:',e));
+    // LocalStorage는 원본 키 그대로 저장 (앱 내부에서는 원래 키 사용)
+    localStorage.setItem(TEAM_ORDER_SK,JSON.stringify(TEAM_MEM_ORDER));
+    // Firebase 저장 시에만 키 인코딩 적용
+    const fbSave={};
+    for(const[k,v] of Object.entries(TEAM_MEM_ORDER)) fbSave[fbKeyEncode(k)]=v;
+    _lastTeamOrderJson=JSON.stringify(fbSave); // Firebase 리스너 중복 렌더 방지
+    fbTeamOrderRef.set(fbSave).catch(e=>console.error('FB teamOrder err:',e));
 }
 
 function moveOrgMember(team,name,dir){
@@ -3807,7 +3813,10 @@ fbTeamOrderRef.on('value',snap=>{
     const json=JSON.stringify(data);
     if(json===_lastTeamOrderJson)return; // 이미 반영된 데이터면 스킵
     _lastTeamOrderJson=json;
-    TEAM_MEM_ORDER={...TEAM_MEM_ORDER_DEFAULT,...data};
+    // Firebase에서 받은 키 디코딩 (__SLASH__ → /)
+    const decoded={};
+    for(const[k,v] of Object.entries(data)) decoded[fbKeyDecode(k)]=v;
+    TEAM_MEM_ORDER={...TEAM_MEM_ORDER_DEFAULT,...decoded};
     localStorage.setItem(TEAM_ORDER_SK,JSON.stringify(TEAM_MEM_ORDER));
     // 조직도 패널이 열려있으면 재렌더 (다른 기기에서 변경 시)
     const orgPanel=document.getElementById('p-orgchart');
@@ -3816,8 +3825,10 @@ fbTeamOrderRef.on('value',snap=>{
 },err=>console.error('FB teamOrder listener err:',err));
 fbTeamOrderRef.once('value',snap=>{
   if(!snap.val()){
-    // 초기 마이그레이션: 하드코딩 데이터를 Firebase에 저장
-    fbTeamOrderRef.set(TEAM_MEM_ORDER_DEFAULT).catch(e=>console.error('FB teamOrder init err:',e));
+    // 초기 마이그레이션: 하드코딩 데이터를 Firebase에 저장 (키 인코딩 적용)
+    const encoded={};
+    for(const[k,v] of Object.entries(TEAM_MEM_ORDER_DEFAULT)) encoded[fbKeyEncode(k)]=v;
+    fbTeamOrderRef.set(encoded).catch(e=>console.error('FB teamOrder init err:',e));
   }
 });
 })();
