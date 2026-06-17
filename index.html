@@ -1228,7 +1228,7 @@ const SK='nf_emp_v4',PK='nf_apw',DEL_KEY='nf_emp_del';
 function getDeleted(){try{return JSON.parse(localStorage.getItem(DEL_KEY))||[];}catch(e){return[];}}
 function addDeleted(nameDiv){const d=getDeleted();if(!d.includes(nameDiv)){d.push(nameDiv);localStorage.setItem(DEL_KEY,JSON.stringify(d));}}
 
-firebase.initializeApp({apiKey:"AIzaSyBqPaSodmaZDtVNc2UEfmHKe_JxOM6k8Io",authDomain:"hr-portal-5f785.firebaseapp.com",databaseURL:"https://hr-portal-5f785-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"hr-portal-5f785",storageBucket:"hr-portal-5f785.firebasestorage.app",messagingSenderId:"193320235811",appId:"1:193320235811:web:fbd35e3ef69a98abbe1296"});
+firebase.initializeApp({apiKey:"AIzaSyBXvG2k_DvInBlE_2ZhC0tSgRTn-4Zqp4w",authDomain:"netform-hr.firebaseapp.com",databaseURL:"https://netform-hr-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"netform-hr",storageBucket:"netform-hr.firebasestorage.app",messagingSenderId:"12368103264",appId:"1:12368103264:web:e6a9ce0f6baaa745008005"});
 const fbDb=firebase.database(),fbEmpRef=fbDb.ref('employees'),fbCtRef=fbDb.ref('contacts'),fbPwRef=fbDb.ref('adminPassword'),fbOrgDateRef=fbDb.ref('orgChartDate'),fbSeatRef=fbDb.ref('seatAssignments'),fbTeamOrderRef=fbDb.ref('teamMemberOrder');
 const ORG_DATE_KEY='nf_org_date';
 function getOrgDate(){return localStorage.getItem(ORG_DATE_KEY)||'2026.02.25';}
