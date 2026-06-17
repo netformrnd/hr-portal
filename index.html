@@ -1296,13 +1296,10 @@ function _mergeDefaults(stored){
         // 팀명: localStorage에 없고 DEFAULT_EMP에 있으면 반영 (관리자 수정 팀명은 유지)
         if(!e.team&&def.team){e.team=def.team;changed=true;}
     });
-    // DEFAULT_EMP에 있는데 localStorage에 없는 신규 직원 추가 (관리자가 삭제한 직원은 제외)
-    const storedNames=new Set(stored.map(e=>e.name+'|'+e.division));
-    const deleted=getDeleted();
-    DEFAULT_EMP.forEach(def=>{
-        const key=def.name+'|'+def.division;
-        if(!storedNames.has(key)&&!deleted.includes(key)){stored.push({...def});changed=true;}
-    });
+    // [비활성화] DEFAULT_EMP에 있는데 stored에 없는 직원 자동 추가는 제거.
+    // Firebase가 진실의 원천(source of truth)이 된 이후로는, 다른 브라우저에서 삭제한
+    // 직원이 _mergeDefaults에 의해 자동 복원되는 부작용이 발생하므로 자동 추가는 하지 않음.
+    // (DEFAULT_EMP는 LocalStorage·Firebase가 완전히 빈 경우의 초기 데이터로만 사용)
     return changed;
 }
 const G=()=>{try{const d=JSON.parse(localStorage.getItem(SK));if(d&&d.length){let changed=_mergeDefaults(d);d.forEach(e=>{if(e&&!e.id){e.id=gid();changed=true;}});if(changed)localStorage.setItem(SK,JSON.stringify(d));return d;}localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e,id:e.id||gid()}));}catch(e){localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e,id:e.id||gid()}));}};
