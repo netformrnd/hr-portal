@@ -10,6 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <style>
 :root {
     --bg-body: #f4f5f7;
@@ -1229,6 +1230,13 @@ function getDeleted(){try{return JSON.parse(localStorage.getItem(DEL_KEY))||[];}
 function addDeleted(nameDiv){const d=getDeleted();if(!d.includes(nameDiv)){d.push(nameDiv);localStorage.setItem(DEL_KEY,JSON.stringify(d));}}
 
 firebase.initializeApp({apiKey:"AIzaSyBXvG2k_DvInBlE_2ZhC0tSgRTn-4Zqp4w",authDomain:"netform-hr.firebaseapp.com",databaseURL:"https://netform-hr-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"netform-hr",storageBucket:"netform-hr.firebasestorage.app",messagingSenderId:"12368103264",appId:"1:12368103264:web:e6a9ce0f6baaa745008005"});
+// 페이지 로드 시 자동 익명 로그인. Realtime Database 보안 규칙이 auth!=null이어야 정상 동작.
+// 이미 인증된 세션이 있으면 onAuthStateChanged에서 사용자 객체가 즉시 들어와 추가 호출 안 함.
+firebase.auth().onAuthStateChanged(user=>{
+  if(!user){
+    firebase.auth().signInAnonymously().catch(e=>console.error('Anon auth err:',e));
+  }
+});
 const fbDb=firebase.database(),fbEmpRef=fbDb.ref('employees'),fbCtRef=fbDb.ref('contacts'),fbPwRef=fbDb.ref('adminPassword'),fbOrgDateRef=fbDb.ref('orgChartDate'),fbSeatRef=fbDb.ref('seatAssignments'),fbTeamOrderRef=fbDb.ref('teamMemberOrder');
 const ORG_DATE_KEY='nf_org_date';
 function getOrgDate(){return localStorage.getItem(ORG_DATE_KEY)||'2026.02.25';}
