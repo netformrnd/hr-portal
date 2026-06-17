@@ -2086,7 +2086,10 @@ function renderOrg(){
     // 본사 각 부문 데이터 미리 수집
     const bonsaData=activeBonsa.map(div=>{
         const de=e.filter(x=>x.division===div&&x.position!=='대표이사');
-        const dh=de.find(x=>headPos.includes(x.position)&&(x.team===div||!x.team));
+        // 부서 헤드는 직급 우선순위로 가장 높은 1명 선택 (예: 영업본부에서 상무이사 황윤선 > 수석 매니저 주현진)
+        const dhCands=de.filter(x=>headPos.includes(x.position)&&(x.team===div||!x.team));
+        const dhPosIdx=p=>{const i=PO.indexOf(p);return i<0?999:i;};
+        const dh=dhCands.sort((a,b)=>dhPosIdx(a.position)-dhPosIdx(b.position))[0];
         // 메인 팀 + 겸직 팀(jointTeams) 모두 트리에 표시되도록 합산
         let tms=[...new Set(de.flatMap(x=>[x.team,...(x.jointTeams||[])]))].filter(t=>t&&t!==div);
         if(div==='영업본부') tms.sort((a,b)=>{const ai=salesTmOrder.indexOf(a),bi=salesTmOrder.indexOf(b);return(ai<0?99:ai)-(bi<0?99:bi);});
@@ -2129,12 +2132,16 @@ function renderOrg(){
     // --- ROW 3: 팀 나열 (모두 같은 높이!) ---
     // 서비스본부 하위팀 정의
     const SUB_DIV_CHILDREN={'서비스본부':['서비스운영1팀','서비스운영2팀','서비스운영3팀','설계/적산팀']};
+    // 서비스본부에 속하진 않지만 트리에서 같은 줄에 표시할 형제 팀
+    // (영업팀은 영업본부 직속이지만, 4팀 옆에 시각적으로 합류시켜 레이아웃을 균형 있게 함)
+    const SIBLING_TMS={'서비스본부':['영업팀']};
     const subChildSet=new Set(Object.values(SUB_DIV_CHILDREN).flat());
+    const siblingSet=new Set(Object.values(SIBLING_TMS).flat());
 
     bonsaData.forEach(bd=>{
         h+=`<div style="display:flex;flex-direction:column;align-items:center;">`;
-        // 서비스본부 하위팀은 개별 나열에서 제외, 서비스본부로 그룹화
-        let visibleTms=bd.tms.filter(tm=>!subChildSet.has(tm));
+        // 서비스본부 하위팀과 형제 팀(영업팀)은 개별 나열에서 제외, 서비스본부 줄로 합류
+        let visibleTms=bd.tms.filter(tm=>!subChildSet.has(tm)&&!siblingSet.has(tm));
         // 서비스본부가 tms에 없지만 하위팀이 있으면 서비스본부를 추가
         for(const [subDiv,children] of Object.entries(SUB_DIV_CHILDREN)){
             if(!visibleTms.includes(subDiv)&&bd.tms.some(tm=>children.includes(tm))){
@@ -2155,18 +2162,22 @@ function renderOrg(){
                 const children=SUB_DIV_CHILDREN[tm];
                 if(children&&children.length){
                     // 중간 조직 (서비스본부): subDivBlock으로 렌더링
+                    // 형제 팀(예: 영업팀)도 같은 줄에 합류시키되, 같은 부문(bd.div)에 실제로 존재하는 경우만
+                    const siblings=(SIBLING_TMS[tm]||[]).filter(s=>bd.tms.includes(s));
+                    const allShownTms=[...children,...siblings];
                     // hasTm으로 메인 팀 + 겸직 팀 모두 매치
-                    const subMembers=bd.de.filter(x=>hasTm(x,tm)||x.subDivision===tm||children.some(c=>hasTm(x,c)));
+                    const subMembers=bd.de.filter(x=>hasTm(x,tm)||x.subDivision===tm||allShownTms.some(c=>hasTm(x,c)));
                     // 중간조직 헤드는 직급 최상위 1명만 선택, 동률이면 sortOrder 낮은(=먼저 등록된) 사람이 헤드.
                     // 같은 직급의 동급자는 헤드 아래(looseMems)에 표시되어 한 단계 낮은 위계로 나타남.
-                    const subHeadCands=subMembers.filter(x=>(hasTm(x,tm)||x.subDivision===tm)&&isLead(x.position)&&!children.some(c=>hasTm(x,c)));
+                    // 헤드 후보에서 children + siblings 멤버는 제외 (자기 팀이 따로 있는 사람)
+                    const subHeadCands=subMembers.filter(x=>(hasTm(x,tm)||x.subDivision===tm)&&isLead(x.position)&&!allShownTms.some(c=>hasTm(x,c)));
                     const subPosIdx=p=>{const i=PO.indexOf(p);return i<0?999:i;};
                     const subHead=subHeadCands.sort((a,b)=>{
                         const d=subPosIdx(a.position)-subPosIdx(b.position);
                         if(d!==0)return d;
                         return (a.sortOrder==null?999:a.sortOrder)-(b.sortOrder==null?999:b.sortOrder);
                     })[0];
-                    h+=subDivBlock(tm,subHead,children,subMembers);
+                    h+=subDivBlock(tm,subHead,allShownTms,subMembers);
                 } else {
                     h+=tmBlock(tm,bd.de.filter(x=>hasTm(x,tm)));
                 }
