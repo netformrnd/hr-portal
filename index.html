@@ -2175,8 +2175,8 @@ function renderOrg(){
                     // 연결선이 영업본부 헤드에서 영업팀까지 직접 이어지므로 서비스본부 소속이 아님을 명확히 함.
                     const teamHtml=tmBlock(tm,bd.de.filter(x=>hasTm(x,tm)));
                     if(bd.div==='영업본부'&&tm==='영업팀'){
-                        // 첫 번째 vl만 height:185px로 늘려 4팀 박스 위치까지 연결선 + spacing 확보
-                        const stretched=teamHtml.replace('<div class="vl"></div>','<div class="vl" style="height:185px;"></div>');
+                        // 첫 번째 vl만 height:210px로 늘려 4팀 박스 위치까지 연결선 + spacing 확보
+                        const stretched=teamHtml.replace('<div class="vl"></div>','<div class="vl" style="height:210px;"></div>');
                         h+=stretched;
                     } else {
                         h+=teamHtml;
