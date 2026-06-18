@@ -1311,7 +1311,9 @@ function _mergeDefaults(stored){
     return changed;
 }
 const G=()=>{try{const d=JSON.parse(localStorage.getItem(SK));if(d&&d.length){let changed=_mergeDefaults(d);d.forEach(e=>{if(e&&!e.id){e.id=gid();changed=true;}});if(changed)localStorage.setItem(SK,JSON.stringify(d));return d;}localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e,id:e.id||gid()}));}catch(e){localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e,id:e.id||gid()}));}};
-const S=d=>{const clean=d.filter(Boolean);clean.forEach(emp=>{if(emp&&!emp.id)emp.id=gid();});localStorage.setItem(SK,JSON.stringify(clean));const keyed={};clean.forEach(emp=>{if(emp&&emp.id)keyed[emp.id]=emp;});fbEmpRef.set(keyed).catch(e=>console.error('FB emp write err:',e));};
+// 직원 데이터 저장. Firebase 쓰기 실패 시 사용자에게 명확한 토스트 알림을 띄워
+// 「본인 PC에만 저장됨」 사실을 즉시 인지하고 관리자에게 알릴 수 있도록 함.
+const S=d=>{const clean=d.filter(Boolean);clean.forEach(emp=>{if(emp&&!emp.id)emp.id=gid();});localStorage.setItem(SK,JSON.stringify(clean));const keyed={};clean.forEach(emp=>{if(emp&&emp.id)keyed[emp.id]=emp;});fbEmpRef.set(keyed).catch(e=>{console.error('FB emp write err:',e);if(typeof toast==='function')toast('⚠️ 클라우드 동기화 실패! 본인 PC에만 저장됐을 수 있습니다. 관리자에게 알려주세요. ('+(e&&e.code||'unknown')+')','err');});};
 const gPw=()=>localStorage.getItem(PK)||'ice080303!';
 
 // Tab (nav-btn + sidebar)
@@ -1453,7 +1455,7 @@ function saveTeamOrder(team,names){
     const fbSave={};
     for(const[k,v] of Object.entries(TEAM_MEM_ORDER)) fbSave[fbKeyEncode(k)]=v;
     _lastTeamOrderJson=JSON.stringify(fbSave); // Firebase 리스너 중복 렌더 방지
-    fbTeamOrderRef.set(fbSave).catch(e=>console.error('FB teamOrder err:',e));
+    fbTeamOrderRef.set(fbSave).catch(e=>{console.error('FB teamOrder err:',e);if(typeof toast==='function')toast('⚠️ 팀 순서 동기화 실패! ('+(e&&e.code||'unknown')+')','err');});
 }
 
 function moveOrgMember(team,name,dir){
@@ -3520,7 +3522,7 @@ function applySeatAssignments(){
 
 function saveSeatAssignments(){
     localStorage.setItem(SEAT_SK,JSON.stringify(_seatAssignments));
-    fbSeatRef.set(_seatAssignments).catch(e=>console.error('FB seat write err:',e));
+    fbSeatRef.set(_seatAssignments).catch(e=>{console.error('FB seat write err:',e);if(typeof toast==='function')toast('⚠️ 자리배치도 동기화 실패! 본인 PC에만 저장됐을 수 있습니다. ('+(e&&e.code||'unknown')+')','err');});
 }
 
 // 편집 모드 토글
@@ -3616,7 +3618,7 @@ const DEFAULT_CONTACTS=[
 {id:"ctmlue7cdw5mzn",category:"회사법인폰",company:"서비스운영2팀",name:"이지연",phone:"010-9500-2734",corpPhone:"",email:"",memo:"대금관련 업무폰"}
 ];
 const getCt=()=>{try{const d=JSON.parse(localStorage.getItem(CT_KEY));if(d&&d.length)return d;localStorage.setItem(CT_KEY,JSON.stringify(DEFAULT_CONTACTS));return DEFAULT_CONTACTS.map(e=>({...e}));}catch(e){localStorage.setItem(CT_KEY,JSON.stringify(DEFAULT_CONTACTS));return DEFAULT_CONTACTS.map(e=>({...e}));}};
-const setCt=d=>{localStorage.setItem(CT_KEY,JSON.stringify(d));fbCtRef.set(d).catch(e=>console.error('FB ct write err:',e));};
+const setCt=d=>{localStorage.setItem(CT_KEY,JSON.stringify(d));fbCtRef.set(d).catch(e=>{console.error('FB ct write err:',e);if(typeof toast==='function')toast('⚠️ 업무 연락처 동기화 실패! 본인 PC에만 저장됐을 수 있습니다. ('+(e&&e.code||'unknown')+')','err');});};
 const getCollapsed=()=>{try{return JSON.parse(localStorage.getItem(CT_COLLAPSE_KEY))||{};}catch(e){return{};}};
 const setCollapsed=d=>localStorage.setItem(CT_COLLAPSE_KEY,JSON.stringify(d));
 
