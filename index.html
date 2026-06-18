@@ -3793,7 +3793,18 @@ fbEmpRef.on('value',snap=>{
   if(arr&&arr.length){
     _mergeDefaults(arr);
     localStorage.setItem(SK,JSON.stringify(arr));
-    if(_fbInitDone){try{refresh();renderAdmEmpList();}catch(e){}}
+    // 첫 호출 포함 모든 동기화 시점에 화면 갱신.
+    // 페이지 첫 로드 시 LocalStorage가 비어있으면 DEFAULT_EMP가 잠깐 보이다가,
+    // Firebase 데이터 도착하는 즉시 최신으로 자동 갱신되도록 함.
+    try{
+      refresh();
+      renderAdmEmpList();
+      // 현재 열려있는 패널도 즉시 재렌더 (사용자가 메뉴 클릭 안 해도 갱신)
+      const orgPanel=document.getElementById('p-orgchart');
+      if(orgPanel&&orgPanel.classList.contains('on'))renderOrg();
+      const seatPanel=document.getElementById('p-seatmap');
+      if(seatPanel&&seatPanel.classList.contains('on')&&typeof syncSeatMap==='function')syncSeatMap();
+    }catch(e){}
     _fbInitDone=true;
   }
 },err=>console.error('FB emp listener err:',err));
