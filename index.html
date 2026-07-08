@@ -1145,7 +1145,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
             </div>
             <div class="fg">
                 <div class="fgi"><label>성명 *</label><input id="fN"></div>
-                <div class="fgi"><label>부문 *</label><select id="fD" onchange="onDivChange()"><option value="">선택</option><option>경영총괄</option><option>용인사업장</option><option>영업본부</option><option>경영관리본부</option><option>커머스사업본부</option><option>브랜드마케팅팀</option></select></div>
+                <div class="fgi"><label>부문 *</label><select id="fD" onchange="onDivChange()"><option value="">선택</option><option>경영총괄</option><option>용인사업장</option><option>영업본부</option><option>경영관리본부</option><option>커머스사업본부</option><option>브랜드마케팅팀</option><option>미디어마케팅팀</option></select></div>
                 <div class="fgi" id="fSubWrap"><label>본부</label><select id="fSub"><option value="">선택</option><option>서비스본부</option></select></div>
                 <div class="fgi"><label>팀명</label><input id="fT" placeholder="본부 총괄자는 비워두세요"></div>
                 <div class="fgi"><label>직위 *</label><select id="fP"><option value="">선택</option><option>대표이사</option><option>부사장</option><option>상무이사</option><option>이사</option><option>공장장</option><option>기술연구소장</option><option>수석 매니저</option><option>부장</option><option>부장/공장장</option><option>리드 매니저</option><option>차장</option><option>차장/팀장</option><option>선임연구원</option><option>매니저</option><option>대리</option><option>연구원</option><option>사원</option></select></div>
@@ -1410,8 +1410,8 @@ function resetFilters(){F.div='';F.team='';F.pos='';F.q='';document.getElementBy
 
 // 기본정렬: 조직도(TEAM_MEM_ORDER) 수동 순서와 동일
 const PO=['대표이사','부사장','상무이사','이사','공장장','기술연구소장','수석 매니저','부장','부장/공장장','리드 매니저','차장','차장/팀장','선임연구원','매니저','대리','연구원','사원'];
-const DO=['경영총괄','용인사업장','영업본부','경영관리본부','커머스사업본부','브랜드마케팅팀'];
-const TO=['경영총괄','용인사업장','용인공장','관리팀','생산/품질관리팀','소재 기술연구소','건설 기술연구소','영업본부','서비스본부','서비스운영1팀','서비스운영2팀','서비스운영3팀','B2B운영팀','영업팀','경영관리본부','경영관리팀','그로스팀','커머스사업본부','브랜드커머스팀','미디어커머스팀','해외사업팀','모여라딜팀','브랜드마케팅팀'];
+const DO=['경영총괄','용인사업장','영업본부','경영관리본부','커머스사업본부','브랜드마케팅팀','미디어마케팅팀'];
+const TO=['경영총괄','용인사업장','용인공장','관리팀','생산/품질관리팀','소재 기술연구소','건설 기술연구소','영업본부','서비스본부','서비스운영1팀','서비스운영2팀','서비스운영3팀','B2B운영팀','영업팀','경영관리본부','경영관리팀','그로스팀','커머스사업본부','브랜드커머스팀','미디어커머스팀','해외사업팀','모여라딜팀','브랜드마케팅팀','미디어마케팅팀'];
 // 팀 내 멤버 수동 정렬 맵 (Firebase에서 동적 관리)
 const TEAM_MEM_ORDER_DEFAULT={
     '경영총괄':['이승우'],
@@ -1436,7 +1436,8 @@ const TEAM_MEM_ORDER_DEFAULT={
     '미디어커머스팀':['김소연','이채은','남윤정'],
     '해외사업팀':['김채원','쩐티리'],
     '모여라딜팀':['김송희'],
-    '브랜드마케팅팀':['권혜영','함지민','김소라','손예진','최경선']
+    '브랜드마케팅팀':['권혜영','함지민','김소라','손예진','최경선'],
+    '미디어마케팅팀':[]
 };
 let TEAM_MEM_ORDER=JSON.parse(JSON.stringify(TEAM_MEM_ORDER_DEFAULT));
 const TEAM_ORDER_SK='nf_team_order_v1';
@@ -1888,7 +1889,7 @@ const TEAM_COLORS={
     '영업팀':'#16A34A','B2B운영팀':'#D97706',
     '경영관리팀':'#4F6DB5','그로스팀':'#DB2777',
     '브랜드커머스팀':'#6D28D9','미디어커머스팀':'#0D9488','해외사업팀':'#EA580C','모여라딜팀':'#DC2626',
-    '브랜드마케팅팀':'#CA8A04',
+    '브랜드마케팅팀':'#CA8A04','미디어마케팅팀':'#7C3AED',
     '관리팀':'#6B7280','생산/품질관리팀':'#92400E',
     '소재 기술연구소':'#0E7490','건설 기술연구소':'#2563EB',
     '용인사업장':'#6B7280',
@@ -2076,13 +2077,13 @@ function renderOrg(){
     h+=`</div></div>`;
 
     // ---- 본사 그룹 ----
-    // 부문(본부) 3개 + 독립팀(브랜드마케팅팀)
+    // 부문(본부) + 독립팀(부문=팀명, 예: 브랜드마케팅팀, 미디어마케팅팀)
     const bonsaDivs=['영업본부','경영관리본부','커머스사업본부'];
+    const soloTeams=['브랜드마케팅팀','미디어마케팅팀'];
     const activeBonsa=bonsaDivs.filter(d=>e.some(x=>x.division===d));
-    const bmTeam=e.filter(x=>x.division==='브랜드마케팅팀');
-    const hasBM=bmTeam.length>0;
-    // 브랜드마케팅팀은 항상 표시 (독립팀)
-    const totalCols=activeBonsa.length+1;
+    // 데이터가 있는 독립팀만 표시
+    const activeSolo=soloTeams.filter(t=>e.some(x=>x.division===t));
+    const totalCols=activeBonsa.length+activeSolo.length;
     const salesTmOrder=['서비스본부','서비스운영1팀','서비스운영2팀','서비스운영3팀','영업팀','B2B운영팀'];
 
     // 본사 각 부문 데이터 미리 수집
@@ -2112,10 +2113,13 @@ function renderOrg(){
         h+=`<div class="o-div" onclick="filterDiv('${bd.div}')" style="cursor:pointer"><div class="o-nm">${bd.div}</div></div>`;
         h+=`</div>`;
     });
-    // 브랜드마케팅팀 - Row 1+2를 하나의 셀로 통합 (줄 끊김 방지), Row 3은 별도 (높이 맞춤)
-    h+=`<div style="grid-row:1/3;grid-column:${totalCols};display:flex;flex-direction:column;align-items:center;">`;
-    h+=`<div style="width:2px;background:#b4b4b4;flex:1;min-height:54px;"></div>`;
-    h+=`</div>`;
+    // 독립팀들(브랜드마케팅팀·미디어마케팅팀 등) - Row 1+2를 하나의 셀로 통합 (줄 끊김 방지), Row 3은 별도 (높이 맞춤)
+    activeSolo.forEach((teamName,idx)=>{
+        const gridCol=activeBonsa.length+idx+1;
+        h+=`<div style="grid-row:1/3;grid-column:${gridCol};display:flex;flex-direction:column;align-items:center;">`;
+        h+=`<div style="width:2px;background:#b4b4b4;flex:1;min-height:54px;"></div>`;
+        h+=`</div>`;
+    });
 
     // --- ROW 2: 담당자 (head) ---
     bonsaData.forEach(bd=>{
@@ -2198,31 +2202,33 @@ function renderOrg(){
         }
         h+=`</div>`;
     });
-    // 브랜드마케팅팀 Row 3: 팀박스+멤버 (다른 팀과 같은 높이)
-    {
-        const bmMembers=hasBM?dedup(bmTeam).filter(x=>!(headPos.includes(x.position)&&(x.team===x.division||!x.team))):[];
-        const bmLd=bmMembers.find(x=>isLead(x.position));
-        const bmRest=hasBM?sortM(bmMembers.filter(x=>x!==bmLd),'브랜드마케팅팀'):[];
-        const tc=getTC('브랜드마케팅팀');
-        h+=`<div style="grid-column:${totalCols};display:flex;flex-direction:column;align-items:center;">`;
+    // 독립팀들 Row 3: 팀박스+멤버 (다른 팀과 같은 높이)
+    activeSolo.forEach((teamName,idx)=>{
+        const gridCol=activeBonsa.length+idx+1;
+        const teamData=e.filter(x=>x.division===teamName);
+        const teamMembers=dedup(teamData).filter(x=>!(headPos.includes(x.position)&&(x.team===x.division||!x.team)));
+        const teamLd=teamMembers.find(x=>isLead(x.position));
+        const teamRest=sortM(teamMembers.filter(x=>x!==teamLd),teamName);
+        const tc=getTC(teamName);
+        h+=`<div style="grid-column:${gridCol};display:flex;flex-direction:column;align-items:center;">`;
         h+=`<div class="vl"></div>`;
         h+=`<div style="height:2px;"></div>`;
         h+=`<div class="vl"></div>`;
-        h+=`<div class="o-tm" style="border-left:4px solid ${tc}" onclick="filterDiv('브랜드마케팅팀')"><div class="o-nm">브랜드마케팅팀</div></div>`;
-        if(bmMembers.length){
+        h+=`<div class="o-tm" style="border-left:4px solid ${tc}" onclick="filterDiv('${teamName}')"><div class="o-nm">${teamName}</div></div>`;
+        if(teamMembers.length){
             h+=`<div class="vl"></div><div class="o-mems">`;
-            if(bmLd) h+=memCard(bmLd,'브랜드마케팅팀');
-            bmRest.forEach(m=>{h+=memCard(m,'브랜드마케팅팀');});
+            if(teamLd) h+=memCard(teamLd,teamName);
+            teamRest.forEach(m=>{h+=memCard(m,teamName);});
             h+=`</div>`;
         }
         h+=`</div>`;
-    }
+    });
 
     h+=`</div></div>`; // /grid, /본사 o-col
     h+=`</div>`; // /최상위 o-row
 
     // === 어디에도 속하지 않는 직원 표시 (새 부문/팀 등) ===
-    const knownDivs=new Set(['경영총괄','용인사업장','영업본부','경영관리본부','커머스사업본부','브랜드마케팅팀']);
+    const knownDivs=new Set(['경영총괄','용인사업장','영업본부','경영관리본부','커머스사업본부','브랜드마케팅팀','미디어마케팅팀']);
     const unmapped=e.filter(x=>!knownDivs.has(x.division)&&x.position!=='대표이사');
     if(unmapped.length){
         const unmDivs=[...new Set(unmapped.map(x=>x.division).filter(Boolean))];
@@ -2669,7 +2675,7 @@ function syncSeatMap(){
 }
 // Seat map - 좌석별 팀명 자동 매핑
 (function(){
-    const colorTeam={'#4f6db5':'경영관리팀','#3182ce':'서비스운영1팀','#805ad5':'서비스운영2팀','#0891b2':'서비스운영3팀','#d97706':'B2B운영팀','#16a34a':'영업팀','#0e7490':'소재기술연구소','#2563eb':'건설기술연구소','#6d28d9':'브랜드커머스팀','#0d9488':'미디어커머스팀','#ea580c':'해외사업팀','#dc2626':'모여라딜팀','#ca8a04':'브랜드마케팅팀','#db2777':'그로스팀','#475569':'대표이사실'};
+    const colorTeam={'#4f6db5':'경영관리팀','#3182ce':'서비스운영1팀','#805ad5':'서비스운영2팀','#0891b2':'서비스운영3팀','#d97706':'B2B운영팀','#16a34a':'영업팀','#0e7490':'소재기술연구소','#2563eb':'건설기술연구소','#6d28d9':'브랜드커머스팀','#0d9488':'미디어커머스팀','#ea580c':'해외사업팀','#dc2626':'모여라딜팀','#ca8a04':'브랜드마케팅팀','#7c3aed':'미디어마케팅팀','#db2777':'그로스팀','#475569':'대표이사실'};
     const nameTeam={'백정석':'경영관리본부','황윤선':'영업본부','이승우':'대표이사실'};
     document.querySelectorAll('.seat-bp .sk[data-name]').forEach(sk=>{
         const nm=sk.dataset.name;
@@ -3061,7 +3067,7 @@ function setTaskRows(rowsId,arr,minRows){
 }
 
 // 겸직 팀 관리
-const JOINT_TEAM_OPTIONS=['관리팀','생산/품질관리팀','소재 기술연구소','건설 기술연구소','서비스본부','서비스운영1팀','서비스운영2팀','서비스운영3팀','B2B운영팀','영업팀','경영관리팀','그로스팀','브랜드커머스팀','미디어커머스팀','해외사업팀','모여라딜팀','브랜드마케팅팀'];
+const JOINT_TEAM_OPTIONS=['관리팀','생산/품질관리팀','소재 기술연구소','건설 기술연구소','서비스본부','서비스운영1팀','서비스운영2팀','서비스운영3팀','B2B운영팀','영업팀','경영관리팀','그로스팀','브랜드커머스팀','미디어커머스팀','해외사업팀','모여라딜팀','브랜드마케팅팀','미디어마케팅팀'];
 function populateJointTeamSel(){
     const sel=document.getElementById('fJointSel');if(!sel)return;
     sel.innerHTML='<option value="">팀 선택</option>'+JOINT_TEAM_OPTIONS.map(t=>`<option>${t}</option>`).join('');
@@ -3309,7 +3315,7 @@ function setView(v){
 }
 
 // ===== 아코디언 뷰 =====
-const DIV_ORDER=['경영총괄','영업본부','경영관리본부','커머스사업본부','브랜드마케팅팀','용인사업장'];
+const DIV_ORDER=['경영총괄','영업본부','경영관리본부','커머스사업본부','브랜드마케팅팀','미디어마케팅팀','용인사업장'];
 function renderAccView(list){
     const area=document.getElementById('accArea');if(!area)return;
     if(!list.length){area.innerHTML='';return;}
