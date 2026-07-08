@@ -190,7 +190,7 @@ table.dt{width:100%;border-collapse:collapse;}
 .cp-s{background:rgba(109,40,217,0.08);color:#7c3aed;}
 .cp-l{background:rgba(230,126,34,0.08);color:#e67e22;}
 .cp-m{background:var(--bg-hover);color:var(--text-sub);}
-.badge-prob{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;background:#FEF3C7;color:#B45309;margin-left:6px;vertical-align:middle;line-height:1.4;}
+.badge-prob{display:inline-block;width:8px;height:8px;border-radius:50%;background:#F59E0B;margin-left:5px;vertical-align:middle;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,0,0,0.05);}
 .tg{display:flex;gap:3px;flex-wrap:nowrap;overflow:hidden;}
 .tg span{padding:2px 7px;border-radius:4px;font-size:11px;background:var(--bg-hover);color:var(--text-sub);white-space:nowrap;}
 .tg-match{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;background:var(--green-dim);color:var(--green);font-weight:600;margin-left:4px;white-space:nowrap;}
@@ -771,6 +771,10 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
             <div class="fdd-btn" onclick="togDD('ddPos')"><span id="lblPos">전체 직위</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
             <div class="fdd-list" id="lstPos"></div>
         </div>
+        <div class="fdd" id="ddStatus">
+            <div class="fdd-btn" onclick="togDD('ddStatus')"><span id="lblStatus">전체 신분</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+            <div class="fdd-list" id="lstStatus"></div>
+        </div>
         <button class="btn" id="btnReset" style="display:none" onclick="resetFilters()">초기화</button>
     </div>
     <!-- 테이블 뷰 (내부용 - 숨김) -->
@@ -1346,7 +1350,7 @@ document.querySelectorAll('.sb-item[data-p]').forEach(b=>b.addEventListener('cli
 function closeMobMenu(){const sb=document.querySelector('.sidebar');if(sb)sb.classList.remove('mob-open');const ov=document.getElementById('mobOverlay');if(ov)ov.classList.remove('on');};
 
 // Filters
-let F={div:'',team:'',pos:'',q:''},SS={k:'sortOrder',a:true};
+let F={div:'',team:'',pos:'',status:'',q:''},SS={k:'sortOrder',a:true};
 
 function togDD(id){
     const d=document.getElementById(id),l=d.querySelector('.fdd-list'),b=d.querySelector('.fdd-btn'),o=l.classList.contains('show');
@@ -1380,6 +1384,14 @@ function buildDD(){
     poss.forEach(p=>{ph+=`<div class="fdd-item${F.pos===p?' on':''}" data-v="${p}">${p} <span class="fdd-cnt">${cp[p]||0}</span></div>`;});
     document.getElementById('lstPos').innerHTML=ph;
 
+    // Build status dropdown (정직원/수습사원 - probationEndDate 기준으로 자동 판정)
+    const probCnt=e.filter(x=>isProbationActive(x)).length;
+    const regCnt=e.length-probCnt;
+    let sh=`<div class="fdd-item${!F.status?' on':''}" data-v="">전체 신분 <span class="fdd-cnt">${e.length}</span></div><div class="fdd-divider"></div>`;
+    sh+=`<div class="fdd-item${F.status==='regular'?' on':''}" data-v="regular">정직원 <span class="fdd-cnt">${regCnt}</span></div>`;
+    sh+=`<div class="fdd-item${F.status==='probation'?' on':''}" data-v="probation">수습사원 <span class="fdd-cnt">${probCnt}</span></div>`;
+    document.getElementById('lstStatus').innerHTML=sh;
+
     // Event: division
     document.getElementById('lstDiv').querySelectorAll('.fdd-item').forEach(el=>el.onclick=()=>{
         F.div=el.dataset.v;
@@ -1405,16 +1417,25 @@ function buildDD(){
         document.querySelector('#ddPos .fdd-btn').classList.toggle('filtered',!!el.dataset.v);
         closeDD();refresh();
     });
+    // Event: status (정직원/수습사원)
+    document.getElementById('lstStatus').querySelectorAll('.fdd-item').forEach(el=>el.onclick=()=>{
+        F.status=el.dataset.v;
+        const label=el.dataset.v==='regular'?'정직원':el.dataset.v==='probation'?'수습사원':'전체 신분';
+        document.getElementById('lblStatus').textContent=label;
+        document.querySelector('#ddStatus .fdd-btn').classList.toggle('filtered',!!el.dataset.v);
+        closeDD();refresh();
+    });
 
     // Sync button filtered state
     document.querySelector('#ddDiv .fdd-btn').classList.toggle('filtered',!!F.div);
     document.querySelector('#ddTeam .fdd-btn').classList.toggle('filtered',!!F.team);
     document.querySelector('#ddPos .fdd-btn').classList.toggle('filtered',!!F.pos);
+    document.querySelector('#ddStatus .fdd-btn').classList.toggle('filtered',!!F.status);
 }
 
 // Main search + directory
 document.getElementById('mainSearch').addEventListener('input',e=>{F.q=e.target.value.trim().toLowerCase();refresh();});
-function resetFilters(){F.div='';F.team='';F.pos='';F.q='';document.getElementById('mainSearch').value='';document.getElementById('lblDiv').textContent='전체 부문';document.getElementById('lblTeam').textContent='전체 팀';document.getElementById('lblPos').textContent='전체 직위';document.querySelectorAll('.fdd-btn').forEach(b=>b.classList.remove('filtered'));refresh();}
+function resetFilters(){F.div='';F.team='';F.pos='';F.status='';F.q='';document.getElementById('mainSearch').value='';document.getElementById('lblDiv').textContent='전체 부문';document.getElementById('lblTeam').textContent='전체 팀';document.getElementById('lblPos').textContent='전체 직위';const lS=document.getElementById('lblStatus');if(lS)lS.textContent='전체 신분';document.querySelectorAll('.fdd-btn').forEach(b=>b.classList.remove('filtered'));refresh();}
 
 // 기본정렬: 조직도(TEAM_MEM_ORDER) 수동 순서와 동일
 const PO=['대표이사','부사장','상무이사','이사','공장장','기술연구소장','수석 매니저','부장','부장/공장장','리드 매니저','차장','차장/팀장','선임연구원','매니저','대리','연구원','사원'];
@@ -1557,6 +1578,7 @@ function refresh(){
         if(F.div&&e.division!==F.div)return false;
         if(F.team){const ch=TEAM_CHILDREN[F.team]||[];const allowed=[F.team,...ch];const jt=e.jointTeams||[];if(!allowed.includes(e.team)&&!jt.some(t=>allowed.includes(t)))return false;}
         if(F.pos&&e.position!==F.pos)return false;
+        if(F.status){const p=isProbationActive(e);if(F.status==='probation'&&!p)return false;if(F.status==='regular'&&p)return false;}
         if(F.q){const s=[e.name,e.position,e.team,e.division,e.phone||'',...(e.primaryTasks||[]),...(e.secondaryTasks||[]),...(e.jointTeams||[])].join(' ').toLowerCase();if(!s.includes(F.q))return false;}
         return true;
     });
@@ -1568,7 +1590,7 @@ function refresh(){
     }
 
     // Stats - 제거됨
-    const hasFilter=F.div||F.team||F.pos||F.q;
+    const hasFilter=F.div||F.team||F.pos||F.status||F.q;
     document.getElementById('statsBar').innerHTML='';
     document.getElementById('btnReset').style.display=hasFilter?'inline-flex':'none';
 
@@ -1597,7 +1619,7 @@ function refresh(){
         taskHtml=priTasks.map(t=>`<span>${t}</span>`).join('');
         const jtArr=Array.isArray(e.jointTeams)?e.jointTeams.filter(Boolean):[];
         const teamCell=(e.team||'-')+(jtArr.length?` <span style="color:var(--accent);font-size:11px;font-weight:600">(겸직)</span> ${jtArr.join(', ')}`:'');
-        const probBadge=isProbationActive(e)?'<span class="badge-prob">수습</span>':'';
+        const probBadge=isProbationActive(e)?'<span class="badge-prob" title="수습사원"></span>':'';
         return `<tr data-id="${e.id}"><td><div class="cn"><div class="av">${e.photo?`<img src="${e.photo}">`:ini}</div>${e.name}${probBadge}${matchBadge}</div></td><td>${e.division||'-'}</td><td>${teamCell}</td><td><span class="cp ${pc}">${e.position||'-'}</span></td><td>${e.phone?`<a href="tel:${e.phone}">${e.phone}</a>`:'-'}</td><td><div class="tg">${taskHtml}</div></td></tr>`;
     }).join('');
     tb.querySelectorAll('tr').forEach(tr=>tr.onclick=()=>showD(tr.dataset.id));
@@ -1881,7 +1903,7 @@ function showD(id){
     const jt=Array.isArray(e.jointTeams)?e.jointTeams.filter(Boolean):[];
     const jointSuffix=jt.length?` <span style="color:var(--accent);font-weight:600">(겸직)</span> ${jt.join(', ')}`:'';
     const teamDisplay=(e.team||'-')+jointSuffix;
-    const probBadgeD=isProbationActive(e)?'<span class="badge-prob">수습</span>':'';
+    const probBadgeD=isProbationActive(e)?'<span class="badge-prob" title="수습사원"></span>':'';
     document.getElementById('dBd').innerHTML=`<div class="dfoto${e.photo?' has-photo':''}">${e.photo?`<img src="${e.photo}">`:ini}</div><div class="dnm">${e.name}${probBadgeD}</div><div class="dsub">${e.position} · ${e.team}${jt.length?' (겸직: '+jt.join(', ')+')':''}</div><div class="dgrid"><div class="dlbl">부문</div><div class="dval">${e.division}</div><div class="dlbl">팀명</div><div class="dval">${teamDisplay}</div><div class="dlbl">직위</div><div class="dval">${e.position}</div>${e.phone?`<div class="dlbl">연락처</div><div class="dval"><a href="tel:${e.phone}">${e.phone}</a></div>`:''} ${e.email?`<div class="dlbl">이메일</div><div class="dval"><a href="mailto:${e.email}">${e.email}</a></div>`:''} ${e.extension?`<div class="dlbl">내선</div><div class="dval">${e.extension}</div>`:''} ${e.memo?`<div class="dlbl">메모</div><div class="dval">${e.memo}</div>`:''}</div>${(e.primaryTasks&&e.primaryTasks.length)?`<div class="dsec">주요 업무</div><div class="dtasks">${e.primaryTasks.map(t=>`<span class="dt-p">${t}</span>`).join('')}</div>`:''}${(e.secondaryTasks&&e.secondaryTasks.length)?`<div class="dsec">기타 업무</div><div class="dtasks">${e.secondaryTasks.map(t=>`<span class="dt-s">${t}</span>`).join('')}</div>`:''}`;
     const isAdm=document.getElementById('admC').classList.contains('unlocked');
     document.getElementById('dAct').innerHTML=isAdm?`<button class="btn btn-p" onclick="editD('${e.id}')">수정</button><button class="btn" onclick="closeD()">닫기</button>`:`<button class="btn" onclick="closeD()">닫기</button>`;
@@ -1948,7 +1970,7 @@ function renderOrg(){
         const badge=sm?'◆':ld?'●':'';
         const teamName=tm||m.team||'';
         const arrows=_isAdmOrg?`<span class="o-arrows"><button class="o-arr" onclick="event.stopPropagation();moveOrgMember('${teamName.replace(/'/g,"\\'")}','${m.name.replace(/'/g,"\\'")}','up')" title="위로">&#9650;</button><button class="o-arr" onclick="event.stopPropagation();moveOrgMember('${teamName.replace(/'/g,"\\'")}','${m.name.replace(/'/g,"\\'")}','down')" title="아래로">&#9660;</button></span>`:'';
-        const probBadge=isProbationActive(m)?'<span class="badge-prob">수습</span>':'';
+        const probBadge=isProbationActive(m)?'<span class="badge-prob" title="수습사원"></span>':'';
         return `<div class="o-mem${sm?' is-sm':''}${ld?' is-ld':''}" onclick="showD('${m.id}')">
             ${badge?'<span class="o-badge">'+badge+'</span> ':''}<span class="o-nm">${m.name}</span>${probBadge} <span class="o-pos">${m.position}</span>${arrows}
         </div>`;
@@ -1959,7 +1981,7 @@ function renderOrg(){
         if(!person)return '';
         const sm=person.position==='수석 매니저'||person.position==='부장'||person.position==='부장/공장장';
         const badge=sm?'◆':'★';
-        const probBadge=isProbationActive(person)?'<span class="badge-prob">수습</span>':'';
+        const probBadge=isProbationActive(person)?'<span class="badge-prob" title="수습사원"></span>':'';
         return `<div class="o-head${sm?' is-sm':''}"${person.id?` onclick="showD('${person.id}')"`:''}>
             <span class="o-badge">${badge}</span> <span class="o-nm">${person.name}</span>${probBadge} <span class="o-pos">${person.position}</span>
         </div>`;
@@ -2769,6 +2791,7 @@ async function downloadDirectoryPDF(withPhoto=true){
         if(F.div&&e.division!==F.div)return false;
         if(F.team){const ch=TEAM_CHILDREN[F.team]||[];const allowed=[F.team,...ch];const jt=e.jointTeams||[];if(!allowed.includes(e.team)&&!jt.some(t=>allowed.includes(t)))return false;}
         if(F.pos&&e.position!==F.pos)return false;
+        if(F.status){const p=isProbationActive(e);if(F.status==='probation'&&!p)return false;if(F.status==='regular'&&p)return false;}
         if(F.q){const s=[e.name,e.position,e.team,e.division,e.phone||'',...(e.primaryTasks||[]),...(e.secondaryTasks||[]),...(e.jointTeams||[])].join(' ').toLowerCase();if(!s.includes(F.q))return false;}
         return true;
     });
@@ -2851,9 +2874,11 @@ async function downloadDirectoryPDF(withPhoto=true){
                             ?`<td style="padding:4px 6px 4px 10px;width:42px;${tmKeys.length>1&&tm!==div?'padding-left:18px;':''}"><img src="${m.photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;display:block;"></td>`
                             :`<td style="padding:4px 6px 4px 10px;width:42px;${tmKeys.length>1&&tm!==div?'padding-left:18px;':''}"><div style="width:36px;height:36px;border-radius:50%;background:#4a5568;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;">${ini}</div></td>`;
                     }
+                    // 수습사원이면 이름 옆에 노란 원형 배지 추가 (PDF 렌더링용 인라인 스타일)
+                    const probDotPDF=isProbationActive(m)?'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F59E0B;margin-left:5px;vertical-align:middle;"></span>':'';
                     tr.innerHTML=
                         photoTd+
-                        `<td style="padding:5px 10px;font-weight:600;color:#1a1a1a;width:70px;${!withPhoto&&tmKeys.length>1&&tm!==div?'padding-left:18px;':''}">${m.name}</td>`+
+                        `<td style="padding:5px 10px;font-weight:600;color:#1a1a1a;width:70px;${!withPhoto&&tmKeys.length>1&&tm!==div?'padding-left:18px;':''}">${m.name}${probDotPDF}</td>`+
                         `<td style="padding:5px 6px;color:#787878;width:80px;">${m.position||'-'}</td>`+
                         `<td style="padding:5px 6px;color:#787878;width:110px;">${m.phone||'-'}</td>`+
                         `<td style="padding:5px 6px;color:#787878;">${tasks||'-'}</td>`;
@@ -3470,7 +3495,7 @@ function showSeatPopup(name,el){
         body.innerHTML=`<div class="seat-popup-nm">${name}</div><div class="seat-popup-sub" style="margin-top:6px;">등록된 직원 정보가 없습니다.</div>`;
     }else{
         const tasks=(emp.primaryTasks||[]);
-        const probBadgeS=isProbationActive(emp)?'<span class="badge-prob">수습</span>':'';
+        const probBadgeS=isProbationActive(emp)?'<span class="badge-prob" title="수습사원"></span>':'';
         body.innerHTML=
             `<div class="seat-popup-nm">${emp.name}${probBadgeS}</div>`+
             `<div class="seat-popup-sub">${emp.position} · ${emp.team}</div>`+
