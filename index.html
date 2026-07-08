@@ -190,6 +190,7 @@ table.dt{width:100%;border-collapse:collapse;}
 .cp-s{background:rgba(109,40,217,0.08);color:#7c3aed;}
 .cp-l{background:rgba(230,126,34,0.08);color:#e67e22;}
 .cp-m{background:var(--bg-hover);color:var(--text-sub);}
+.badge-prob{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;background:#FEF3C7;color:#B45309;margin-left:6px;vertical-align:middle;line-height:1.4;}
 .tg{display:flex;gap:3px;flex-wrap:nowrap;overflow:hidden;}
 .tg span{padding:2px 7px;border-radius:4px;font-size:11px;background:var(--bg-hover);color:var(--text-sub);white-space:nowrap;}
 .tg-match{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;background:var(--green-dim);color:var(--green);font-weight:600;margin-left:4px;white-space:nowrap;}
@@ -1153,6 +1154,13 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
                 <div class="fgi"><label>이메일</label><input id="fEm"></div>
                 <div class="fgi"><label>내선번호</label><input id="fEx"></div>
                 <div class="fgi"><label>생년월일 (6자리)</label><input id="fBirth" maxlength="6" placeholder="예: 930515" inputmode="numeric"></div>
+                <div class="fgi"><label>수습 여부</label>
+                    <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text);padding:8px 0;">
+                        <input type="checkbox" id="fProb" onchange="onProbationChange()" style="width:16px;height:16px;cursor:pointer;">
+                        수습사원
+                    </label>
+                </div>
+                <div class="fgi" id="fProbEndWrap" style="display:none;"><label>수습 종료일</label><input type="date" id="fProbEnd"></div>
                 <div class="fgi full"><label>겸직 팀</label>
                     <div class="joint-team-row">
                         <select id="fJointSel" class="joint-team-sel"><option value="">팀 선택</option></select>
@@ -1589,7 +1597,8 @@ function refresh(){
         taskHtml=priTasks.map(t=>`<span>${t}</span>`).join('');
         const jtArr=Array.isArray(e.jointTeams)?e.jointTeams.filter(Boolean):[];
         const teamCell=(e.team||'-')+(jtArr.length?` <span style="color:var(--accent);font-size:11px;font-weight:600">(겸직)</span> ${jtArr.join(', ')}`:'');
-        return `<tr data-id="${e.id}"><td><div class="cn"><div class="av">${e.photo?`<img src="${e.photo}">`:ini}</div>${e.name}${matchBadge}</div></td><td>${e.division||'-'}</td><td>${teamCell}</td><td><span class="cp ${pc}">${e.position||'-'}</span></td><td>${e.phone?`<a href="tel:${e.phone}">${e.phone}</a>`:'-'}</td><td><div class="tg">${taskHtml}</div></td></tr>`;
+        const probBadge=isProbationActive(e)?'<span class="badge-prob">수습</span>':'';
+        return `<tr data-id="${e.id}"><td><div class="cn"><div class="av">${e.photo?`<img src="${e.photo}">`:ini}</div>${e.name}${probBadge}${matchBadge}</div></td><td>${e.division||'-'}</td><td>${teamCell}</td><td><span class="cp ${pc}">${e.position||'-'}</span></td><td>${e.phone?`<a href="tel:${e.phone}">${e.phone}</a>`:'-'}</td><td><div class="tg">${taskHtml}</div></td></tr>`;
     }).join('');
     tb.querySelectorAll('tr').forEach(tr=>tr.onclick=()=>showD(tr.dataset.id));
     syncSeatMap();
@@ -1872,7 +1881,8 @@ function showD(id){
     const jt=Array.isArray(e.jointTeams)?e.jointTeams.filter(Boolean):[];
     const jointSuffix=jt.length?` <span style="color:var(--accent);font-weight:600">(겸직)</span> ${jt.join(', ')}`:'';
     const teamDisplay=(e.team||'-')+jointSuffix;
-    document.getElementById('dBd').innerHTML=`<div class="dfoto${e.photo?' has-photo':''}">${e.photo?`<img src="${e.photo}">`:ini}</div><div class="dnm">${e.name}</div><div class="dsub">${e.position} · ${e.team}${jt.length?' (겸직: '+jt.join(', ')+')':''}</div><div class="dgrid"><div class="dlbl">부문</div><div class="dval">${e.division}</div><div class="dlbl">팀명</div><div class="dval">${teamDisplay}</div><div class="dlbl">직위</div><div class="dval">${e.position}</div>${e.phone?`<div class="dlbl">연락처</div><div class="dval"><a href="tel:${e.phone}">${e.phone}</a></div>`:''} ${e.email?`<div class="dlbl">이메일</div><div class="dval"><a href="mailto:${e.email}">${e.email}</a></div>`:''} ${e.extension?`<div class="dlbl">내선</div><div class="dval">${e.extension}</div>`:''} ${e.memo?`<div class="dlbl">메모</div><div class="dval">${e.memo}</div>`:''}</div>${(e.primaryTasks&&e.primaryTasks.length)?`<div class="dsec">주요 업무</div><div class="dtasks">${e.primaryTasks.map(t=>`<span class="dt-p">${t}</span>`).join('')}</div>`:''}${(e.secondaryTasks&&e.secondaryTasks.length)?`<div class="dsec">기타 업무</div><div class="dtasks">${e.secondaryTasks.map(t=>`<span class="dt-s">${t}</span>`).join('')}</div>`:''}`;
+    const probBadgeD=isProbationActive(e)?'<span class="badge-prob">수습</span>':'';
+    document.getElementById('dBd').innerHTML=`<div class="dfoto${e.photo?' has-photo':''}">${e.photo?`<img src="${e.photo}">`:ini}</div><div class="dnm">${e.name}${probBadgeD}</div><div class="dsub">${e.position} · ${e.team}${jt.length?' (겸직: '+jt.join(', ')+')':''}</div><div class="dgrid"><div class="dlbl">부문</div><div class="dval">${e.division}</div><div class="dlbl">팀명</div><div class="dval">${teamDisplay}</div><div class="dlbl">직위</div><div class="dval">${e.position}</div>${e.phone?`<div class="dlbl">연락처</div><div class="dval"><a href="tel:${e.phone}">${e.phone}</a></div>`:''} ${e.email?`<div class="dlbl">이메일</div><div class="dval"><a href="mailto:${e.email}">${e.email}</a></div>`:''} ${e.extension?`<div class="dlbl">내선</div><div class="dval">${e.extension}</div>`:''} ${e.memo?`<div class="dlbl">메모</div><div class="dval">${e.memo}</div>`:''}</div>${(e.primaryTasks&&e.primaryTasks.length)?`<div class="dsec">주요 업무</div><div class="dtasks">${e.primaryTasks.map(t=>`<span class="dt-p">${t}</span>`).join('')}</div>`:''}${(e.secondaryTasks&&e.secondaryTasks.length)?`<div class="dsec">기타 업무</div><div class="dtasks">${e.secondaryTasks.map(t=>`<span class="dt-s">${t}</span>`).join('')}</div>`:''}`;
     const isAdm=document.getElementById('admC').classList.contains('unlocked');
     document.getElementById('dAct').innerHTML=isAdm?`<button class="btn btn-p" onclick="editD('${e.id}')">수정</button><button class="btn" onclick="closeD()">닫기</button>`:`<button class="btn" onclick="closeD()">닫기</button>`;
     document.getElementById('dOv').classList.add('open');document.getElementById('dPn').classList.add('open');
@@ -1938,8 +1948,9 @@ function renderOrg(){
         const badge=sm?'◆':ld?'●':'';
         const teamName=tm||m.team||'';
         const arrows=_isAdmOrg?`<span class="o-arrows"><button class="o-arr" onclick="event.stopPropagation();moveOrgMember('${teamName.replace(/'/g,"\\'")}','${m.name.replace(/'/g,"\\'")}','up')" title="위로">&#9650;</button><button class="o-arr" onclick="event.stopPropagation();moveOrgMember('${teamName.replace(/'/g,"\\'")}','${m.name.replace(/'/g,"\\'")}','down')" title="아래로">&#9660;</button></span>`:'';
+        const probBadge=isProbationActive(m)?'<span class="badge-prob">수습</span>':'';
         return `<div class="o-mem${sm?' is-sm':''}${ld?' is-ld':''}" onclick="showD('${m.id}')">
-            ${badge?'<span class="o-badge">'+badge+'</span> ':''}<span class="o-nm">${m.name}</span> <span class="o-pos">${m.position}</span>${arrows}
+            ${badge?'<span class="o-badge">'+badge+'</span> ':''}<span class="o-nm">${m.name}</span>${probBadge} <span class="o-pos">${m.position}</span>${arrows}
         </div>`;
     }
 
@@ -1948,8 +1959,9 @@ function renderOrg(){
         if(!person)return '';
         const sm=person.position==='수석 매니저'||person.position==='부장'||person.position==='부장/공장장';
         const badge=sm?'◆':'★';
+        const probBadge=isProbationActive(person)?'<span class="badge-prob">수습</span>':'';
         return `<div class="o-head${sm?' is-sm':''}"${person.id?` onclick="showD('${person.id}')"`:''}>
-            <span class="o-badge">${badge}</span> <span class="o-nm">${person.name}</span> <span class="o-pos">${person.position}</span>
+            <span class="o-badge">${badge}</span> <span class="o-nm">${person.name}</span>${probBadge} <span class="o-pos">${person.position}</span>
         </div>`;
     }
 
@@ -3098,6 +3110,27 @@ function addJointTeam(){
 }
 document.addEventListener('DOMContentLoaded',populateJointTeamSel);
 
+// 수습사원 판정 헬퍼: 종료일이 지정되어 있고 오늘 날짜가 종료일 이전(포함)이면 수습중.
+// 오늘 > 종료일이면 자동으로 정직원으로 취급됨 (데이터는 그대로, 렌더링만 달라짐).
+function isProbationActive(emp){
+    if(!emp||!emp.probationEndDate)return false;
+    const today=new Date();
+    const y=today.getFullYear(),m=String(today.getMonth()+1).padStart(2,'0'),d=String(today.getDate()).padStart(2,'0');
+    const todayStr=y+'-'+m+'-'+d;
+    return todayStr<=emp.probationEndDate;
+}
+// 폼: 수습사원 체크박스 변경 시 종료일 필드 표시/숨김
+function onProbationChange(){
+    const chk=document.getElementById('fProb');
+    const wrap=document.getElementById('fProbEndWrap');
+    if(!chk||!wrap)return;
+    wrap.style.display=chk.checked?'':'none';
+    if(!chk.checked){
+        const inp=document.getElementById('fProbEnd');
+        if(inp)inp.value='';
+    }
+}
+
 // 부문→본부 매핑
 const DIV_SUBS={'영업본부':['서비스본부']};
 function onDivChange(){
@@ -3122,16 +3155,19 @@ function saveEmp(){
     const finalTeam=t;
     // 겸직 팀: 메인 팀(team)과 동일한 항목은 제외
     const jointTeams=getJointTeams().filter(jt=>jt&&jt!==finalTeam);
-    const data={id:eid||gid(),name:n,division:d,subDivision:sub||'',team:finalTeam,jointTeams:jointTeams,position:p,phone:document.getElementById('fPh').value.trim(),email:document.getElementById('fEm').value.trim(),joinDate:eid?(all.find(x=>x.id===eid)||{}).joinDate||'':'',extension:document.getElementById('fEx').value.trim(),birthDate:document.getElementById('fBirth').value.trim(),primaryTasks:getTaskValues('fPrRows'),secondaryTasks:getTaskValues('fScRows'),memo:document.getElementById('fMe').value.trim(),photo:photo,sortOrder:eid?(all.find(e=>e.id===eid)||{}).sortOrder||0:all.length};
+    // 수습사원: 체크박스 켜져있으면 종료일 저장, 아니면 빈 문자열 (자동 정직원)
+    const probChk=document.getElementById('fProb');
+    const probEnd=(probChk&&probChk.checked)?(document.getElementById('fProbEnd').value||''):'';
+    const data={id:eid||gid(),name:n,division:d,subDivision:sub||'',team:finalTeam,jointTeams:jointTeams,position:p,phone:document.getElementById('fPh').value.trim(),email:document.getElementById('fEm').value.trim(),joinDate:eid?(all.find(x=>x.id===eid)||{}).joinDate||'':'',extension:document.getElementById('fEx').value.trim(),birthDate:document.getElementById('fBirth').value.trim(),probationEndDate:probEnd,primaryTasks:getTaskValues('fPrRows'),secondaryTasks:getTaskValues('fScRows'),memo:document.getElementById('fMe').value.trim(),photo:photo,sortOrder:eid?(all.find(e=>e.id===eid)||{}).sortOrder||0:all.length};
     const isNew=!eid;
     const divChanged=oldEmp&&(oldEmp.division!==d||oldEmp.team!==finalTeam||oldEmp.position!==p);
     if(eid){const i=all.findIndex(e=>e.id===eid);if(i!==-1)all[i]=data;toast(n+' 수정 완료','ok');}else{all.push(data);toast(n+' 등록 완료','ok');}
     if(isNew||divChanged) setOrgDate();
     S(all);resetF();refresh();renderAdmEmpList();
 }
-function editD(id){closeD();const e=G().find(x=>x.id===id);if(!e)return;switchPanel('admin');document.getElementById('fTitle').textContent='직원 정보 수정';document.getElementById('editId').value=e.id;document.getElementById('fN').value=e.name;document.getElementById('fD').value=e.division;onDivChange();document.getElementById('fSub').value=e.subDivision||'';document.getElementById('fT').value=e.team;document.getElementById('fP').value=e.position;document.getElementById('fPh').value=e.phone||'';document.getElementById('fEm').value=e.email||'';document.getElementById('fEx').value=e.extension||'';document.getElementById('fBirth').value=e.birthDate||'';setTaskRows('fPrRows',e.primaryTasks||[],2);setTaskRows('fScRows',e.secondaryTasks||[],1);setJointTeams(e.jointTeams||[]);document.getElementById('fMe').value=e.memo||'';if(e.photo){document.getElementById('fPhoto').value=e.photo;document.getElementById('fPhotoPreview').innerHTML=`<img src="${e.photo}">`;document.getElementById('fPhotoDelBtn').style.display='inline-flex';}else{clearPhoto();}document.getElementById('delBtn').style.display='inline-flex';window.scrollTo({top:0,behavior:'smooth'});}
+function editD(id){closeD();const e=G().find(x=>x.id===id);if(!e)return;switchPanel('admin');document.getElementById('fTitle').textContent='직원 정보 수정';document.getElementById('editId').value=e.id;document.getElementById('fN').value=e.name;document.getElementById('fD').value=e.division;onDivChange();document.getElementById('fSub').value=e.subDivision||'';document.getElementById('fT').value=e.team;document.getElementById('fP').value=e.position;document.getElementById('fPh').value=e.phone||'';document.getElementById('fEm').value=e.email||'';document.getElementById('fEx').value=e.extension||'';document.getElementById('fBirth').value=e.birthDate||'';setTaskRows('fPrRows',e.primaryTasks||[],2);setTaskRows('fScRows',e.secondaryTasks||[],1);setJointTeams(e.jointTeams||[]);document.getElementById('fMe').value=e.memo||'';const probChk=document.getElementById('fProb'),probEnd=document.getElementById('fProbEnd');if(probChk){probChk.checked=!!e.probationEndDate;if(probEnd)probEnd.value=e.probationEndDate||'';onProbationChange();}if(e.photo){document.getElementById('fPhoto').value=e.photo;document.getElementById('fPhotoPreview').innerHTML=`<img src="${e.photo}">`;document.getElementById('fPhotoDelBtn').style.display='inline-flex';}else{clearPhoto();}document.getElementById('delBtn').style.display='inline-flex';window.scrollTo({top:0,behavior:'smooth'});}
 function delEmp(){const eid=document.getElementById('editId').value;if(!eid||!confirm('삭제하시겠습니까?'))return;const all=G();const emp=all.find(e=>e.id===eid);if(emp)addDeleted(emp.name+'|'+emp.division);setOrgDate();S(all.filter(e=>e.id!==eid));toast('삭제 완료','ok');resetF();refresh();renderAdmEmpList();}
-function resetF(){document.getElementById('fTitle').textContent='신규 직원 등록';document.getElementById('editId').value='';['fN','fT','fPh','fEm','fEx','fBirth','fMe'].forEach(i=>document.getElementById(i).value='');setTaskRows('fPrRows',[],2);setTaskRows('fScRows',[],1);setJointTeams([]);clearPhoto();document.getElementById('fD').value='';document.getElementById('fSub').value='';document.getElementById('fP').value='';document.getElementById('delBtn').style.display='none';}
+function resetF(){document.getElementById('fTitle').textContent='신규 직원 등록';document.getElementById('editId').value='';['fN','fT','fPh','fEm','fEx','fBirth','fMe','fProbEnd'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});setTaskRows('fPrRows',[],2);setTaskRows('fScRows',[],1);setJointTeams([]);clearPhoto();document.getElementById('fD').value='';document.getElementById('fSub').value='';document.getElementById('fP').value='';const probChk=document.getElementById('fProb');if(probChk){probChk.checked=false;onProbationChange();}document.getElementById('delBtn').style.display='none';}
 
 // Excel
 const xd=document.getElementById('xDrop');
@@ -3434,8 +3470,9 @@ function showSeatPopup(name,el){
         body.innerHTML=`<div class="seat-popup-nm">${name}</div><div class="seat-popup-sub" style="margin-top:6px;">등록된 직원 정보가 없습니다.</div>`;
     }else{
         const tasks=(emp.primaryTasks||[]);
+        const probBadgeS=isProbationActive(emp)?'<span class="badge-prob">수습</span>':'';
         body.innerHTML=
-            `<div class="seat-popup-nm">${emp.name}</div>`+
+            `<div class="seat-popup-nm">${emp.name}${probBadgeS}</div>`+
             `<div class="seat-popup-sub">${emp.position} · ${emp.team}</div>`+
             `<div class="seat-popup-grid">`+
             `<div class="sp-l">부문</div><div class="sp-v">${emp.division||'-'}</div>`+
