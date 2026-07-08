@@ -2880,9 +2880,10 @@ async function downloadDirectoryPDF(withPhoto=true){
                     const probDotPDF=isProbationActive(m)?'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F59E0B;margin-left:5px;vertical-align:middle;"></span>':'';
                     tr.innerHTML=
                         photoTd+
-                        `<td style="padding:5px 10px;font-weight:600;color:#1a1a1a;width:70px;${!withPhoto&&tmKeys.length>1&&tm!==div?'padding-left:18px;':''}">${m.name}${probDotPDF}</td>`+
-                        `<td style="padding:5px 6px;color:#787878;width:80px;">${m.position||'-'}</td>`+
-                        `<td style="padding:5px 6px;color:#787878;width:110px;">${m.phone||'-'}</td>`+
+                        `<td style="padding:5px 10px;font-weight:600;color:#1a1a1a;width:65px;${!withPhoto&&tmKeys.length>1&&tm!==div?'padding-left:18px;':''}">${m.name}${probDotPDF}</td>`+
+                        `<td style="padding:5px 5px;color:#787878;width:70px;">${m.position||'-'}</td>`+
+                        `<td style="padding:5px 5px;color:#787878;width:100px;">${m.phone||'-'}</td>`+
+                        `<td style="padding:5px 5px;color:#4a5568;width:150px;font-size:10px;word-break:break-all;">${m.email||'-'}</td>`+
                         `<td style="padding:5px 6px;color:#787878;">${tasks||'-'}</td>`;
                     tbl.appendChild(tr);
                 });
