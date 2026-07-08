@@ -190,7 +190,9 @@ table.dt{width:100%;border-collapse:collapse;}
 .cp-s{background:rgba(109,40,217,0.08);color:#7c3aed;}
 .cp-l{background:rgba(230,126,34,0.08);color:#e67e22;}
 .cp-m{background:var(--bg-hover);color:var(--text-sub);}
-.badge-prob{display:inline-block;width:8px;height:8px;border-radius:50%;background:#F59E0B;margin-left:5px;vertical-align:middle;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,0,0,0.05);}
+.badge-prob{display:inline-block;width:10px;height:10px;border-radius:50%;background:#F59E0B;margin-left:6px;vertical-align:middle;flex-shrink:0;box-shadow:0 0 0 2px #FEF3C7;}
+.av.is-prob{outline:3px solid #F59E0B;outline-offset:0;}
+.av.is-prob img{display:block;}
 .tg{display:flex;gap:3px;flex-wrap:nowrap;overflow:hidden;}
 .tg span{padding:2px 7px;border-radius:4px;font-size:11px;background:var(--bg-hover);color:var(--text-sub);white-space:nowrap;}
 .tg-match{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;background:var(--green-dim);color:var(--green);font-weight:600;margin-left:4px;white-space:nowrap;}
@@ -1619,8 +1621,10 @@ function refresh(){
         taskHtml=priTasks.map(t=>`<span>${t}</span>`).join('');
         const jtArr=Array.isArray(e.jointTeams)?e.jointTeams.filter(Boolean):[];
         const teamCell=(e.team||'-')+(jtArr.length?` <span style="color:var(--accent);font-size:11px;font-weight:600">(겸직)</span> ${jtArr.join(', ')}`:'');
-        const probBadge=isProbationActive(e)?'<span class="badge-prob" title="수습사원"></span>':'';
-        return `<tr data-id="${e.id}"><td><div class="cn"><div class="av">${e.photo?`<img src="${e.photo}">`:ini}</div>${e.name}${probBadge}${matchBadge}</div></td><td>${e.division||'-'}</td><td>${teamCell}</td><td><span class="cp ${pc}">${e.position||'-'}</span></td><td>${e.phone?`<a href="tel:${e.phone}">${e.phone}</a>`:'-'}</td><td><div class="tg">${taskHtml}</div></td></tr>`;
+        const isProb=isProbationActive(e);
+        const probBadge=isProb?'<span class="badge-prob" title="수습사원"></span>':'';
+        const avClass=isProb?'av is-prob':'av';
+        return `<tr data-id="${e.id}"><td><div class="cn"><div class="${avClass}">${e.photo?`<img src="${e.photo}">`:ini}</div>${e.name}${probBadge}${matchBadge}</div></td><td>${e.division||'-'}</td><td>${teamCell}</td><td><span class="cp ${pc}">${e.position||'-'}</span></td><td>${e.phone?`<a href="tel:${e.phone}">${e.phone}</a>`:'-'}</td><td><div class="tg">${taskHtml}</div></td></tr>`;
     }).join('');
     tb.querySelectorAll('tr').forEach(tr=>tr.onclick=()=>showD(tr.dataset.id));
     syncSeatMap();
@@ -1970,9 +1974,8 @@ function renderOrg(){
         const badge=sm?'◆':ld?'●':'';
         const teamName=tm||m.team||'';
         const arrows=_isAdmOrg?`<span class="o-arrows"><button class="o-arr" onclick="event.stopPropagation();moveOrgMember('${teamName.replace(/'/g,"\\'")}','${m.name.replace(/'/g,"\\'")}','up')" title="위로">&#9650;</button><button class="o-arr" onclick="event.stopPropagation();moveOrgMember('${teamName.replace(/'/g,"\\'")}','${m.name.replace(/'/g,"\\'")}','down')" title="아래로">&#9660;</button></span>`:'';
-        const probBadge=isProbationActive(m)?'<span class="badge-prob" title="수습사원"></span>':'';
         return `<div class="o-mem${sm?' is-sm':''}${ld?' is-ld':''}" onclick="showD('${m.id}')">
-            ${badge?'<span class="o-badge">'+badge+'</span> ':''}<span class="o-nm">${m.name}</span>${probBadge} <span class="o-pos">${m.position}</span>${arrows}
+            ${badge?'<span class="o-badge">'+badge+'</span> ':''}<span class="o-nm">${m.name}</span> <span class="o-pos">${m.position}</span>${arrows}
         </div>`;
     }
 
@@ -1981,9 +1984,8 @@ function renderOrg(){
         if(!person)return '';
         const sm=person.position==='수석 매니저'||person.position==='부장'||person.position==='부장/공장장';
         const badge=sm?'◆':'★';
-        const probBadge=isProbationActive(person)?'<span class="badge-prob" title="수습사원"></span>':'';
         return `<div class="o-head${sm?' is-sm':''}"${person.id?` onclick="showD('${person.id}')"`:''}>
-            <span class="o-badge">${badge}</span> <span class="o-nm">${person.name}</span>${probBadge} <span class="o-pos">${person.position}</span>
+            <span class="o-badge">${badge}</span> <span class="o-nm">${person.name}</span> <span class="o-pos">${person.position}</span>
         </div>`;
     }
 
