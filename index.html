@@ -1208,6 +1208,18 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
             <p style="font-size:11px;color:#7c3aed;margin-top:4px">📷 <b>사진 일괄 등록</b>: photos_import.json 파일을 선택하면 이름+팀으로 자동 매칭하여 사진을 일괄 등록합니다.</p>
             <div id="mergeResult" style="margin-top:8px"></div>
         </div>
+        <!-- 자동 백업 -->
+        <div class="adm-sec">
+            <div class="adm-sec-t">🛡️ 자동 백업</div>
+            <p style="font-size:11px;color:var(--text-sub);margin-bottom:10px">직원 정보 변경 시마다 자동으로 스냅샷을 저장합니다. 최근 10건까지 보관되며, 언제든 이전 상태로 복원 가능합니다.</p>
+            <div class="dacts" style="margin-bottom:12px;">
+                <button class="btn btn-p" onclick="createManualBackup()">📥 지금 백업</button>
+                <button class="btn" onclick="downloadCurrentBackup()">💾 현재 데이터 다운로드 (JSON)</button>
+                <button class="btn" onclick="document.getElementById('backupUpload').click()">📤 백업 파일로 복원</button>
+                <input type="file" id="backupUpload" accept=".json,.txt" style="display:none" onchange="restoreFromFile(event)">
+            </div>
+            <div id="backupList"></div>
+        </div>
         <!-- 비밀번호 -->
         <div class="adm-sec">
             <div class="adm-sec-t">관리자 비밀번호 변경</div>
@@ -1338,7 +1350,104 @@ function _mergeDefaults(stored){
 const G=()=>{try{const d=JSON.parse(localStorage.getItem(SK));if(d&&d.length){let changed=_mergeDefaults(d);d.forEach(e=>{if(e&&!e.id){e.id=gid();changed=true;}});if(changed)localStorage.setItem(SK,JSON.stringify(d));return d;}localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e,id:e.id||gid()}));}catch(e){localStorage.setItem(SK,JSON.stringify(DEFAULT_EMP));return DEFAULT_EMP.map(e=>({...e,id:e.id||gid()}));}};
 // 직원 데이터 저장. Firebase 쓰기 실패 시 사용자에게 명확한 토스트 알림을 띄워
 // 「본인 PC에만 저장됨」 사실을 즉시 인지하고 관리자에게 알릴 수 있도록 함.
-const S=d=>{const clean=d.filter(Boolean);clean.forEach(emp=>{if(emp&&!emp.id)emp.id=gid();});localStorage.setItem(SK,JSON.stringify(clean));const keyed={};clean.forEach(emp=>{if(emp&&emp.id)keyed[emp.id]=emp;});fbEmpRef.set(keyed).catch(e=>{console.error('FB emp write err:',e);if(typeof toast==='function')toast('⚠️ 클라우드 동기화 실패! 본인 PC에만 저장됐을 수 있습니다. 관리자에게 알려주세요. ('+(e&&e.code||'unknown')+')','err');});};
+const S=d=>{const clean=d.filter(Boolean);clean.forEach(emp=>{if(emp&&!emp.id)emp.id=gid();});localStorage.setItem(SK,JSON.stringify(clean));const keyed={};clean.forEach(emp=>{if(emp&&emp.id)keyed[emp.id]=emp;});fbEmpRef.set(keyed).catch(e=>{console.error('FB emp write err:',e);if(typeof toast==='function')toast('⚠️ 클라우드 동기화 실패! 본인 PC에만 저장됐을 수 있습니다. 관리자에게 알려주세요. ('+(e&&e.code||'unknown')+')','err');});try{createBackup('auto');}catch(e){console.error('auto backup err:',e);}};
+
+// === 자동 백업 시스템 ===
+// LocalStorage에 최근 백업 이력을 저장. S() 호출 시마다 자동 백업.
+const BACKUP_KEY='nf_backups';
+const MAX_BACKUPS=10;
+function getBackups(){try{return JSON.parse(localStorage.getItem(BACKUP_KEY))||[];}catch(e){return[];}}
+function _saveBackups(list){
+    // LocalStorage 용량 초과 시 백업 개수를 줄여가며 재시도
+    for(let n=list.length;n>=1;n--){
+        try{localStorage.setItem(BACKUP_KEY,JSON.stringify(list.slice(0,n)));return n;}
+        catch(e){}
+    }
+    try{localStorage.removeItem(BACKUP_KEY);}catch(e){}
+    return 0;
+}
+function createBackup(source){
+    try{
+        const data=G();if(!data||!data.length)return false;
+        const backups=getBackups();
+        // 최신 백업과 데이터가 완전 동일하면 중복 저장 안 함
+        if(backups[0]){
+            try{if(JSON.stringify(backups[0].data)===JSON.stringify(data))return false;}catch(e){}
+        }
+        backups.unshift({time:Date.now(),count:data.length,source:source||'auto',data:data});
+        const saved=_saveBackups(backups.slice(0,MAX_BACKUPS));
+        // 백업 목록 UI가 열려있으면 자동 갱신
+        try{if(document.getElementById('backupList'))renderBackupList();}catch(e){}
+        return saved>0;
+    }catch(e){console.error('createBackup err:',e);return false;}
+}
+function createManualBackup(){
+    const ok=createBackup('manual');
+    if(ok){if(typeof toast==='function')toast('✅ 백업 완료','ok');renderBackupList();}
+    else{if(typeof toast==='function')toast('⚠️ 백업 실패 또는 변경사항 없음','err');}
+}
+function _fmtTime(t){const d=new Date(t);const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0'),hh=String(d.getHours()).padStart(2,'0'),mm=String(d.getMinutes()).padStart(2,'0');return`${y}-${m}-${dd} ${hh}:${mm}`;}
+function renderBackupList(){
+    const box=document.getElementById('backupList');if(!box)return;
+    const backups=getBackups();
+    if(!backups.length){box.innerHTML='<div style="padding:12px;color:var(--text-dim);font-size:13px;">백업 이력이 없습니다. 직원 정보를 저장하면 자동으로 생성됩니다.</div>';return;}
+    box.innerHTML='<div style="font-size:12px;color:var(--text-sub);margin-bottom:8px;">최근 백업 '+backups.length+'건 (최대 '+MAX_BACKUPS+'건 보관)</div>'+
+        backups.map((b,i)=>{
+            const tagColor=b.source==='manual'?'#7c3aed':'#787878';
+            const tagLabel=b.source==='manual'?'수동':'자동';
+            return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;margin-bottom:4px;font-size:13px;">'+
+                '<span style="flex:1"><strong>'+_fmtTime(b.time)+'</strong> · '+b.count+'명 · <span style="color:'+tagColor+';font-weight:600">['+tagLabel+']</span></span>'+
+                '<button class="btn" onclick="downloadBackup('+i+')">💾 다운로드</button>'+
+                '<button class="btn btn-p" onclick="restoreBackup('+i+')">↶ 복원</button>'+
+                '</div>';
+        }).join('');
+}
+function _downloadJSON(data,fname){
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=fname;document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function downloadBackup(idx){
+    const b=getBackups()[idx];if(!b)return;
+    const d=new Date(b.time);
+    const stamp=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+    _downloadJSON(b.data,`직원백업_${stamp}.json`);
+}
+function downloadCurrentBackup(){
+    const data=G();
+    const d=new Date();
+    const stamp=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+    _downloadJSON(data,`직원백업_${stamp}.json`);
+    if(typeof toast==='function')toast('💾 다운로드 완료','ok');
+}
+function restoreBackup(idx){
+    const b=getBackups()[idx];if(!b)return;
+    if(!confirm('⚠️ 이 백업으로 복원할까요?\n\n일시: '+_fmtTime(b.time)+'\n직원: '+b.count+'명\n\n현재 데이터는 자동 백업 후 덮어써집니다.'))return;
+    createBackup('auto'); // 복원 직전 현재 상태를 자동 백업
+    localStorage.setItem(SK,JSON.stringify(b.data));
+    fbEmpRef.set(Object.fromEntries(b.data.filter(e=>e&&e.id).map(e=>[e.id,e])))
+        .then(()=>{alert('✅ 복원 완료 ('+b.count+'명). 새로고침합니다.');location.reload();})
+        .catch(e=>{alert('⚠️ Firebase 오류: '+e.code+'\nLocalStorage는 복원됨. 새로고침합니다.');location.reload();});
+}
+function restoreFromFile(event){
+    const f=event.target.files[0];if(!f){return;}
+    const reader=new FileReader();
+    reader.onload=e=>{
+        try{
+            const B=JSON.parse(e.target.result);
+            if(!Array.isArray(B))throw new Error('JSON 배열 형식이 아닙니다');
+            if(!confirm('📤 파일로 복원할까요?\n\n파일: '+f.name+'\n직원: '+B.length+'명\n\n현재 데이터는 자동 백업 후 덮어써집니다.'))return;
+            createBackup('auto');
+            localStorage.setItem(SK,JSON.stringify(B));
+            fbEmpRef.set(Object.fromEntries(B.filter(e=>e&&e.id).map(e=>[e.id,e])))
+                .then(()=>{alert('✅ 파일 복원 완료 ('+B.length+'명). 새로고침합니다.');location.reload();})
+                .catch(err=>{alert('⚠️ Firebase 오류: '+err.code+'\nLocalStorage는 복원됨. 새로고침합니다.');location.reload();});
+        }catch(err){alert('❌ 파일 오류: '+err.message);}
+    };
+    reader.readAsText(f);
+    event.target.value='';
+}
 const gPw=()=>localStorage.getItem(PK)||'ice080303!';
 
 // Tab (nav-btn + sidebar)
@@ -3050,7 +3159,7 @@ function clearMyPhoto(){
 }
 
 // Admin
-function admLogin(){if(document.getElementById('admPw').value===gPw()){document.getElementById('admLock').style.display='none';document.getElementById('admC').classList.add('unlocked');toast('관리자 로그인 완료','ok');renderAdmEmpList();document.querySelectorAll('.seat-edit-toggle').forEach(el=>el.classList.add('force-show'));const ofcBtn=document.getElementById('btnOfficialOrg');if(ofcBtn)ofcBtn.style.display='inline-flex';}else toast('비밀번호가 올바르지 않습니다.','err');}
+function admLogin(){if(document.getElementById('admPw').value===gPw()){document.getElementById('admLock').style.display='none';document.getElementById('admC').classList.add('unlocked');toast('관리자 로그인 완료','ok');renderAdmEmpList();if(typeof renderBackupList==='function')renderBackupList();document.querySelectorAll('.seat-edit-toggle').forEach(el=>el.classList.add('force-show'));const ofcBtn=document.getElementById('btnOfficialOrg');if(ofcBtn)ofcBtn.style.display='inline-flex';}else toast('비밀번호가 올바르지 않습니다.','err');}
 function chgPw(){const p=document.getElementById('nPw').value.trim();if(!p){toast('비밀번호를 입력하세요.','err');return;}localStorage.setItem(PK,p);fbPwRef.set(p).catch(e=>console.error('FB pw err:',e));document.getElementById('nPw').value='';toast('비밀번호 변경됨','ok');}
 
 // Photo helpers
