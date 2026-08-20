@@ -2284,6 +2284,15 @@ function renderOrg(){
         if(bd.dh){
             h+=`<div class="vl"></div>`;
             h+=headCard(bd.dh);
+            // 헤드 외의 헤드급 동료 (예: 서비스운영본부 주현진 아래 신명희 수석 매니저)
+            // 팀 미지정(team===division 또는 빈값) + 헤드급 + dh 아닌 사람을 순차 표시
+            const extraHeads=bd.de.filter(x=>x!==bd.dh&&(x.team===bd.div||!x.team)&&headPos.includes(x.position));
+            // 직급 → sortOrder 순으로 정렬
+            extraHeads.sort((a,b)=>{const ai=PO.indexOf(a.position),bi=PO.indexOf(b.position);const d=(ai<0?99:ai)-(bi<0?99:bi);if(d!==0)return d;return(a.sortOrder==null?999:a.sortOrder)-(b.sortOrder==null?999:b.sortOrder);});
+            extraHeads.forEach(eh=>{
+                h+=`<div class="vl"></div>`;
+                h+=`<div class="o-mems">`+memCard(eh,bd.div)+`</div>`;
+            });
         } else {
             // 담당자 없는 부문: vl 라인으로 연결
             h+=`<div class="vl" style="flex:1;height:auto;min-height:36px;"></div>`;
