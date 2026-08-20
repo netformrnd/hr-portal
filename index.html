@@ -2283,7 +2283,14 @@ function renderOrg(){
         h+=`<div style="display:flex;flex-direction:column;align-items:center;">`;
         if(bd.dh){
             h+=`<div class="vl"></div>`;
-            h+=headCard(bd.dh);
+            // 수석 매니저·부장급 부문 헤드(예: 서비스운영본부 주현진)는 동급자와 시각적 통일을 위해 memCard로 표시.
+            // 상위 직급(임원·이사·부사장 등)은 기존 headCard 유지.
+            const dhIsSm=bd.dh.position==='수석 매니저'||bd.dh.position==='부장'||bd.dh.position==='부장/공장장';
+            if(dhIsSm){
+                h+=`<div class="o-mems">`+memCard(bd.dh,bd.div)+`</div>`;
+            } else {
+                h+=headCard(bd.dh);
+            }
             // 헤드 외의 헤드급 동료 (예: 서비스운영본부 주현진 아래 신명희 수석 매니저)
             // 팀 미지정(team===division 또는 빈값) + 헤드급 + dh 아닌 사람을 순차 표시
             const extraHeads=bd.de.filter(x=>x!==bd.dh&&(x.team===bd.div||!x.team)&&headPos.includes(x.position));
