@@ -2493,7 +2493,14 @@ function renderOrg(){
 
         // (서비스운영본부가 별도 부문으로 승격되어 서비스영업2팀-B2B운영팀 정렬 로직 제거)
     }
-    requestAnimationFrame(()=>{ layoutHLines(); setTimeout(layoutHLines,100); });
+    requestAnimationFrame(()=>{ layoutHLines(); setTimeout(layoutHLines,100); setTimeout(layoutHLines,400); setTimeout(layoutHLines,900); });
+    // 브라우저 창 크기 변경 시 수평선 재계산 (한 번만 등록)
+    if(!window._orgHLResizeAttached){
+        window._orgHLResizeAttached=true;
+        window.addEventListener('resize',()=>{try{layoutHLines();}catch(e){}});
+    }
+    // 함수를 전역에 노출해서 외부에서도 호출 가능
+    window._layoutOrgHLines=layoutHLines;
 }
 function filterDiv(d){F.div=d;F.team='';document.getElementById('lblDiv').textContent=d;document.getElementById('lblTeam').textContent='전체 팀';switchPanel('directory');refresh();if(curView==='orgtree'){const el=document.querySelector(`.orgtree-div-hd[data-otdiv="${d}"]`);if(el)selectOrgTreeDiv(d,el);}}
 function filterTeam(t){F.div='';F.team=t;document.getElementById('lblDiv').textContent='전체 부문';document.getElementById('lblTeam').textContent=t;switchPanel('directory');refresh();if(curView==='orgtree'){const emp=G().find(e=>e.team===t);if(emp)selectOrgTreeTeam(emp.division,t);}}
