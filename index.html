@@ -2300,6 +2300,9 @@ function renderOrg(){
                 h+=`<div class="vl"></div>`;
                 h+=`<div class="o-mems">`+memCard(eh,bd.div)+`</div>`;
             });
+            // Row 2 grid 셀 하단 남는 공간을 vl로 채워 헤드→팀 세로선 끊김 방지
+            // (다른 부문 Row 2가 신명희 등으로 커지면 이 셀은 빈 공간이 생김)
+            h+=`<div class="vl" style="flex:1;height:auto;min-height:0;"></div>`;
         } else {
             // 담당자 없는 부문: vl 라인으로 연결
             h+=`<div class="vl" style="flex:1;height:auto;min-height:36px;"></div>`;
