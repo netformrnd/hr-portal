@@ -234,11 +234,8 @@ table.dt{width:100%;border-collapse:collapse;}
 .org-print-area{display:flex;flex-direction:column;align-items:center;min-width:fit-content;padding:20px 10px;}
 
 /* 공통 연결선 */
-.vl{width:3px;height:18px;background:#b4b4b4;margin:0 auto;display:block;flex-shrink:0;}
-.hl{height:3px;background:#b4b4b4;min-width:40px;display:block;}
-/* hl parent (flex row + justify-content:center) 안에서 hl이 강제로 보이도록 */
-#orgArea .hl{background:#b4b4b4!important;height:3px!important;}
-#orgArea .vl{background:#b4b4b4!important;width:3px!important;height:18px!important;display:block!important;}
+.vl{width:2px;height:18px;background:#b4b4b4;margin:0 auto;}
+.hl{height:2px;background:#b4b4b4;}
 
 /* CEO 박스 */
 .o-ceo{background:#1a1a1a;border-radius:10px;padding:12px 32px;text-align:center;cursor:pointer;display:inline-block;box-shadow:0 2px 8px rgba(0,0,0,.12);}
@@ -2155,7 +2152,7 @@ function renderOrg(){
                 s+=`</div>`;
             }
             s+=`<div class="vl"></div>`;
-            if(teams.length>1) s+=`<div style="display:flex;justify-content:center"><div class="hl" style="width:0"></div></div>`;
+            if(teams.length>1) s+=`<div style="position:relative;height:2px;width:100%;"><div class="hl" style="width:0"></div></div>`;
             s+=`<div class="o-row">`;
             teams.forEach(tm=>{s+=tmBlock(tm,members.filter(x=>hasTm(x,tm)));});
             s+=`</div>`;
@@ -2186,7 +2183,7 @@ function renderOrg(){
     if(ceo) h+=`<div class="o-ceo" onclick="showD('${ceo.id}')"><span class="o-nm">${ceo.name}</span> <span class="o-pos">${ceo.position}</span></div><div class="vl"></div>`;
 
     // === 2대 그룹 ===
-    h+=`<div style="display:flex;justify-content:center"><div class="hl" style="width:0"></div></div>`;
+    h+=`<div style="position:relative;height:2px;width:100%;"><div class="hl" style="width:0"></div></div>`;
     h+=`<div class="o-row">`;
 
     // ---- 용인사업장 그룹 ----
@@ -2196,7 +2193,7 @@ function renderOrg(){
     h+=`<div class="o-col" style="padding:0 10px">`;
     h+=`<div class="vl"></div><div class="o-grp" onclick="filterDiv('용인사업장')" style="cursor:pointer">용인사업장</div><div class="vl"></div>`;
     if(yHead) h+=headCard(yHead)+`<div class="vl"></div>`;
-    h+=`<div style="display:flex;justify-content:center"><div class="hl" style="width:0"></div></div>`;
+    h+=`<div style="position:relative;height:2px;width:100%;"><div class="hl" style="width:0"></div></div>`;
     h+=`<div class="o-row">`;
 
     // 용인공장 소속 (공장장은 리드 매니저급 - 팀 멤버로 표시)
@@ -2261,7 +2258,7 @@ function renderOrg(){
 
     h+=`<div class="o-col" style="padding:0 10px">`;
     h+=`<div class="vl"></div><div class="o-grp">본사</div><div class="vl"></div>`;
-    if(totalCols>1) h+=`<div style="display:flex;justify-content:center"><div class="hl" id="hlBonsa" style="width:0"></div></div>`;
+    if(totalCols>1) h+=`<div style="position:relative;height:2px;width:100%;"><div class="hl" id="hlBonsa" style="width:0"></div></div>`;
 
     // CSS Grid 3행: ① 부문명 ② 담당자(있으면) ③ 팀row
     h+=`<div id="rowBonsa" style="display:grid;grid-template-columns:repeat(${totalCols},auto);grid-template-rows:auto auto auto;justify-content:center;gap:0 8px;">`;
@@ -2335,7 +2332,7 @@ function renderOrg(){
 
         if(visibleTms.length||looseMems.length){
             h+=`<div class="vl"></div>`;
-            if(visibleTms.length>1||(visibleTms.length>=1&&looseMems.length)) h+=`<div style="display:flex;justify-content:center"><div class="hl" style="width:0"></div></div>`;
+            if(visibleTms.length>1||(visibleTms.length>=1&&looseMems.length)) h+=`<div style="position:relative;height:2px;width:100%;"><div class="hl" style="width:0"></div></div>`;
             h+=`<div class="o-row">`;
             visibleTms.forEach(tm=>{
                 const children=SUB_DIV_CHILDREN[tm];
