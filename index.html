@@ -709,6 +709,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
     </div>
     <div class="sb-section">
         <div class="sb-section-title">내 정보</div>
+        <button class="sb-item" data-p="admin" style="display:none"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>직원 관리</button>
         <button class="sb-item" data-p="myinfo"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>내정보 수정</button>
     </div>
     <div class="sb-hotline" style="margin-top:auto">
@@ -730,7 +731,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
     <button class="nav-btn" data-p="orgchart">조직도</button>
     <button class="nav-btn" data-p="seatmap">자리배치도</button>
     <button class="nav-btn" data-p="contacts">업무 연락처</button>
-    <button class="nav-btn" data-p="admin">관리</button>
+    <button class="nav-btn" data-p="admin" style="display:none">관리</button>
 </nav>
 
 <div class="main-area">
@@ -1137,7 +1138,7 @@ table.ct-tbl{width:100%;border-collapse:collapse;table-layout:fixed;}
         <div class="adm-lock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
         <h3>관리자 인증 필요</h3>
         <p>직원 정보 수정 및 데이터 관리는 관리자만 접근할 수 있습니다.</p>
-        <div class="adm-form"><input type="password" id="admPw" placeholder="관리자 비밀번호" autocomplete="off" onkeydown="if(event.key==='Enter')admLogin()"><button class="btn btn-p" onclick="admLogin()">로그인</button></div>
+        <div class="adm-form" style="justify-content:center"><button class="btn btn-p" onclick="admLogin()">관리자 확인</button></div><p style="font-size:12px;color:var(--text-sub);margin-top:8px;">관리자 메일(mgmt@netformrnd.com)로 넷폼 라운지에 로그인하면 자동으로 열립니다.</p>
     </div>
     <div id="admC" class="adm-c">
         <!-- 직원 목록 (수정용) -->
@@ -1268,6 +1269,7 @@ function addDeleted(nameDiv){const d=getDeleted();if(!d.includes(nameDiv)){d.pus
 
 // 2026-09-04 hr 데이터 mgmtny 이전: 저장소만 mgmtny RTDB로 교체(코드 동일). 되돌리기 = 아래 주석의 원래 줄로 복원
 // 원본: firebase.initializeApp({apiKey:"AIzaSyBXvG2k_DvInBlE_2ZhC0tSgRTn-4Zqp4w",authDomain:"netform-hr.firebaseapp.com",databaseURL:"https://netform-hr-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"netform-hr",storageBucket:"netform-hr.firebasestorage.app",messagingSenderId:"12368103264",appId:"1:12368103264:web:e6a9ce0f6baaa745008005"});
+window.HR_BETA=false; /* true=베타(employees_beta 사본) */
 firebase.initializeApp({apiKey:"AIzaSyB3ULoKVnAwBZ7rsmAEQzcLfR5VzbwFlw4",authDomain:"mgmtny.firebaseapp.com",databaseURL:"https://mgmtny-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"mgmtny",storageBucket:"mgmtny.firebasestorage.app",messagingSenderId:"969518247645",appId:"1:969518247645:web:2141129ee4cb2e9a3b3534"});
 // 페이지 로드 시 자동 익명 로그인. Realtime Database 보안 규칙이 auth!=null이어야 정상 동작.
 // 이미 인증된 세션이 있으면 onAuthStateChanged에서 사용자 객체가 즉시 들어와 추가 호출 안 함.
@@ -1276,7 +1278,7 @@ firebase.auth().onAuthStateChanged(user=>{
     firebase.auth().signInAnonymously().catch(e=>console.error('Anon auth err:',e));
   }
 });
-const fbDb=firebase.database(),fbEmpRef=fbDb.ref('employees'),fbCtRef=fbDb.ref('contacts'),fbPwRef=fbDb.ref('adminPassword'),fbOrgDateRef=fbDb.ref('orgChartDate'),fbSeatRef=fbDb.ref('seatAssignments'),fbTeamOrderRef=fbDb.ref('teamMemberOrder');
+const fbDb=firebase.database(),fbEmpRef=fbDb.ref(window.HR_BETA?'employees_beta':'employees'),fbCtRef=fbDb.ref('contacts'),fbPwRef=fbDb.ref('adminPassword'),fbOrgDateRef=fbDb.ref('orgChartDate'),fbSeatRef=fbDb.ref('seatAssignments'),fbTeamOrderRef=fbDb.ref('teamMemberOrder');
 const ORG_DATE_KEY='nf_org_date';
 function getOrgDate(){return localStorage.getItem(ORG_DATE_KEY)||'2026.02.25';}
 function setOrgDate(){const d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');const ds=y+'.'+m+'.'+dd;localStorage.setItem(ORG_DATE_KEY,ds);fbOrgDateRef.set(ds).catch(e=>console.error('FB orgDate err:',e));}
@@ -4149,6 +4151,140 @@ fbTeamOrderRef.once('value',snap=>{
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",gate); else gate();
   window.addEventListener("load",function(){ setTimeout(gate,600); setTimeout(gate,2500); setTimeout(gate,6000); });
+})();
+</script>
+<!-- ===== 메일 기반 권한 (2026-09-04): 본인 수정 · 팀장의 팀원 수정 · 관리자(mgmt@) 자동 인식 · 직원 1명 단위 저장 ===== -->
+<script>
+(function(){
+  var HRP={admins:{},leads:{},ready:false};
+  window.HRP=HRP;
+  var REF=function(){ return (typeof fbEmpRef!=='undefined')?fbEmpRef:firebase.database().ref(window.HR_BETA?'employees_beta':'employees'); };
+  var DBR=function(p){ return (typeof fbDb!=='undefined')?fbDb.ref(p):firebase.database().ref(p); };
+  function mkey(m){ return String(m||'').trim().toLowerCase().split('.').join(','); }
+  function curMail(){ try{ var u=firebase.auth().currentUser; return (u&&!u.isAnonymous&&u.email)?String(u.email).toLowerCase():''; }catch(e){ return ''; } }
+  function isAdmin(){ var m=curMail(); return !!(m && HRP.admins[mkey(m)]===true); }
+  function myLead(){ var m=curMail(); return m ? (HRP.leads[mkey(m)]||null) : null; }
+  function findMe(){ var m=curMail(); if(!m) return null; var hits=G().filter(function(e){ return String(e.email||'').trim().toLowerCase()===m; }); return hits.length===1?hits[0]:null; }
+  function inScope(emp){ if(isAdmin()) return true; var me=findMe(); if(me&&me.id===emp.id) return true; var L=myLead(); if(!L) return false; if(L.team) return (emp.team||'')===L.team; return (emp.division||'')===L.division; }
+  function teamMembers(){ var L=myLead(); if(!L) return []; var me=findMe(); return G().filter(function(e){ if(me&&e.id===me.id) return false; return L.team ? (e.team||'')===L.team : (e.division||'')===L.division; }).sort(function(a,b){ return (a.sortOrder||0)-(b.sortOrder||0); }); }
+  function localUpsert(rec){ try{ var arr=G(); var i=arr.findIndex(function(e){return e.id===rec.id;}); if(i>=0) arr[i]=Object.assign({},arr[i],rec); else arr.push(rec); localStorage.setItem(SK,JSON.stringify(arr)); }catch(e){} }
+  function localRemove(id){ try{ var arr=G().filter(function(e){return e.id!==id;}); localStorage.setItem(SK,JSON.stringify(arr)); }catch(e){} }
+  function el(tag,attrs,text){ var n=document.createElement(tag); if(attrs){ Object.keys(attrs).forEach(function(k){ n.setAttribute(k,attrs[k]); }); } if(text!=null) n.textContent=text; return n; }
+  function clearNode(n){ while(n.firstChild) n.removeChild(n.firstChild); }
+
+  /* ---- 내정보 / 팀원 편집 화면 ---- */
+  function ensureExtraFields(){
+    if(document.getElementById('myPhone')) return;
+    var box=document.querySelector('#myEditArea .fg'); if(!box) return;
+    var w1=el('div',{'class':'fgi'}); w1.appendChild(el('label',null,'휴대폰')); w1.appendChild(el('input',{id:'myPhone',placeholder:'010-0000-0000',autocomplete:'off'}));
+    var w2=el('div',{'class':'fgi'}); w2.appendChild(el('label',null,'내선번호')); w2.appendChild(el('input',{id:'myExt',placeholder:'예: 201',autocomplete:'off'}));
+    box.insertBefore(w2, box.firstChild); box.insertBefore(w1, box.firstChild);
+  }
+  function setPhotoPreview(dataUrl){
+    var pv=document.getElementById('myPhotoPreview'); if(!pv) return;
+    clearNode(pv); var img=el('img'); img.src=dataUrl; pv.appendChild(img);
+  }
+  function openEdit(emp, asTeam){
+    ensureExtraFields();
+    document.getElementById('myVerify').style.display='none';
+    document.getElementById('myEditArea').style.display='block';
+    document.getElementById('myEditId').value=emp.id;
+    document.getElementById('myEditTitle').textContent=asTeam?(emp.name+' 님 정보 수정 (팀장 권한)'):'내 정보 수정';
+    document.getElementById('myDispName').textContent=emp.name+' · '+(emp.position||'');
+    document.getElementById('myDispInfo').textContent=(emp.division||'')+((emp.team&&emp.team!==emp.division)?(' / '+emp.team):'');
+    document.getElementById('myPhone').value=emp.phone||''; document.getElementById('myExt').value=emp.extension||'';
+    if(emp.photo){ document.getElementById('myPhoto').value=emp.photo; setPhotoPreview(emp.photo); document.getElementById('myPhotoDelBtn').style.display='inline-flex'; } else { clearMyPhoto(); }
+    setTaskRows('myPrRows',emp.primaryTasks||[],2); setTaskRows('myScRows',emp.secondaryTasks||[],1);
+    var cancel=document.querySelector('#myEditArea .fa .btn:not(.btn-p)'); if(cancel) cancel.textContent=asTeam?'내 정보로 돌아가기':'취소';
+  }
+  function renderTeam(){
+    var host=document.getElementById('myTeamSec'); var L=myLead();
+    if(!L){ if(host) host.style.display='none'; return; }
+    if(!host){ host=el('div',{id:'myTeamSec','class':'adm-sec',style:'margin-top:16px'}); document.getElementById('p-myinfo').appendChild(host); }
+    host.style.display=''; clearNode(host);
+    var mem=teamMembers(); var scope=L.team||L.division;
+    host.appendChild(el('div',{'class':'adm-sec-t'},'우리 팀 정보 수정 · '+scope+' ('+mem.length+'명)'));
+    host.appendChild(el('div',{style:'font-size:12px;color:var(--text-sub);margin-bottom:8px;'},'휴대폰·내선·사진·담당업무만 수정할 수 있습니다. 소속·직급 변경은 경영관리팀에 요청해 주세요.'));
+    if(!mem.length){ host.appendChild(el('div',{style:'font-size:13px;color:var(--text-sub);'},'수정 가능한 팀원이 없습니다.')); return; }
+    var list=el('div',{'class':'adm-emp-list'});
+    mem.forEach(function(e){
+      var row=el('div',{style:'display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-bottom:1px solid var(--border);'});
+      var left=el('div'); left.appendChild(el('b',null,e.name)); left.appendChild(el('span',{style:'color:var(--text-sub);font-size:12px;'},' '+(e.position||'')+' · '+(e.team||e.division||'')));
+      var btn=el('button',{'class':'btn',type:'button'},'수정');
+      btn.addEventListener('click',function(){ openEdit(e,true); window.scrollTo({top:0,behavior:'smooth'}); });
+      row.appendChild(left); row.appendChild(btn); list.appendChild(row);
+    });
+    host.appendChild(list);
+  }
+  function onMyInfoOpen(){
+    var me=findMe();
+    if(me){ openEdit(me,false); }
+    else { document.getElementById('myVerify').style.display=''; document.getElementById('myEditArea').style.display='none'; var p=document.querySelector('#myVerify p'); if(p&&curMail()) p.textContent='라운지 로그인 메일('+curMail()+')과 일치하는 직원 정보가 없습니다. 경영관리팀에 메일 등록을 요청해 주세요.'; }
+    renderTeam();
+  }
+  /* 저장: 직원 1명 단위 update — 서버 규칙이 본인·팀장·관리자만 허용 */
+  window.saveMyInfo=function(){
+    var eid=document.getElementById('myEditId').value; if(!eid){ toast('인증 정보가 없습니다.','err'); return; }
+    var emp=G().filter(function(e){return e.id===eid;})[0]; if(!emp){ toast('직원 데이터를 찾을 수 없습니다.','err'); return; }
+    if(!inScope(emp)){ toast('이 직원의 정보를 수정할 권한이 없습니다.','err'); return; }
+    var ph=document.getElementById('myPhone'), ex=document.getElementById('myExt');
+    var patch={ phone:String(ph?ph.value:'').trim(), extension:String(ex?ex.value:'').trim(), photo:document.getElementById('myPhoto').value||'', primaryTasks:getTaskValues('myPrRows'), secondaryTasks:getTaskValues('myScRows') };
+    REF().child(eid).update(patch).then(function(){ localUpsert(Object.assign({id:eid},patch)); toast('저장되었습니다!','ok'); refresh(); renderTeam(); })
+      .catch(function(e){ console.error('[hrp] save err',e); toast('저장 실패: 권한이 없거나 네트워크 오류입니다. ('+(e&&e.code||'unknown')+')','err'); });
+  };
+  window.logoutMyInfo=function(){ var me=findMe(); if(me){ openEdit(me,false); } else { document.getElementById('myVerify').style.display=''; document.getElementById('myEditArea').style.display='none'; document.getElementById('myEditId').value=''; clearMyPhoto(); } };
+
+  /* ---- 관리자: mgmt@ 메일 자동 인식 (비밀번호 폐지) ---- */
+  function unlockAdmin(){
+    var lk=document.getElementById('admLock'); if(lk) lk.style.display='none';
+    document.getElementById('admC').classList.add('unlocked');
+    try{ renderAdmEmpList(); }catch(e){}
+    try{ if(typeof renderBackupList==='function') renderBackupList(); }catch(e){}
+    document.querySelectorAll('.seat-edit-toggle').forEach(function(x){ x.classList.add('force-show'); });
+    var ofcBtn=document.getElementById('btnOfficialOrg'); if(ofcBtn) ofcBtn.style.display='inline-flex';
+  }
+  window.admLogin=function(){ if(isAdmin()){ unlockAdmin(); toast('관리자 확인 완료','ok'); } else { toast('관리자 메일(mgmt@netformrnd.com)로 넷폼 라운지에 로그인해야 합니다.','err'); } };
+  function applyAdminUI(){ var a=isAdmin(); document.querySelectorAll('[data-p="admin"]').forEach(function(b){ b.style.display=a?'':'none'; }); if(a) unlockAdmin(); }
+
+  /* ---- 관리자 저장/삭제도 1명 단위로 (명단 통째 저장 폐지) ---- */
+  window.saveEmp=function(){
+    var n=document.getElementById('fN').value.trim(),d=document.getElementById('fD').value,t=document.getElementById('fT').value.trim(),p=document.getElementById('fP').value;
+    if(!n||!d||!p){ toast('필수 항목(성명, 부문, 직위)을 입력하세요.','err'); return; }
+    if(!isAdmin()){ toast('관리자만 가능합니다.','err'); return; }
+    var all=G(), eid=document.getElementById('editId').value;
+    var old=eid?all.filter(function(x){return x.id===eid;})[0]:null;
+    var photo=document.getElementById('fPhoto').value||(old?(old.photo||''):'');
+    var sub=document.getElementById('fSub').value;
+    var jointTeams=getJointTeams().filter(function(jt){ return jt&&jt!==t; });
+    var probChk=document.getElementById('fProb'); var probEnd=(probChk&&probChk.checked)?(document.getElementById('fProbEnd').value||''):'';
+    var data={id:eid||gid(),name:n,division:d,subDivision:sub||'',team:t,jointTeams:jointTeams,position:p,phone:document.getElementById('fPh').value.trim(),email:document.getElementById('fEm').value.trim(),joinDate:document.getElementById('fJoin').value||'',extension:document.getElementById('fEx').value.trim(),birthDate:document.getElementById('fBirth').value.trim(),probationEndDate:probEnd,primaryTasks:getTaskValues('fPrRows'),secondaryTasks:getTaskValues('fScRows'),memo:document.getElementById('fMe').value.trim(),photo:photo,sortOrder:old?(old.sortOrder||0):all.length};
+    var isNew=!eid; var divChanged=old&&(old.division!==d||old.team!==t||old.position!==p);
+    REF().child(data.id).set(data).then(function(){
+      localUpsert(data); if(isNew||divChanged) setOrgDate();
+      var k=mkey(data.email); if(k&&HRP.leads[k]){ var scopeTeam=(data.team===data.division)?'':(data.team||''); DBR('leads/'+k).update({team:scopeTeam,division:data.division||'',name:data.name,position:data.position||''}).catch(function(){}); }
+      toast(n+(isNew?' 등록 완료':' 수정 완료'),'ok'); resetF(); refresh(); renderAdmEmpList();
+      try{ createBackup('auto'); }catch(e){}
+    }).catch(function(e){ console.error('[hrp] admin save err',e); toast('저장 실패 ('+(e&&e.code||'unknown')+')','err'); });
+  };
+  window.delEmp=function(){
+    var eid=document.getElementById('editId').value; if(!eid||!confirm('삭제하시겠습니까?')) return;
+    if(!isAdmin()){ toast('관리자만 가능합니다.','err'); return; }
+    var emp=G().filter(function(e){return e.id===eid;})[0];
+    REF().child(eid).remove().then(function(){ if(emp) addDeleted(emp.name+'|'+emp.division); localRemove(eid); setOrgDate(); toast('삭제 완료','ok'); resetF(); refresh(); renderAdmEmpList(); try{ createBackup('auto'); }catch(e){} })
+      .catch(function(e){ toast('삭제 실패 ('+(e&&e.code||'unknown')+')','err'); });
+  };
+
+  /* ---- 패널 전환 훅 ---- */
+  var _sp=window.switchPanel;
+  window.switchPanel=function(p){ _sp(p); if(p==='myinfo') onMyInfoOpen(); if(p==='admin') applyAdminUI(); };
+
+  /* ---- 초기화: 메일 인증 후 admins/leads 구독 ---- */
+  function boot(){
+    DBR('admins').on('value',function(s){ HRP.admins=s.val()||{}; applyAdminUI(); if(document.getElementById('p-myinfo').classList.contains('on')) onMyInfoOpen(); },function(e){ console.warn('[hrp] admins',e); });
+    DBR('leads').on('value',function(s){ HRP.leads=s.val()||{}; if(document.getElementById('p-myinfo').classList.contains('on')) onMyInfoOpen(); },function(e){ console.warn('[hrp] leads',e); });
+    if(window.HR_BETA){ var b=el('div',{style:'position:fixed;right:12px;bottom:12px;z-index:99998;background:#d98a13;color:#fff;font-size:12px;font-weight:700;padding:6px 10px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15)'},'베타 · 시험용 데이터'); document.body.appendChild(b); }
+  }
+  firebase.auth().onAuthStateChanged(function(u){ if(u&&!u.isAnonymous){ if(!HRP.ready){ HRP.ready=true; boot(); } else { applyAdminUI(); } } });
 })();
 </script>
 </body>
