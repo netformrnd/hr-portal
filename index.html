@@ -4195,6 +4195,10 @@ fbTeamOrderRef.once('value',snap=>{
     document.getElementById('myPhone').value=emp.phone||''; document.getElementById('myExt').value=emp.extension||'';
     if(emp.photo){ document.getElementById('myPhoto').value=emp.photo; setPhotoPreview(emp.photo); document.getElementById('myPhotoDelBtn').style.display='inline-flex'; } else { clearMyPhoto(); }
     setTaskRows('myPrRows',emp.primaryTasks||[],2); setTaskRows('myScRows',emp.secondaryTasks||[],1);
+    /* 팀장 권한으로 팀원을 열면 담당업무만 수정 가능 — 연락처·사진 영역은 숨김 */
+    var teamOnly=!!asTeam && !isAdmin();
+    var pw=document.querySelector('#myEditArea .photo-upload'); if(pw) pw.style.display=teamOnly?'none':'';
+    ['myPhone','myExt'].forEach(function(id){ var f=document.getElementById(id); var wrap=f?f.closest('.fgi'):null; if(wrap) wrap.style.display=teamOnly?'none':''; });
     var cancel=document.querySelector('#myEditArea .fa .btn:not(.btn-p)'); if(cancel) cancel.textContent=asTeam?'내 정보로 돌아가기':'취소';
   }
   function renderTeam(){
@@ -4204,7 +4208,7 @@ fbTeamOrderRef.once('value',snap=>{
     host.style.display=''; clearNode(host);
     var mem=teamMembers(); var scope=L.team||L.division;
     host.appendChild(el('div',{'class':'adm-sec-t'},'우리 팀 정보 수정 · '+scope+' ('+mem.length+'명)'));
-    host.appendChild(el('div',{style:'font-size:12px;color:var(--text-sub);margin-bottom:8px;'},'휴대폰·내선·사진·담당업무만 수정할 수 있습니다. 소속·직급 변경은 경영관리팀에 요청해 주세요.'));
+    host.appendChild(el('div',{style:'font-size:12px;color:var(--text-sub);margin-bottom:8px;'},'팀원의 담당업무(주요·기타)만 수정할 수 있습니다. 연락처·사진은 본인이, 소속·직급은 경영관리팀이 수정합니다.'));
     if(!mem.length){ host.appendChild(el('div',{style:'font-size:13px;color:var(--text-sub);'},'수정 가능한 팀원이 없습니다.')); return; }
     var list=el('div',{'class':'adm-emp-list'});
     mem.forEach(function(e){
@@ -4227,8 +4231,10 @@ fbTeamOrderRef.once('value',snap=>{
     var eid=document.getElementById('myEditId').value; if(!eid){ toast('인증 정보가 없습니다.','err'); return; }
     var emp=G().filter(function(e){return e.id===eid;})[0]; if(!emp){ toast('직원 데이터를 찾을 수 없습니다.','err'); return; }
     if(!inScope(emp)){ toast('이 직원의 정보를 수정할 권한이 없습니다.','err'); return; }
-    var ph=document.getElementById('myPhone'), ex=document.getElementById('myExt');
-    var patch={ phone:String(ph?ph.value:'').trim(), extension:String(ex?ex.value:'').trim(), photo:document.getElementById('myPhoto').value||'', primaryTasks:getTaskValues('myPrRows'), secondaryTasks:getTaskValues('myScRows') };
+    var me=findMe(); var teamOnly=!isAdmin() && !(me&&me.id===eid);
+    /* 팀장이 팀원을 수정할 때는 담당업무만 저장 (서버 규칙도 동일하게 제한) */
+    var patch={ primaryTasks:getTaskValues('myPrRows'), secondaryTasks:getTaskValues('myScRows') };
+    if(!teamOnly){ var ph=document.getElementById('myPhone'), ex=document.getElementById('myExt'); patch.phone=String(ph?ph.value:'').trim(); patch.extension=String(ex?ex.value:'').trim(); patch.photo=document.getElementById('myPhoto').value||''; }
     REF().child(eid).update(patch).then(function(){ localUpsert(Object.assign({id:eid},patch)); toast('저장되었습니다!','ok'); refresh(); renderTeam(); })
       .catch(function(e){ console.error('[hrp] save err',e); toast('저장 실패: 권한이 없거나 네트워크 오류입니다. ('+(e&&e.code||'unknown')+')','err'); });
   };
