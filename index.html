@@ -1266,7 +1266,9 @@ const SK='nf_emp_v4',PK='nf_apw',DEL_KEY='nf_emp_del';
 function getDeleted(){try{return JSON.parse(localStorage.getItem(DEL_KEY))||[];}catch(e){return[];}}
 function addDeleted(nameDiv){const d=getDeleted();if(!d.includes(nameDiv)){d.push(nameDiv);localStorage.setItem(DEL_KEY,JSON.stringify(d));}}
 
-firebase.initializeApp({apiKey:"AIzaSyBXvG2k_DvInBlE_2ZhC0tSgRTn-4Zqp4w",authDomain:"netform-hr.firebaseapp.com",databaseURL:"https://netform-hr-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"netform-hr",storageBucket:"netform-hr.firebasestorage.app",messagingSenderId:"12368103264",appId:"1:12368103264:web:e6a9ce0f6baaa745008005"});
+// 2026-09-04 hr 데이터 mgmtny 이전: 저장소만 mgmtny RTDB로 교체(코드 동일). 되돌리기 = 아래 주석의 원래 줄로 복원
+// 원본: firebase.initializeApp({apiKey:"AIzaSyBXvG2k_DvInBlE_2ZhC0tSgRTn-4Zqp4w",authDomain:"netform-hr.firebaseapp.com",databaseURL:"https://netform-hr-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"netform-hr",storageBucket:"netform-hr.firebasestorage.app",messagingSenderId:"12368103264",appId:"1:12368103264:web:e6a9ce0f6baaa745008005"});
+firebase.initializeApp({apiKey:"AIzaSyB3ULoKVnAwBZ7rsmAEQzcLfR5VzbwFlw4",authDomain:"mgmtny.firebaseapp.com",databaseURL:"https://mgmtny-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"mgmtny",storageBucket:"mgmtny.firebasestorage.app",messagingSenderId:"969518247645",appId:"1:969518247645:web:2141129ee4cb2e9a3b3534"});
 // 페이지 로드 시 자동 익명 로그인. Realtime Database 보안 규칙이 auth!=null이어야 정상 동작.
 // 이미 인증된 세션이 있으면 onAuthStateChanged에서 사용자 객체가 즉시 들어와 추가 호출 안 함.
 firebase.auth().onAuthStateChanged(user=>{
@@ -4183,12 +4185,13 @@ fbTeamOrderRef.once('value',snap=>{
     (document.body||document.documentElement).appendChild(ov);
   }
   function gate(){
+    try{ var fu=(window.firebase&&firebase.auth)?firebase.auth().currentUser:null; if(fu && fu.isAnonymous){ show("넷폼 라운지에서 로그인해 주세요","임직원 정보는 라운지를 통해서만 이용할 수 있습니다."); return; } }catch(e){}
     var u=sess();
     if(!u){ show("넷폼 라운지에서 로그인해 주세요","임직원 정보는 라운지를 통해서만 이용할 수 있습니다."); return; }
     if(!allowed(u)){ show("접근 권한이 없습니다","임직원 정보 보기 권한이 없습니다. 경영관리팀으로 문의 바랍니다."); return; }
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",gate); else gate();
-  window.addEventListener("load",function(){ setTimeout(gate,600); });
+  window.addEventListener("load",function(){ setTimeout(gate,600); setTimeout(gate,2500); setTimeout(gate,6000); });
 })();
 </script>
 </body>
